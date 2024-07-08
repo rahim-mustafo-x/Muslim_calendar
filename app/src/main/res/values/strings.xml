@@ -8,4 +8,6 @@
     <string name="asr">Asr</string>
     <string name="shom">Shom</string>
     <string name="xufton">Xufton</string>
+    <string name="refresh">Yangilash</string>
+    <string name="chooseRegion">Mintaqani almashtirish</string>
 </resources>
