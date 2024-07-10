@@ -13,10 +13,12 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.model.model.Item
 import uz.coder.muslimcalendar.model.model.MuslimCalendar
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
+import uz.coder.muslimcalendar.todo.REGION
 import uz.coder.muslimcalendar.todo.isConnected
 
 data class CalendarViewModel(private val application: Application):AndroidViewModel(application){
     private val repo = CalendarRepositoryImpl(application)
+    private val preferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Application.MODE_PRIVATE) }
     private val _calendar = MutableStateFlow(MuslimCalendar())
     val calendar = _calendar.asStateFlow()
     init {
@@ -55,6 +57,10 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
         }
     }
 
+    fun region(region:String){
+        preferences.edit().putString(REGION, region).apply()
+    }
+
     fun timeList() = flow{
         repo.presentDay().collect{
             emit(mutableListOf<Item>().apply {
@@ -67,5 +73,4 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
             })
         }
     }
-
 }

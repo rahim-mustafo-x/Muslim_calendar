@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Muslim taqvim</string>
     <string name="successful">Ma\'lumot olindi</string>
-    <string name="failure">Internet yo\'q</string>
+    <string name="failure">Internet yo\'q internetni yoqib yangilash tugmasini bosing</string>
     <string name="bomdod">Bomdod</string>
     <string name="quyosh">Quyosh</string>
     <string name="peshin">Peshin</string>
@@ -10,4 +10,6 @@
     <string name="xufton">Xufton</string>
     <string name="refresh">Yangilash</string>
     <string name="chooseRegion">Mintaqani almashtirish</string>
+    <string name="about">Haqida</string>
+    <string name="about_text">\nBu ilova Muslim Taqvim bo\'lib bu ilovada Namoz vaqtlari bor va namoz vaqtlari aniq bu ilovani namoz vaqtlarini aniq bilish uchun avval mintaqani tanlab, keyin yangilash tugmasini bosing faqat internet bilan aloqasi bo\'lgan xolatda.\n\n Aytgancha oyning boshida ma\'lumotni yangilang.\n\nBu ilova faqat namoz vaqtlari emas balki Allohning 99 ta ismini ma\'nosi bilan bor, Duolar, Qur\'on va namoz o\'qish tartibi ham bor</string>
 </resources>
