@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import uz.coder.muslimcalendar.model.db.MuslimCalendarDbModel
+import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
 
 @Database([MuslimCalendarDbModel::class], version = 1)
 abstract class MuslimCalendarDatabase:RoomDatabase() {

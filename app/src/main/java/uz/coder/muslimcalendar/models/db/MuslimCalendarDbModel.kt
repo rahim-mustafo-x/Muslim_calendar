@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.model.db
+package uz.coder.muslimcalendar.models.db
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

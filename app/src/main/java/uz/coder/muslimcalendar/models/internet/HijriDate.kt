@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.model.internet
+package uz.coder.muslimcalendar.models.internet
 
 
 import kotlinx.serialization.SerialName

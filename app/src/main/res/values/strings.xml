@@ -8,8 +8,24 @@
     <string name="asr">Asr</string>
     <string name="shom">Shom</string>
     <string name="xufton">Xufton</string>
+    <string name="vitr">Vitr</string>
     <string name="refresh">Yangilash</string>
     <string name="chooseRegion">Mintaqani almashtirish</string>
     <string name="about">Haqida</string>
     <string name="about_text">\nBu ilova Muslim Taqvim bo\'lib bu ilovada Namoz vaqtlari bor va namoz vaqtlari aniq bu ilovani namoz vaqtlarini aniq bilish uchun avval mintaqani tanlab, keyin yangilash tugmasini bosing faqat internet bilan aloqasi bo\'lgan xolatda.\n\n Aytgancha oyning boshida ma\'lumotni yangilang.\n\nBu ilova faqat namoz vaqtlari emas balki Allohning 99 ta ismini ma\'nosi bilan bor, Duolar, Qur\'on va namoz o\'qish tartibi ham bor</string>
+    <string name="prayerTimeName">namozini vaqti bo\'ldi</string>
+    <string name="prayerTime">Namoz vaqti %s da kiradi</string>
+    <string name="blessing">Duolar</string>
+    <string name="quran">Qur\'an</string>
+    <string name="allah">Alloh</string>
+    <string name="rosary">Tasbeh</string>
+    <string name="orderOfPrayer">Namoz</string>
+    <string name="qazo">Qazo</string>
+    <string name="calendar">Taqvim</string>
+    <string name="timeSetting">Namoz Vaqti</string>
+    <string name="errorMessage">Bu no\'ldan kichik</string>
+    <string name="cancel">Bekor qilish</string>
+    <string name="save">Saqlash</string>
+    <string name="requastPermission">Namoz vaqtini eslatish uchun ruxsat bering</string>
+    <string name="allow">Ruxsat berish</string>
 </resources>

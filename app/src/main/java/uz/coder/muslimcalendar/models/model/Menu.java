@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.model.model;
+package uz.coder.muslimcalendar.models.model;
 
 import androidx.annotation.NonNull;
 
@@ -10,6 +10,11 @@ public class Menu {
     public Menu(int img, String text, MenuScreen menu) {
         this.img = img;
         this.text = text;
+        this.menu = menu;
+    }
+
+    public Menu(int img, MenuScreen menu) {
+        this.img = img;
         this.menu = menu;
     }
 

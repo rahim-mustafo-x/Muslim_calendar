@@ -18,35 +18,40 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.model.model.Menu
-import uz.coder.muslimcalendar.model.model.MenuScreen
+import uz.coder.muslimcalendar.models.model.Menu
+import uz.coder.muslimcalendar.models.model.MenuScreen
 import uz.coder.muslimcalendar.ui.theme.Dark_Green
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarTopBar(modifier:Modifier = Modifier, onClick:(MenuScreen)->Unit){
-    val context = LocalContext.current
-    val menuList = listOf(Menu(R.drawable.refresh, context.getString(R.string.refresh), MenuScreen.Refresh), Menu(R.drawable.region, context.getString(R.string.chooseRegion), MenuScreen.ChangeRegion), Menu(R.drawable.about, context.getString(R.string.about), MenuScreen.About))
+fun CalendarTopBar(modifier:Modifier = Modifier, list: List<Menu>, onClick:(MenuScreen)->Unit){
     TopAppBar(title = { Text(text = stringResource(R.string.app_name), fontSize = 20.sp, modifier = modifier, color = White) }, colors = TopAppBarDefaults.topAppBarColors(
         Dark_Green), actions = {
             var showMenu by remember {
                 mutableStateOf(false)
             }
-            IconButton(onClick = { showMenu = !showMenu }) {
-                Icon(Icons.Default.Menu, null, tint = White)
-            }
-            DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                menuList.forEachIndexed { _, menu ->
-                    DropdownMenuItem(text = { Text(menu.text, fontSize = 15.sp, color = Black) }, onClick = { onClick(menu.menu); showMenu = false }, leadingIcon = { Icon(
-                        painterResource(menu.img),
-                        contentDescription = null,
-                        tint = Black
-                    ) })
+            if (list.size>1){
+                IconButton(onClick = { showMenu = !showMenu }) {
+                    Icon(Icons.Default.Menu, null, tint = White)
+                }
+                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                    list.forEachIndexed { _, menu ->
+                        DropdownMenuItem(text = { Text(menu.text, fontSize = 15.sp, color = Black) }, onClick = { onClick(menu.menu); showMenu = false }, leadingIcon = { Icon(
+                            painterResource(menu.img),
+                            contentDescription = null,
+                            tint = Black
+                        ) })
+                    }
+                }
+            }else{
+                list.forEachIndexed {_,item->
+                    IconButton(onClick = { onClick(item.menu) }) {
+                        Icon(painterResource(item.img), null, tint = White)
+                    }
                 }
             }
     })

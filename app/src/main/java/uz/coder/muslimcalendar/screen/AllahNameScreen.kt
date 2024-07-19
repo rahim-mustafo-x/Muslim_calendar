@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import uz.coder.muslimcalendar.model.model.AllahName
-import uz.coder.muslimcalendar.model.sealed.Screen
+import uz.coder.muslimcalendar.models.model.AllahName
+import uz.coder.muslimcalendar.models.sealed.Screen
 import uz.coder.muslimcalendar.todo.allahNames
 import uz.coder.muslimcalendar.ui.theme.Dark_Green
 

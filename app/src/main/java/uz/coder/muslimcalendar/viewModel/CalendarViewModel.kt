@@ -10,35 +10,96 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.model.model.Item
-import uz.coder.muslimcalendar.model.model.MuslimCalendar
+import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
+import uz.coder.muslimcalendar.todo.ASR
+import uz.coder.muslimcalendar.todo.BOMDOD
+import uz.coder.muslimcalendar.todo.PESHIN
 import uz.coder.muslimcalendar.todo.REGION
+import uz.coder.muslimcalendar.todo.SHOM
+import uz.coder.muslimcalendar.todo.VITR
+import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.todo.isConnected
+import uz.coder.muslimcalendar.todo.workReceiver
 
 data class CalendarViewModel(private val application: Application):AndroidViewModel(application){
     private val repo = CalendarRepositoryImpl(application)
     private val preferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Application.MODE_PRIVATE) }
-    private val _calendar = MutableStateFlow(MuslimCalendar())
-    val calendar = _calendar.asStateFlow()
+    private val _bomdod = MutableStateFlow(0)
+    val bomdod = _bomdod.asStateFlow()
+    private val _peshin = MutableStateFlow(0)
+    val peshin = _peshin.asStateFlow()
+    private val _asr = MutableStateFlow(0)
+    val asr = _asr.asStateFlow()
+    private val _shom = MutableStateFlow(0)
+    val shom = _shom.asStateFlow()
+    private val _xufton = MutableStateFlow(0)
+    val xufton = _xufton.asStateFlow()
+    private val _vitr = MutableStateFlow(0)
+    val vitr = _vitr.asStateFlow()
     init {
         loading()
+        showNotification()
+        fromPreferencesQazo()
     }
+
+    private fun showNotification() {
+        viewModelScope.launch {
+            timeList().collectLatest {
+                it.forEach { item->
+                    workReceiver(item)
+                }
+            }
+        }
+    }
+
     fun loading(){
         try {
             loadInformationFromInternet()
         }catch (_:Exception){}
-        try {
-            putInformation()
-        }catch (_:Exception){}
     }
 
-    private fun putInformation() {
+    fun setBomdod(bomdod: Int){
         viewModelScope.launch {
-             repo.presentDay().collectLatest {
-                 Log.d("TAG", "putInformation : $it")
-                 _calendar.emit(it)
-             }
+            _bomdod.emit(bomdod)
+        }
+    }fun setPeshin(peshin: Int){
+        viewModelScope.launch {
+            _peshin.emit(peshin)
+        }
+    }fun setAsr(asr: Int){
+        viewModelScope.launch {
+            _asr.emit(asr)
+        }
+    }fun setShom(shom: Int){
+        viewModelScope.launch {
+            _shom.emit(shom)
+        }
+    }fun setXufton(xufton: Int){
+        viewModelScope.launch {
+            _xufton.emit(xufton)
+        }
+    }fun setVitr(vitr: Int){
+        viewModelScope.launch {
+            _vitr.emit(vitr)
+        }
+    }
+
+    fun fromPreferencesQazo(){
+        viewModelScope.launch {
+            _bomdod.emit(
+                getTime(BOMDOD))
+            _peshin.emit(
+                getTime(PESHIN))
+            _asr.emit(
+                getTime(ASR))
+            _shom.emit(
+                getTime(SHOM))
+            _xufton.emit(
+                getTime(XUFTON))
+            _vitr.emit(
+                getTime(VITR))
+
         }
     }
 
@@ -73,4 +134,8 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
             })
         }
     }
+    fun saveTime(key:String, value:Int){
+        preferences.edit().putInt(key,value).apply()
+    }
+    private fun getTime(key:String) = preferences.getInt(key, 0)
 }

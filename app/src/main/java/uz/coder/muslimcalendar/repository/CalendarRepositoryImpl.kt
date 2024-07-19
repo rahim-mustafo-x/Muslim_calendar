@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.collectLatest
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.db.MuslimCalendarDatabase
 import uz.coder.muslimcalendar.ktor.PrayerTimeService
-import uz.coder.muslimcalendar.model.db.MuslimCalendarDbModel
+import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
 import uz.coder.muslimcalendar.todo.DEFAULT_REGION
 import uz.coder.muslimcalendar.todo.REGION
 import java.util.Calendar.DAY_OF_MONTH
 import java.util.Calendar.MONTH
 import java.util.Calendar.getInstance
-import uz.coder.muslimcalendar.model.model.MuslimCalendar
+import uz.coder.muslimcalendar.models.model.MuslimCalendar
 
 data class CalendarRepositoryImpl(private val application: Application):CalendarRepository {
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }

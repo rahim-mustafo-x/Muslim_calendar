@@ -5,9 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import uz.coder.muslimcalendar.model.db.MuslimCalendarDbModel
-import uz.coder.muslimcalendar.model.internet.PrayerTime
-import uz.coder.muslimcalendar.model.model.RefreshDay
+import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
+import uz.coder.muslimcalendar.models.model.RefreshDay
 
 @Dao
 interface MuslimCalendarDao {

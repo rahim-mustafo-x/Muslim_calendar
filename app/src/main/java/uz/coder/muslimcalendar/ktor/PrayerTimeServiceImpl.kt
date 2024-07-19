@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.ktor.PrayerTimeService.Companion.ONE_MONTH_BASE_URL
-import uz.coder.muslimcalendar.model.internet.PrayerTime
+import uz.coder.muslimcalendar.models.internet.PrayerTime
 import java.util.Calendar
 
 data class PrayerTimeServiceImpl(

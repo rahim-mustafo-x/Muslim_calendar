@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.model.model;
+package uz.coder.muslimcalendar.models.model;
 
 import androidx.annotation.NonNull;
 

@@ -1,7 +1,7 @@
 package uz.coder.muslimcalendar.repository
 
 import kotlinx.coroutines.flow.Flow
-import uz.coder.muslimcalendar.model.model.MuslimCalendar
+import uz.coder.muslimcalendar.models.model.MuslimCalendar
 
 interface CalendarRepository {
     suspend fun loading()

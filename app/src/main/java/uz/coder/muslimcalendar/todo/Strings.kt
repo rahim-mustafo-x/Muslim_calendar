@@ -1,10 +1,21 @@
 package uz.coder.muslimcalendar.todo
 
-import uz.coder.muslimcalendar.model.model.AllahName
+import uz.coder.muslimcalendar.models.model.AllahName
 
 const val REGION = "region"
 const val DEFAULT_REGION = "Urganch"
 const val ALLAH_NAME_INDEX = "allahNameIndex"
+const val CHANNEL_ID = "channel_id"
+const val CHANNEL_NAME = "channel_name"
+const val ID = 1
+const val ITEM_TIME = "time"
+const val ITEM_NAME = "name"
+const val BOMDOD = "bomdod_time"
+const val PESHIN = "peshin_time"
+const val ASR = "asr_time"
+const val SHOM = "shom_time"
+const val XUFTON = "xufton_time"
+const val VITR = "vitr_time"
 val regionList = listOf(
     "Angren", "Bekobod",
     "Andijon", "Xonobod", "Qo'rg'ontepa", "Shahrixon", "Paxtaobod",
