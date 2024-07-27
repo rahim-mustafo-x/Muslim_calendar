@@ -2,6 +2,7 @@ package uz.coder.muslimcalendar.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
@@ -40,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.models.model.Date
 import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
@@ -48,6 +51,7 @@ import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
 import uz.coder.muslimcalendar.models.sealed.Screen.ChooseRegion
 import uz.coder.muslimcalendar.models.sealed.Screen.TimeSetting
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
+import uz.coder.muslimcalendar.todo.MONTH
 import uz.coder.muslimcalendar.ui.theme.Dark_Green
 import uz.coder.muslimcalendar.ui.theme.Light_Green
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
@@ -57,7 +61,7 @@ import uz.coder.muslimcalendar.viewModel.CalendarViewModel
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     val viewModel = viewModel<CalendarViewModel>()
-    val menuList = listOf(Menu(R.drawable.refresh, stringResource(R.string.refresh), MenuScreen.Refresh), Menu(R.drawable.region, stringResource(R.string.chooseRegion), MenuScreen.ChangeRegion), Menu(R.drawable.setting, stringResource(R.string.timeSetting), MenuScreen.TimeSetting), Menu(R.drawable.about, stringResource(R.string.about), MenuScreen.About))
+    val menuList = listOf(Menu(R.drawable.refresh, stringResource(R.string.refresh), MenuScreen.Refresh), Menu(R.drawable.region, stringResource(R.string.chooseRegion), MenuScreen.ChangeRegion), Menu(R.drawable.about, stringResource(R.string.about), MenuScreen.About))
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         CalendarTopBar(modifier = modifier, menuList){
             when(it){
@@ -66,9 +70,6 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
                 }
                 MenuScreen.ChangeRegion->{
                     controller.navigate(ChooseRegion.route)
-                }
-                MenuScreen.TimeSetting->{
-                    controller.navigate(TimeSetting.route)
                 }
                 MenuScreen.About->{
                     controller.navigate(About.route)
@@ -88,7 +89,7 @@ fun Home(
     viewModel: CalendarViewModel,
     paddingValues: PaddingValues
 ) {
-    val list by viewModel.timeList().collectAsState(emptyList())
+    val list by viewModel.itemList().collectAsState(emptyList())
     val pagerState = rememberPagerState {
         list.size
     }
@@ -99,7 +100,8 @@ fun Home(
             pagerState = pagerState,
             paddingValues = paddingValues,
             list = list,
-            controller = controller
+            controller = controller,
+            viewModel = viewModel
         )
     }
 }
@@ -127,30 +129,40 @@ fun Screen(
     pagerState: PagerState,
     paddingValues: PaddingValues,
     list: List<Item>,
-    controller: NavHostController
+    controller: NavHostController,
+    viewModel: CalendarViewModel
 ) {
     val scope = rememberCoroutineScope()
+    val date by viewModel.day().collectAsState(initial = Date())
     Column(
         modifier = modifier
             .padding(paddingValues)
+            .background(White)
     ) {
-        HorizontalPager(state = pagerState) {
-            Card(
-                modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .padding(10.dp), colors = CardDefaults.cardColors(Dark_Green)
-            ) {
-                Column(
+        Box{
+            HorizontalPager(state = pagerState) {
+                Card(
                     modifier
                         .fillMaxWidth()
-                        .height(220.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                        .height(220.dp)
+                        .padding(5.dp), colors = CardDefaults.cardColors(Dark_Green)
                 ) {
-                    Text(list[it].name, color = White, fontSize = 25.sp)
-                    Text(list[it].time, color = White, fontSize = 25.sp)
+                    Column(
+                        modifier
+                            .fillMaxWidth()
+                            .height(220.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(list[it].name, color = White, fontSize = 25.sp)
+                        Text(list[it].time, color = White, fontSize = 25.sp)
+                    }
                 }
+
+            }
+            Row(modifier.padding(5.dp).background(White)) {
+                Text("${date.weekDay}, ${date.day} ${MONTH[date.month]};", fontSize = 20.sp, color = Dark_Green)
+                Text("${date.hijriDay} ${date.hijriMonth}.", fontSize = 20.sp, color = Dark_Green)
             }
 
         }
@@ -173,7 +185,10 @@ fun Screen(
                 }, selectedContentColor = Light_Green, unselectedContentColor = Dark_Green)
             }
         }
-        Bottom(modifier, controller)
+        Box(modifier = modifier.fillMaxSize()){
+            Image(painterResource(R.drawable.bottom_image), null, contentScale = ContentScale.Crop, modifier =  modifier.fillMaxSize())
+            Bottom(modifier, controller)
+        }
     }
 }
 

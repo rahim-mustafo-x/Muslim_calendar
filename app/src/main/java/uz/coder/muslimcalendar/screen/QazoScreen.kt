@@ -100,39 +100,39 @@ fun Qazo(modifier: Modifier = Modifier, controller: NavHostController, paddingVa
     Column(modifier = modifier
         .fillMaxSize()
         .padding(paddingValues), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        QazoCount(text = stringResource(R.string.bomdod), count = bomdod, minus = { viewModel.setBomdod(if (bomdod<0){ 0 } else --bomdod) }, plus = { ++bomdod }) {
+        QazoCount(text = stringResource(R.string.bomdod), count = bomdod, minus = { viewModel.setBomdod(if (bomdod<=0){ 0 } else --bomdod) }, plus = { viewModel.setBomdod(++bomdod) }) {
             showDialog = true
             id = 1
         }
-        QazoCount(text = stringResource(R.string.peshin), count = peshin, minus = { viewModel.setPeshin(if (peshin<0){ 0 } else --peshin) }, plus = { ++peshin }) {
+        QazoCount(text = stringResource(R.string.peshin), count = peshin, minus = { viewModel.setPeshin(if (peshin<=0){ 0 } else --peshin) }, plus = { viewModel.setPeshin(++peshin) }) {
             showDialog = true
             id = 2
         }
-        QazoCount(text = stringResource(R.string.asr), count = asr, minus = { viewModel.setAsr(if (asr<0){ 0 } else --asr) }, plus = { ++asr }) {
+        QazoCount(text = stringResource(R.string.asr), count = asr, minus = { viewModel.setAsr(if (asr<=0){ 0 } else --asr) }, plus = { viewModel.setAsr(++asr) }) {
             showDialog = true
             id = 3
         }
-        QazoCount(text = stringResource(R.string.shom), count = shom, minus = { viewModel.setShom(if (shom<0){ 0 } else --shom) }, plus = { ++shom }) {
+        QazoCount(text = stringResource(R.string.shom), count = shom, minus = { viewModel.setShom(if (shom<=0){ 0 } else --shom) }, plus = { viewModel.setShom(++shom) }) {
             showDialog = true
             id = 4
         }
-        QazoCount(text = stringResource(R.string.xufton), count = xufton, minus = { viewModel.setXufton(if (xufton<0){ 0 } else --xufton) }, plus = { ++xufton }) {
+        QazoCount(text = stringResource(R.string.xufton), count = xufton, minus = { viewModel.setXufton(if (xufton<=0){ 0 } else --xufton) }, plus = { viewModel.setXufton(++xufton) }) {
             showDialog = true
             id = 5
         }
-        QazoCount(text = stringResource(R.string.vitr), count = vitr, minus = { viewModel.setVitr(if (vitr<0){ 0 } else --vitr) }, plus = { ++vitr }) {
+        QazoCount(text = stringResource(R.string.vitr), count = vitr, minus = { viewModel.setVitr(if (vitr<=0){ 0 } else --vitr) }, plus = { viewModel.setVitr(++vitr) }) {
             showDialog = true
             id = 6
         }
     }
-    QazoDialog()
+    QazoDialog(viewModel = viewModel)
     BackHandler {
-        viewModel.saveTime(BOMDOD, bomdod)
-        viewModel.saveTime(PESHIN, peshin)
-        viewModel.saveTime(ASR, asr)
-        viewModel.saveTime(SHOM, shom)
-        viewModel.saveTime(XUFTON, xufton)
-        viewModel.saveTime(VITR, vitr)
+        viewModel.saveInt(BOMDOD, bomdod)
+        viewModel.saveInt(PESHIN, peshin)
+        viewModel.saveInt(ASR, asr)
+        viewModel.saveInt(SHOM, shom)
+        viewModel.saveInt(XUFTON, xufton)
+        viewModel.saveInt(VITR, vitr)
         controller.popBackStack()
     }
 }
@@ -142,22 +142,16 @@ private var showDialog by
 
 
 @Composable
-fun QazoDialog(modifier: Modifier = Modifier) {
+fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
     var numberOfQazo by remember {
         mutableStateOf("0")
     }
-    var error by remember {
-        mutableStateOf(numberOfQazo.toInt()<0 || numberOfQazo.isEmpty() || numberOfQazo.isBlank())
-    }
+
     if (showDialog){
         Dialog(onDismissRequest = { showDialog = false }) {
             OutlinedCard(modifier, colors = CardDefaults.cardColors(White), elevation = CardDefaults.cardElevation(10.dp)) {
                 Column {
-                    OutlinedTextField(value = numberOfQazo, onValueChange = { numberOfQazo = it; error = false }, isError = error, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), supportingText =
-                    { if (error){ Text(stringResource(R.string.errorMessage, MaterialTheme.colorScheme.error)) } }, trailingIcon =
-                    {
-                        if (error){ Icon(Icons.Default.Info, null, tint =  MaterialTheme.colorScheme.error) }
-                    }, modifier = modifier
+                    OutlinedTextField(value = numberOfQazo, onValueChange = { numberOfQazo = it }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = modifier
                         .fillMaxWidth()
                         .padding(5.dp, 2.5.dp))
                     Row(modifier.fillMaxWidth()) {
@@ -168,7 +162,7 @@ fun QazoDialog(modifier: Modifier = Modifier) {
                                 Text(stringResource(R.string.cancel), color = White, fontSize = 20.sp)
                             }
                         }
-                        OutlinedButton(onClick = { try{ showDialog=false; buttonClicked(numberOfQazo.toInt(), id); id = -1; numberOfQazo = "0" }catch (_:Exception){ error = true } }, modifier = modifier
+                        OutlinedButton(onClick = { try{ showDialog=false; buttonClicked(numberOfQazo.toInt(), viewModel); id = -1; numberOfQazo = "0" }catch (_:Exception){  } }, modifier = modifier
                             .fillMaxWidth()
                             .weight(1f), colors = ButtonDefaults.buttonColors(Dark_Green)) {
                             Box(modifier = modifier.fillMaxWidth()){
@@ -182,7 +176,7 @@ fun QazoDialog(modifier: Modifier = Modifier) {
     }
 }
 
-fun buttonClicked(numberOfQazo: Int, id: Int) {
+fun buttonClicked(numberOfQazo: Int, viewModel: CalendarViewModel) {
     if (id!=-1){
         when(id){
             1->{

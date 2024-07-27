@@ -10,17 +10,30 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.models.model.Date
 import uz.coder.muslimcalendar.models.model.Item
+import uz.coder.muslimcalendar.models.model.Time
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
 import uz.coder.muslimcalendar.todo.ASR
 import uz.coder.muslimcalendar.todo.BOMDOD
+import uz.coder.muslimcalendar.todo.ICON_ASR
+import uz.coder.muslimcalendar.todo.ICON_BOMDOD
+import uz.coder.muslimcalendar.todo.ICON_PESHIN
+import uz.coder.muslimcalendar.todo.ICON_QUYOSH
+import uz.coder.muslimcalendar.todo.ICON_SHOM
+import uz.coder.muslimcalendar.todo.ICON_XUFTON
 import uz.coder.muslimcalendar.todo.PESHIN
 import uz.coder.muslimcalendar.todo.REGION
 import uz.coder.muslimcalendar.todo.SHOM
+import uz.coder.muslimcalendar.todo.SOUND_ASR
+import uz.coder.muslimcalendar.todo.SOUND_BOMDOD
+import uz.coder.muslimcalendar.todo.SOUND_PESHIN
+import uz.coder.muslimcalendar.todo.SOUND_QUYOSH
+import uz.coder.muslimcalendar.todo.SOUND_SHOM
+import uz.coder.muslimcalendar.todo.SOUND_XUFTON
 import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.todo.isConnected
-import uz.coder.muslimcalendar.todo.workReceiver
 
 data class CalendarViewModel(private val application: Application):AndroidViewModel(application){
     private val repo = CalendarRepositoryImpl(application)
@@ -39,18 +52,7 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
     val vitr = _vitr.asStateFlow()
     init {
         loading()
-        showNotification()
         fromPreferencesQazo()
-    }
-
-    private fun showNotification() {
-        viewModelScope.launch {
-            timeList().collectLatest {
-                it.forEach { item->
-                    workReceiver(item)
-                }
-            }
-        }
     }
 
     fun loading(){
@@ -63,23 +65,28 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
         viewModelScope.launch {
             _bomdod.emit(bomdod)
         }
-    }fun setPeshin(peshin: Int){
+    }
+    fun setPeshin(peshin: Int){
         viewModelScope.launch {
             _peshin.emit(peshin)
         }
-    }fun setAsr(asr: Int){
+    }
+    fun setAsr(asr: Int){
         viewModelScope.launch {
             _asr.emit(asr)
         }
-    }fun setShom(shom: Int){
+    }
+    fun setShom(shom: Int){
         viewModelScope.launch {
             _shom.emit(shom)
         }
-    }fun setXufton(xufton: Int){
+    }
+    fun setXufton(xufton: Int){
         viewModelScope.launch {
             _xufton.emit(xufton)
         }
-    }fun setVitr(vitr: Int){
+    }
+    fun setVitr(vitr: Int){
         viewModelScope.launch {
             _vitr.emit(vitr)
         }
@@ -88,17 +95,17 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
     fun fromPreferencesQazo(){
         viewModelScope.launch {
             _bomdod.emit(
-                getTime(BOMDOD))
+                getInt(BOMDOD))
             _peshin.emit(
-                getTime(PESHIN))
+                getInt(PESHIN))
             _asr.emit(
-                getTime(ASR))
+                getInt(ASR))
             _shom.emit(
-                getTime(SHOM))
+                getInt(SHOM))
             _xufton.emit(
-                getTime(XUFTON))
+                getInt(XUFTON))
             _vitr.emit(
-                getTime(VITR))
+                getInt(VITR))
 
         }
     }
@@ -122,20 +129,60 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
         preferences.edit().putString(REGION, region).apply()
     }
 
-    fun timeList() = flow{
+    fun timeList() = flow {
         repo.presentDay().collect{
-            emit(mutableListOf<Item>().apply {
-                add(Item(application.getString(R.string.bomdod), it.tongSaharlik))
-                add(Item(application.getString(R.string.quyosh), it.quyosh))
-                add(Item(application.getString(R.string.peshin), it.peshin))
-                add(Item(application.getString(R.string.asr), it.asr))
-                add(Item(application.getString(R.string.shom), it.shomIftor))
-                add(Item(application.getString(R.string.xufton), it.hufton))
-            })
+            emit(listOf(
+                Time(Item(application.getString(R.string.bomdod), it.tongSaharlik),
+                    it.tongSaharlik.subSequence(0,2).toString().toInt(),
+                    it.tongSaharlik.subSequence(3, it.tongSaharlik.length).toString().toInt(), getInt(ICON_BOMDOD, R.drawable.sound_off), getInt(
+                    SOUND_BOMDOD, R.raw.nothing)),
+
+                Time(Item(application.getString(R.string.quyosh), it.quyosh),
+                    it.quyosh.subSequence(0,2).toString().toInt(),
+                    it.quyosh.subSequence(3, it.quyosh.length).toString().toInt(), getInt(ICON_QUYOSH, R.drawable.bell_off), getInt(
+                    SOUND_QUYOSH, R.raw.nothing)),
+
+                Time(Item(application.getString(R.string.peshin), it.peshin),
+                    it.peshin.subSequence(0,2).toString().toInt(),
+                    it.peshin.subSequence(3, it.peshin.length).toString().toInt(), getInt(ICON_PESHIN, R.drawable.sound_off), getInt(
+                    SOUND_PESHIN, R.raw.nothing)),
+
+                Time(Item(application.getString(R.string.asr), it.asr),
+                    it.asr.subSequence(0,2).toString().toInt(),
+                    it.asr.subSequence(3, it.asr.length).toString().toInt(), getInt(ICON_ASR, R.drawable.sound_off), getInt(
+                    SOUND_ASR, R.raw.nothing)),
+
+                Time(Item(application.getString(R.string.shom), it.shomIftor),
+                    it.shomIftor.subSequence(0,2).toString().toInt(),
+                    it.shomIftor.subSequence(3, it.shomIftor.length).toString().toInt(), getInt(ICON_SHOM, R.drawable.sound_off), getInt(
+                    SOUND_SHOM, R.raw.nothing)),
+
+                Time(Item(application.getString(R.string.xufton), it.hufton),
+                    it.hufton.subSequence(0,2).toString().toInt(),
+                    it.hufton.subSequence(3, it.hufton.length).toString().toInt(), getInt(ICON_XUFTON, R.drawable.sound_off), getInt(
+                    SOUND_XUFTON, R.raw.nothing))))
         }
     }
-    fun saveTime(key:String, value:Int){
+
+    fun itemList() = flow{
+        repo.presentDay().collect{
+            emit(listOf(Item(application.getString(R.string.bomdod), it.tongSaharlik),
+                    Item(application.getString(R.string.quyosh), it.quyosh),
+                    Item(application.getString(R.string.peshin), it.peshin),
+            Item(application.getString(R.string.asr), it.asr),
+            Item(application.getString(R.string.shom), it.shomIftor),
+            Item(application.getString(R.string.xufton), it.hufton)))
+        }
+    }
+
+    fun day() = flow {
+        repo.presentDay().collect{
+            emit(Date(it.day, it.month-1, it.weekday, it.hijriDay+1, it.hijriMonth))
+        }
+    }
+
+    fun saveInt(key:String, value:Int){
         preferences.edit().putInt(key,value).apply()
     }
-    private fun getTime(key:String) = preferences.getInt(key, 0)
+    private fun getInt(key:String, defValue:Int = 0) = preferences.getInt(key, defValue)
 }

@@ -1,21 +1,31 @@
 package uz.coder.muslimcalendar.todo
 
+import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.AllahName
 
 const val REGION = "region"
 const val DEFAULT_REGION = "Urganch"
 const val ALLAH_NAME_INDEX = "allahNameIndex"
-const val CHANNEL_ID = "channel_id"
-const val CHANNEL_NAME = "channel_name"
-const val ID = 1
-const val ITEM_TIME = "time"
-const val ITEM_NAME = "name"
 const val BOMDOD = "bomdod_time"
 const val PESHIN = "peshin_time"
 const val ASR = "asr_time"
 const val SHOM = "shom_time"
 const val XUFTON = "xufton_time"
 const val VITR = "vitr_time"
+const val ICON_BOMDOD = "b_icon"
+const val ICON_QUYOSH = "q_icon"
+const val ICON_PESHIN = "p_icon"
+const val ICON_ASR = "a_icon"
+const val ICON_SHOM = "s_icon"
+const val ICON_XUFTON = "x_icon"
+const val SOUND_BOMDOD = "b_icon"
+const val SOUND_QUYOSH = "q_icon"
+const val SOUND_PESHIN = "p_icon"
+const val SOUND_ASR = "a_icon"
+const val SOUND_SHOM = "s_icon"
+const val SOUND_XUFTON = "x_icon"
+const val ONE_TIME = "one_time_for_screen"
+val MONTH:Array<String> = App.application!!.resources.getStringArray(R.array.months)
 val regionList = listOf(
     "Angren", "Bekobod",
     "Andijon", "Xonobod", "Qo'rg'ontepa", "Shahrixon", "Paxtaobod",
