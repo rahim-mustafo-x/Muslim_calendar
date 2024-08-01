@@ -194,8 +194,8 @@ fun Bottom(
             MainButton(resId = R.drawable.book, text = stringResource(R.string.blessing)) {
 
             }
-            MainButton(resId = R.drawable.quran, text = stringResource(R.string.quran)) {
-
+            MainButton(resId = R.drawable.calendar, text = stringResource(R.string.calendar)) {
+                controller.navigate(Calendar.route)
             }
             MainButton(resId = R.drawable.nine_nine, text = stringResource(R.string.allah)) {
                 controller.navigate(AllahName.route)
@@ -210,11 +210,6 @@ fun Bottom(
             }
             MainButton(resId = R.drawable.carpet, text = stringResource(R.string.qazo)) {
                 controller.navigate(Qazo.route)
-            }
-        }
-        Row(modifier = modifier.fillMaxWidth()) {
-            MainButton(resId = R.drawable.calendar, text = stringResource(R.string.calendar)) {
-                controller.navigate(Calendar.route)
             }
         }
     }
