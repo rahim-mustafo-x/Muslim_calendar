@@ -2,6 +2,7 @@ package uz.coder.muslimcalendar.ui.view
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,13 +25,13 @@ import androidx.compose.ui.unit.sp
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarTopBar(modifier:Modifier = Modifier, list: List<Menu>, onClick:(MenuScreen)->Unit){
     TopAppBar(title = { Text(text = stringResource(R.string.app_name), fontSize = 20.sp, modifier = modifier, color = White) }, colors = TopAppBarDefaults.topAppBarColors(
-        Dark_Green), actions = {
+        Light_Blue), actions = {
             var showMenu by remember {
                 mutableStateOf(false)
             }
@@ -47,12 +48,13 @@ fun CalendarTopBar(modifier:Modifier = Modifier, list: List<Menu>, onClick:(Menu
                         ) })
                     }
                 }
-            }else{
+            }else if(list.size == 1){
                 list.forEachIndexed {_,item->
                     IconButton(onClick = { onClick(item.menu) }) {
                         Icon(painterResource(item.img), null, tint = White)
                     }
                 }
             }
+            else return@TopAppBar
     })
 }

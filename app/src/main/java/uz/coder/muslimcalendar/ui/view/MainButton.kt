@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @Composable
 fun MainButton(modifier: Modifier = Modifier, resId: Int, text:String, onClick:()->Unit) {
@@ -26,8 +26,8 @@ fun MainButton(modifier: Modifier = Modifier, resId: Int, text:String, onClick:(
             Icon(
                 painterResource(resId), contentDescription = null, modifier = modifier
                     .size(80.dp)
-                    .padding(5.dp), tint = Dark_Green)
-            Text(text = text, color = Dark_Green, fontSize = 20.sp)
+                    .padding(5.dp), tint = Light_Blue)
+            Text(text = text, color = Light_Blue, fontSize = 20.sp)
         }
     }
 }

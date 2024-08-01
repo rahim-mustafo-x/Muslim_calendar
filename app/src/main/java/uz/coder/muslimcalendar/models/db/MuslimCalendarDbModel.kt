@@ -7,12 +7,10 @@ import androidx.room.PrimaryKey
 data class MuslimCalendarDbModel(
     @PrimaryKey
     val day: Int = 0,
-    val date: String = "",
     val hijriDay: Int = 0,
     val hijriMonth: String = "",
     val month: Int = 0,
     val region: String = "",
-    val regionNumber: Int = 0,
     val weekday: String = "",
     val asr: String = "",
     val hufton: String = "",

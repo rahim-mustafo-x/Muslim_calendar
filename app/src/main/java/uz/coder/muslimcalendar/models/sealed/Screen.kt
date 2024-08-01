@@ -2,8 +2,8 @@ package uz.coder.muslimcalendar.models.sealed
 
 sealed class Screen(val route:String) {
     data object Home:Screen(HOME)
-    data object TimeSetting:Screen(TIME_SETTING)
-    data object OneTimeSetting:Screen(ONE_TIME_SETTING)
+    data object Tasbeh:Screen(TASBEH)
+    data object Calendar:Screen(CALENDAR)
     data object Qazo:Screen(QAZO)
     data object ChooseRegion:Screen(CHOOSE_REGION)
     data object About:Screen(ABOUT)
@@ -12,8 +12,8 @@ sealed class Screen(val route:String) {
 
     companion object{
         private const val HOME = "home"
-        private const val TIME_SETTING = "time_setting"
-        private const val ONE_TIME_SETTING = "one_time_setting"
+        private const val TASBEH = "tasbeh"
+        private const val CALENDAR = "calendar"
         private const val QAZO = "qazo"
         private const val CHOOSE_REGION = "choose_region"
         private const val ABOUT = "about"

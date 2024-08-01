@@ -10,12 +10,12 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.db.MuslimCalendarDatabase
 import uz.coder.muslimcalendar.ktor.PrayerTimeService
 import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
+import uz.coder.muslimcalendar.models.model.MuslimCalendar
 import uz.coder.muslimcalendar.todo.DEFAULT_REGION
 import uz.coder.muslimcalendar.todo.REGION
 import java.util.Calendar.DAY_OF_MONTH
 import java.util.Calendar.MONTH
 import java.util.Calendar.getInstance
-import uz.coder.muslimcalendar.models.model.MuslimCalendar
 
 data class CalendarRepositoryImpl(private val application: Application):CalendarRepository {
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
@@ -33,7 +33,7 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
                     db.calendarDao().insertMuslimCalendar(mutableListOf<MuslimCalendarDbModel>().apply {
                         result.forEach {
                             it.apply {
-                                add(MuslimCalendarDbModel(day, date, hijriDate.day, hijriDate.month, month, region, regionNumber, weekday, times.asr, times.hufton, times.peshin, times.quyosh, times.shomIftor, times.tongSaharlik))
+                                add(MuslimCalendarDbModel(day, hijriDate.day, hijriDate.month, month, region, weekday, times.asr, times.hufton, times.peshin, times.quyosh, times.shomIftor, times.tongSaharlik))
                             }
                         }
                     })
@@ -67,12 +67,10 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
                        send(
                            MuslimCalendar(
                                day,
-                               date,
                                hijriDay,
                                hijriMonth,
                                month,
                                region,
-                               regionNumber,
                                weekday,
                                asr,
                                hufton,
@@ -85,5 +83,30 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
                    }catch (_:Exception){}
                }
            }
+    }
+
+    override fun oneMonth() = channelFlow {
+        db.calendarDao().oneMonth().collect{
+            send(mutableListOf<MuslimCalendar>().apply {
+                it.forEach {
+                    add(
+                        MuslimCalendar(
+                            it.day,
+                            it.hijriDay,
+                            it.hijriMonth,
+                            it.month,
+                            it.region,
+                            it.weekday,
+                            it.asr,
+                            it.hufton,
+                            it.peshin,
+                            it.quyosh,
+                            it.shomIftor,
+                            it.tongSaharlik
+                        )
+                    )
+                }
+            })
+        }
     }
 }

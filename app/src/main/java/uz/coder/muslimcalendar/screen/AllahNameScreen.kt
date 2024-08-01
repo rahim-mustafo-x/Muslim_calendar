@@ -17,7 +17,7 @@ import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.models.model.AllahName
 import uz.coder.muslimcalendar.models.sealed.Screen
 import uz.coder.muslimcalendar.todo.allahNames
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @Composable
 fun AllahNameScreen(modifier: Modifier = Modifier, controller: NavHostController) {
@@ -37,7 +37,7 @@ fun AllahName(modifier: Modifier = Modifier, controller: NavHostController) {
 fun Name(modifier: Modifier = Modifier, index: Int, item: AllahName, controller: NavHostController) {
     Card(onClick = { controller.navigate(Screen.AllahNameMeaning.route + "/$index") }, elevation = CardDefaults.elevatedCardElevation(8.dp), modifier = modifier
         .fillMaxWidth()
-        .padding(8.dp), colors = CardDefaults.cardColors(Dark_Green)) {
+        .padding(8.dp), colors = CardDefaults.cardColors(Light_Blue)) {
         Text(item.name, modifier = modifier.padding(16.dp).fillMaxSize(), color = White, fontSize = 20.sp)
     }
 }

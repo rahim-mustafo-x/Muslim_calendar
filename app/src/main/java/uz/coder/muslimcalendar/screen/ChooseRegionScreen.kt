@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.todo.regionList
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.viewModel.CalendarViewModel
 
 @Composable
@@ -42,7 +42,7 @@ fun Region(
     viewModel: CalendarViewModel
 ) {
     Card(onClick = { controller.popBackStack(); viewModel.region(item); viewModel.loading() }, modifier = modifier.padding(5.dp).fillMaxWidth(), colors = CardDefaults.cardColors(
-        Dark_Green)) {
+        Light_Blue)) {
         Text(text = item, modifier = modifier.padding(16.dp).fillMaxSize(), color = White, fontSize = 20.sp)
     }
 }

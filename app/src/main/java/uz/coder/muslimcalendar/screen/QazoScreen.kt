@@ -10,12 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
@@ -47,7 +43,7 @@ import uz.coder.muslimcalendar.todo.PESHIN
 import uz.coder.muslimcalendar.todo.SHOM
 import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.ui.view.QazoCount
 import uz.coder.muslimcalendar.viewModel.CalendarViewModel
@@ -144,27 +140,29 @@ private var showDialog by
 @Composable
 fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
     var numberOfQazo by remember {
-        mutableStateOf("0")
+        mutableIntStateOf(0)
     }
 
     if (showDialog){
         Dialog(onDismissRequest = { showDialog = false }) {
             OutlinedCard(modifier, colors = CardDefaults.cardColors(White), elevation = CardDefaults.cardElevation(10.dp)) {
                 Column {
-                    OutlinedTextField(value = numberOfQazo, onValueChange = { numberOfQazo = it }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = modifier
+                    OutlinedTextField(value = numberOfQazo.toString(), onValueChange = { numberOfQazo = try {
+                        it.toInt()
+                    }catch (_:Exception){ 0 } }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = modifier
                         .fillMaxWidth()
                         .padding(5.dp, 2.5.dp))
                     Row(modifier.fillMaxWidth()) {
-                        OutlinedButton(onClick = { showDialog=false; id = -1; numberOfQazo = "0" }, modifier = modifier
+                        OutlinedButton(onClick = { showDialog=false; id = -1; numberOfQazo = 0 }, modifier = modifier
                             .fillMaxWidth()
-                            .weight(1f), colors = ButtonDefaults.buttonColors(Dark_Green)) {
+                            .weight(1f), colors = ButtonDefaults.buttonColors(Light_Blue)) {
                             Box(modifier = modifier.fillMaxWidth()){
                                 Text(stringResource(R.string.cancel), color = White, fontSize = 20.sp)
                             }
                         }
-                        OutlinedButton(onClick = { try{ showDialog=false; buttonClicked(numberOfQazo.toInt(), viewModel); id = -1; numberOfQazo = "0" }catch (_:Exception){  } }, modifier = modifier
+                        OutlinedButton(onClick = { try{ showDialog=false; buttonClicked(numberOfQazo, viewModel); id = -1; numberOfQazo = 0 }catch (_:Exception){  } }, modifier = modifier
                             .fillMaxWidth()
-                            .weight(1f), colors = ButtonDefaults.buttonColors(Dark_Green)) {
+                            .weight(1f), colors = ButtonDefaults.buttonColors(Light_Blue)) {
                             Box(modifier = modifier.fillMaxWidth()){
                                 Text(stringResource(R.string.save), color = White, fontSize = 20.sp)
                             }
@@ -181,30 +179,42 @@ fun buttonClicked(numberOfQazo: Int, viewModel: CalendarViewModel) {
         when(id){
             1->{
                 bomdod = numberOfQazo
+                viewModel.setBomdod(numberOfQazo)
             }
             2->{
                 peshin = numberOfQazo
+                viewModel.setPeshin(numberOfQazo)
             }
             3->{
                 asr = numberOfQazo
+                viewModel.setAsr(numberOfQazo)
             }
             4->{
                 shom = numberOfQazo
+                viewModel.setShom(numberOfQazo)
             }
             5->{
                 xufton = numberOfQazo
+                viewModel.setXufton(numberOfQazo)
             }
             6->{
                 vitr = numberOfQazo
+                viewModel.setVitr(numberOfQazo)
             }
         }
     }
     else{
         bomdod = numberOfQazo
+        viewModel.setBomdod(numberOfQazo)
         peshin = numberOfQazo
+        viewModel.setPeshin(numberOfQazo)
         asr = numberOfQazo
+        viewModel.setAsr(numberOfQazo)
         shom = numberOfQazo
+        viewModel.setShom(numberOfQazo)
         xufton = numberOfQazo
+        viewModel.setXufton(numberOfQazo)
         vitr = numberOfQazo
+        viewModel.setVitr(numberOfQazo)
     }
 }

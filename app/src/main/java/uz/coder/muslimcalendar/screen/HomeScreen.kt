@@ -29,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
@@ -42,18 +41,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.models.model.Date
 import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
 import uz.coder.muslimcalendar.models.sealed.Screen.About
+import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
 import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
+import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
 import uz.coder.muslimcalendar.models.sealed.Screen.ChooseRegion
-import uz.coder.muslimcalendar.models.sealed.Screen.TimeSetting
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
-import uz.coder.muslimcalendar.todo.MONTH
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
-import uz.coder.muslimcalendar.ui.theme.Light_Green
+import uz.coder.muslimcalendar.ui.theme.Blue
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.ui.view.MainButton
 import uz.coder.muslimcalendar.viewModel.CalendarViewModel
@@ -100,8 +98,7 @@ fun Home(
             pagerState = pagerState,
             paddingValues = paddingValues,
             list = list,
-            controller = controller,
-            viewModel = viewModel
+            controller = controller
         )
     }
 }
@@ -124,16 +121,14 @@ fun NoInternetScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Screen(
+private fun Screen(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     paddingValues: PaddingValues,
     list: List<Item>,
-    controller: NavHostController,
-    viewModel: CalendarViewModel
+    controller: NavHostController
 ) {
     val scope = rememberCoroutineScope()
-    val date by viewModel.day().collectAsState(initial = Date())
     Column(
         modifier = modifier
             .padding(paddingValues)
@@ -145,7 +140,7 @@ fun Screen(
                     modifier
                         .fillMaxWidth()
                         .height(220.dp)
-                        .padding(5.dp), colors = CardDefaults.cardColors(Dark_Green)
+                        .padding(5.dp), colors = CardDefaults.cardColors(Light_Blue)
                 ) {
                     Column(
                         modifier
@@ -159,10 +154,6 @@ fun Screen(
                     }
                 }
 
-            }
-            Row(modifier.padding(5.dp).background(White)) {
-                Text("${date.weekDay}, ${date.day} ${MONTH[date.month]};", fontSize = 20.sp, color = Dark_Green)
-                Text("${date.hijriDay} ${date.hijriMonth}.", fontSize = 20.sp, color = Dark_Green)
             }
 
         }
@@ -182,7 +173,7 @@ fun Screen(
                     scope.launch { pagerState.animateScrollToPage(index) }
                 }, text = {
                     Text(item)
-                }, selectedContentColor = Light_Green, unselectedContentColor = Dark_Green)
+                }, selectedContentColor = Blue, unselectedContentColor = Light_Blue)
             }
         }
         Box(modifier = modifier.fillMaxSize()){
@@ -212,7 +203,7 @@ fun Bottom(
         }
         Row(modifier = modifier.fillMaxWidth()) {
             MainButton(resId = R.drawable.rosary, text = stringResource(R.string.rosary)) {
-
+                controller.navigate(Tasbeh.route)
             }
             MainButton(resId = R.drawable.muslim_man, text = stringResource(R.string.orderOfPrayer)) {
 
@@ -223,7 +214,7 @@ fun Bottom(
         }
         Row(modifier = modifier.fillMaxWidth()) {
             MainButton(resId = R.drawable.calendar, text = stringResource(R.string.calendar)) {
-
+                controller.navigate(Calendar.route)
             }
         }
     }

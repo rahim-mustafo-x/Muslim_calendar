@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @Composable
 fun QazoCount(modifier: Modifier = Modifier, text:String, count:Int, minus:()->Unit, plus:()->Unit, onClick:()->Unit) {
@@ -36,7 +36,7 @@ fun QazoCount(modifier: Modifier = Modifier, text:String, count:Int, minus:()->U
                 .padding(end = 10.dp), textAlign = TextAlign.Center)
         Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = modifier.fillMaxWidth()) {
             IconButton(onClick = minus, colors = IconButtonDefaults.iconButtonColors(
-                Dark_Green), modifier = modifier.size(50.dp)) {
+                Light_Blue), modifier = modifier.size(50.dp)) {
                 Icon(painterResource(R.drawable.minus), contentDescription = null, tint = White)
             }
             Box(modifier = modifier
@@ -44,12 +44,12 @@ fun QazoCount(modifier: Modifier = Modifier, text:String, count:Int, minus:()->U
                 .height(50.dp)
                 .width(120.dp)
                 .background(
-                    Dark_Green, CircleShape
+                    Light_Blue, CircleShape
                 ), contentAlignment = Alignment.Center){
                 Text(count.toString(), color =  White, fontSize =  25.sp)
             }
             IconButton(onClick = plus, colors = IconButtonDefaults.iconButtonColors(
-                Dark_Green), modifier = modifier.size(50.dp)) {
+                Light_Blue), modifier = modifier.size(50.dp)) {
                 Icon(painterResource(R.drawable.plus), contentDescription = null, tint = White)
             }
         }

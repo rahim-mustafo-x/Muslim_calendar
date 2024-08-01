@@ -24,7 +24,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.allahNames
-import uz.coder.muslimcalendar.ui.theme.Dark_Green
+import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @Composable
 fun AllahNameMeaningScreen(modifier: Modifier = Modifier, controller: NavHostController, navBackStackEntry: NavBackStackEntry) {
@@ -33,7 +33,7 @@ fun AllahNameMeaningScreen(modifier: Modifier = Modifier, controller: NavHostCon
     val state = rememberScrollState()
     Column(modifier = modifier
         .verticalScroll(state)
-        .background(Dark_Green)
+        .background(Light_Blue)
         .fillMaxSize()) {
         Card(modifier = modifier
             .fillMaxWidth()

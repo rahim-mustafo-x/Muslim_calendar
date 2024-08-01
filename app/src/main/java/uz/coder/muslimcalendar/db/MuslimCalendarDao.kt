@@ -22,4 +22,7 @@ interface MuslimCalendarDao {
 
     @Query("select MAX(day) as day, month from muslimCalendar limit 1")
     fun refreshDay():Flow<RefreshDay>
+
+    @Query("select * from muslimCalendar")
+    fun oneMonth():Flow<List<MuslimCalendarDbModel>>
 }

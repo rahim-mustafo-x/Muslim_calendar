@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
+import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
 import uz.coder.muslimcalendar.models.sealed.Screen.About
 import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
 import uz.coder.muslimcalendar.models.sealed.Screen.AllahNameMeaning
@@ -17,9 +19,11 @@ import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.screen.AboutScreen
 import uz.coder.muslimcalendar.screen.AllahNameMeaningScreen
 import uz.coder.muslimcalendar.screen.AllahNameScreen
+import uz.coder.muslimcalendar.screen.CalendarScreen
 import uz.coder.muslimcalendar.screen.ChooseRegionScreen
 import uz.coder.muslimcalendar.screen.HomeScreen
 import uz.coder.muslimcalendar.screen.QazoScreen
+import uz.coder.muslimcalendar.screen.TasbehScreen
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 
 @Composable
@@ -29,8 +33,14 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         composable(Home.route){
             HomeScreen(controller = controller)
         }
+        composable(Tasbeh.route){
+            TasbehScreen(controller = controller)
+        }
         composable(Qazo.route){
             QazoScreen(controller = controller)
+        }
+        composable(Calendar.route){
+            CalendarScreen(controller = controller)
         }
         composable(ChooseRegion.route){
             ChooseRegionScreen(controller = controller)
