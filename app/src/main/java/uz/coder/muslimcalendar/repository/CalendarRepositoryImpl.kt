@@ -51,7 +51,7 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         val day = calendar.get(DAY_OF_MONTH)
         db.calendarDao().refreshDay().collect{
             if (it.day == day && it.month == month){
-
+                db.calendarDao().deleteCalendar()
             }
         }
     }
