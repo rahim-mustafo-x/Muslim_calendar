@@ -1,6 +1,7 @@
 package uz.coder.muslimcalendar.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,12 +38,6 @@ import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
-import uz.coder.muslimcalendar.todo.ASR
-import uz.coder.muslimcalendar.todo.BOMDOD
-import uz.coder.muslimcalendar.todo.PESHIN
-import uz.coder.muslimcalendar.todo.SHOM
-import uz.coder.muslimcalendar.todo.VITR
-import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.ui.view.QazoCount
@@ -95,40 +90,35 @@ fun Qazo(modifier: Modifier = Modifier, controller: NavHostController, paddingVa
     }
     Column(modifier = modifier
         .fillMaxSize()
+        .background(White)
         .padding(paddingValues), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        QazoCount(text = stringResource(R.string.bomdod), count = bomdod, minus = { viewModel.setBomdod(if (bomdod<=0){ 0 } else --bomdod) }, plus = { viewModel.setBomdod(++bomdod) }) {
+        QazoCount(text = stringResource(R.string.bomdod), count = bomdod, minus = { viewModel.setBomdod(if (bomdod <=0){ 0 } else --bomdod) }, plus = { viewModel.setBomdod(++bomdod) }) {
             showDialog = true
             id = 1
         }
-        QazoCount(text = stringResource(R.string.peshin), count = peshin, minus = { viewModel.setPeshin(if (peshin<=0){ 0 } else --peshin) }, plus = { viewModel.setPeshin(++peshin) }) {
+        QazoCount(text = stringResource(R.string.peshin), count = peshin, minus = { viewModel.setPeshin(if (peshin <=0){ 0 } else --peshin) }, plus = { viewModel.setPeshin(++peshin) }) {
             showDialog = true
             id = 2
         }
-        QazoCount(text = stringResource(R.string.asr), count = asr, minus = { viewModel.setAsr(if (asr<=0){ 0 } else --asr) }, plus = { viewModel.setAsr(++asr) }) {
+        QazoCount(text = stringResource(R.string.asr), count = asr, minus = { viewModel.setAsr(if (asr <=0){ 0 } else --asr) }, plus = { viewModel.setAsr(++asr) }) {
             showDialog = true
             id = 3
         }
-        QazoCount(text = stringResource(R.string.shom), count = shom, minus = { viewModel.setShom(if (shom<=0){ 0 } else --shom) }, plus = { viewModel.setShom(++shom) }) {
+        QazoCount(text = stringResource(R.string.shom), count = shom, minus = { viewModel.setShom(if (shom <=0){ 0 } else --shom) }, plus = { viewModel.setShom(++shom) }) {
             showDialog = true
             id = 4
         }
-        QazoCount(text = stringResource(R.string.xufton), count = xufton, minus = { viewModel.setXufton(if (xufton<=0){ 0 } else --xufton) }, plus = { viewModel.setXufton(++xufton) }) {
+        QazoCount(text = stringResource(R.string.xufton), count = xufton, minus = { viewModel.setXufton(if (xufton <=0){ 0 } else --xufton) }, plus = { viewModel.setXufton(++xufton) }) {
             showDialog = true
             id = 5
         }
-        QazoCount(text = stringResource(R.string.vitr), count = vitr, minus = { viewModel.setVitr(if (vitr<=0){ 0 } else --vitr) }, plus = { viewModel.setVitr(++vitr) }) {
+        QazoCount(text = stringResource(R.string.vitr), count = vitr, minus = { viewModel.setVitr(if (vitr <=0){ 0 } else --vitr) }, plus = { viewModel.setVitr(++vitr) }) {
             showDialog = true
             id = 6
         }
     }
     QazoDialog(viewModel = viewModel)
     BackHandler {
-        viewModel.saveInt(BOMDOD, bomdod)
-        viewModel.saveInt(PESHIN, peshin)
-        viewModel.saveInt(ASR, asr)
-        viewModel.saveInt(SHOM, shom)
-        viewModel.saveInt(XUFTON, xufton)
-        viewModel.saveInt(VITR, vitr)
         controller.popBackStack()
     }
 }
@@ -153,14 +143,14 @@ fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
                         .fillMaxWidth()
                         .padding(5.dp, 2.5.dp))
                     Row(modifier.fillMaxWidth()) {
-                        OutlinedButton(onClick = { showDialog=false; id = -1; numberOfQazo = 0 }, modifier = modifier
+                        OutlinedButton(onClick = { showDialog =false; id = -1; numberOfQazo = 0 }, modifier = modifier
                             .fillMaxWidth()
                             .weight(1f), colors = ButtonDefaults.buttonColors(Light_Blue)) {
                             Box(modifier = modifier.fillMaxWidth()){
                                 Text(stringResource(R.string.cancel), color = White, fontSize = 20.sp)
                             }
                         }
-                        OutlinedButton(onClick = { try{ showDialog=false; buttonClicked(numberOfQazo, viewModel); id = -1; numberOfQazo = 0 }catch (_:Exception){  } }, modifier = modifier
+                        OutlinedButton(onClick = { try{ showDialog =false; buttonClicked(numberOfQazo, viewModel); id = -1; numberOfQazo = 0 }catch (_:Exception){  } }, modifier = modifier
                             .fillMaxWidth()
                             .weight(1f), colors = ButtonDefaults.buttonColors(Light_Blue)) {
                             Box(modifier = modifier.fillMaxWidth()){
@@ -175,7 +165,7 @@ fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
 }
 
 fun buttonClicked(numberOfQazo: Int, viewModel: CalendarViewModel) {
-    if (id!=-1){
+    if (id !=-1){
         when(id){
             1->{
                 bomdod = numberOfQazo

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import uz.coder.muslimcalendar.models.sealed.Screen.Namoz
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -41,15 +43,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.models.model.Date
 import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
 import uz.coder.muslimcalendar.models.sealed.Screen.About
 import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
 import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
+import uz.coder.muslimcalendar.models.sealed.Screen.Duo
 import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
 import uz.coder.muslimcalendar.models.sealed.Screen.ChooseRegion
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
+import uz.coder.muslimcalendar.todo.MONTH
 import uz.coder.muslimcalendar.ui.theme.Blue
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
@@ -59,7 +64,23 @@ import uz.coder.muslimcalendar.viewModel.CalendarViewModel
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     val viewModel = viewModel<CalendarViewModel>()
-    val menuList = listOf(Menu(R.drawable.refresh, stringResource(R.string.refresh), MenuScreen.Refresh), Menu(R.drawable.region, stringResource(R.string.chooseRegion), MenuScreen.ChangeRegion), Menu(R.drawable.about, stringResource(R.string.about), MenuScreen.About))
+    val menuList = listOf(
+        Menu(
+            R.drawable.refresh,
+            stringResource(R.string.refresh),
+            MenuScreen.Refresh
+        ),
+        Menu(
+            R.drawable.region,
+            stringResource(R.string.chooseRegion),
+            MenuScreen.ChangeRegion
+        ),
+        Menu(
+            R.drawable.about,
+            stringResource(R.string.about),
+            MenuScreen.About
+        )
+    )
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         CalendarTopBar(modifier = modifier, menuList){
             when(it){
@@ -98,7 +119,8 @@ fun Home(
             pagerState = pagerState,
             paddingValues = paddingValues,
             list = list,
-            controller = controller
+            controller = controller,
+            viewModel = viewModel
         )
     }
 }
@@ -110,6 +132,7 @@ fun NoInternetScreen(
     Column(
         modifier
             .fillMaxSize()
+            .background(White)
             .padding(paddingValues), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
         Image(painterResource(R.drawable.no_internet), contentDescription = null, contentScale = ContentScale.Crop, modifier = modifier
             .size(200.dp))
@@ -126,7 +149,8 @@ private fun Screen(
     pagerState: PagerState,
     paddingValues: PaddingValues,
     list: List<Item>,
-    controller: NavHostController
+    controller: NavHostController,
+    viewModel: CalendarViewModel
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -159,7 +183,7 @@ private fun Screen(
         }
         ScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(), containerColor = White,
             indicator = { Box(modifier) {} }) {
             listOf(
                 stringResource(R.string.bomdod),
@@ -176,40 +200,48 @@ private fun Screen(
                 }, selectedContentColor = Blue, unselectedContentColor = Light_Blue)
             }
         }
-        Box(modifier = modifier.fillMaxSize()){
-            Image(painterResource(R.drawable.bottom_image), null, contentScale = ContentScale.Crop, modifier =  modifier.fillMaxSize())
-            Bottom(modifier, controller)
-        }
+        Bottom(modifier, controller, viewModel)
     }
 }
 
 @Composable
 fun Bottom(
     modifier: Modifier,
-    controller: NavHostController
+    controller: NavHostController,
+    viewModel: CalendarViewModel
 ) {
+    val date by viewModel.day().collectAsState(initial = Date())
+    val context = LocalContext.current
     Column(modifier = modifier
-        .fillMaxSize(), verticalArrangement = Arrangement.Center) {
-        Row(modifier = modifier.fillMaxWidth()) {
-            MainButton(resId = R.drawable.book, text = stringResource(R.string.blessing)) {
-
-            }
-            MainButton(resId = R.drawable.calendar, text = stringResource(R.string.calendar)) {
-                controller.navigate(Calendar.route)
-            }
-            MainButton(resId = R.drawable.nine_nine, text = stringResource(R.string.allah)) {
-                controller.navigate(AllahName.route)
-            }
+        .fillMaxSize()
+        .background(White)) {
+        Column(modifier.fillMaxWidth().weight(2.5f)) {
+            Text(text = (context.getString(R.string.region) + date.region), color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
+            Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]};", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
+            Text("${date.hijriDay} - ${date.hijriMonth}.", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
         }
-        Row(modifier = modifier.fillMaxWidth()) {
-            MainButton(resId = R.drawable.rosary, text = stringResource(R.string.rosary)) {
-                controller.navigate(Tasbeh.route)
+        Column(modifier.fillMaxWidth().weight(9.5f)) {
+            Row(modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)) {
+                MainButton(resId = R.drawable.book, text = stringResource(R.string.blessing)) {
+                    controller.navigate(Duo.route)
+                }
+                MainButton(resId = R.drawable.calendar, text = stringResource(R.string.calendar)) {
+                    controller.navigate(Calendar.route)
+                }
+                MainButton(resId = R.drawable.nine_nine, text = stringResource(R.string.allah)) {
+                    controller.navigate(AllahName.route)
+                }
             }
-            MainButton(resId = R.drawable.muslim_man, text = stringResource(R.string.orderOfPrayer)) {
-
-            }
-            MainButton(resId = R.drawable.carpet, text = stringResource(R.string.qazo)) {
-                controller.navigate(Qazo.route)
+            Row(modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)) {
+                MainButton(resId = R.drawable.rosary, text = stringResource(R.string.rosary)) {
+                    controller.navigate(Tasbeh.route)
+                }
+                MainButton(resId = R.drawable.muslim_man, text = stringResource(R.string.orderOfPrayer)) {
+                    controller.navigate(Namoz.route)
+                }
+                MainButton(resId = R.drawable.carpet, text = stringResource(R.string.qazo)) {
+                    controller.navigate(Qazo.route)
+                }
             }
         }
     }

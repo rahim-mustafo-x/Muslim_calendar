@@ -33,8 +33,6 @@ import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
-import uz.coder.muslimcalendar.todo.ALL_TASBEH
-import uz.coder.muslimcalendar.todo.TASBEH
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.viewModel.CalendarViewModel
@@ -48,7 +46,12 @@ fun TasbehScreen(modifier: Modifier = Modifier, controller: NavHostController) {
 fun Tasbeh(modifier: Modifier = Modifier, controller: NavHostController) {
     val viewModel = viewModel<CalendarViewModel>()
     viewModel.fromPreferencesTasbeh()
-    val list = listOf(Menu(R.drawable.refresh, MenuScreen.RefreshTasbeh))
+    val list = listOf(
+        Menu(
+            R.drawable.refresh,
+            MenuScreen.RefreshTasbeh
+        )
+    )
     Scaffold(topBar = { CalendarTopBar(list = list) {
         when(it){
             MenuScreen.RefreshTasbeh->{
@@ -75,6 +78,7 @@ fun Screen(modifier: Modifier = Modifier, paddingValues: PaddingValues, controll
     }
     Column(modifier = modifier
         .fillMaxSize()
+        .background(White)
         .padding(paddingValues)) {
         Box(modifier = modifier
             .height(220.dp)
@@ -90,12 +94,14 @@ fun Screen(modifier: Modifier = Modifier, paddingValues: PaddingValues, controll
         Box(modifier = modifier
             .fillMaxSize(), contentAlignment = Alignment.Center) {
             OutlinedCard(onClick = {
-                if (tasbeh==33){
+                if (tasbeh ==33){
                     tasbeh = 0
                     viewModel.saveTasbeh(0)
                 }
                 else viewModel.saveTasbeh(++tasbeh)
-                viewModel.saveAllTasbeh(++allTasbeh) }, modifier = modifier.size(180.dp), shape = CircleShape, colors = CardDefaults.cardColors(Light_Blue)) {
+                viewModel.saveAllTasbeh(++allTasbeh) }, modifier = modifier.size(180.dp), shape = CircleShape, colors = CardDefaults.cardColors(
+                Light_Blue
+            )) {
                 Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                     Text(tasbeh.toString(), color = White, fontSize = 40.sp)
                 }
@@ -103,8 +109,6 @@ fun Screen(modifier: Modifier = Modifier, paddingValues: PaddingValues, controll
         }
     }
     BackHandler {
-        viewModel.saveInt(TASBEH, tasbeh)
-        viewModel.saveInt(ALL_TASBEH, allTasbeh)
         controller.popBackStack()
     }
 }

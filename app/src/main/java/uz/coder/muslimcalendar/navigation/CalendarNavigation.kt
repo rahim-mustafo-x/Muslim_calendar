@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import uz.coder.muslimcalendar.models.sealed.Screen
 import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
 import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
 import uz.coder.muslimcalendar.models.sealed.Screen.About
@@ -21,10 +22,16 @@ import uz.coder.muslimcalendar.screen.AllahNameMeaningScreen
 import uz.coder.muslimcalendar.screen.AllahNameScreen
 import uz.coder.muslimcalendar.screen.CalendarScreen
 import uz.coder.muslimcalendar.screen.ChooseRegionScreen
+import uz.coder.muslimcalendar.screen.DuoMeaningScreen
+import uz.coder.muslimcalendar.screen.DuoScreen
 import uz.coder.muslimcalendar.screen.HomeScreen
+import uz.coder.muslimcalendar.screen.NamozMeaningScreen
+import uz.coder.muslimcalendar.screen.NamozScreen
 import uz.coder.muslimcalendar.screen.QazoScreen
 import uz.coder.muslimcalendar.screen.TasbehScreen
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
+import uz.coder.muslimcalendar.todo.DUO_INDEX
+import uz.coder.muslimcalendar.todo.NAMOZ_INDEX
 
 @Composable
 fun CalendarNavigation(modifier: Modifier = Modifier) {
@@ -35,6 +42,24 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         }
         composable(Tasbeh.route){
             TasbehScreen(controller = controller)
+        }
+        composable(Screen.Duo.route){
+            DuoScreen(controller = controller)
+        }
+        composable(
+            Screen.DuoMeaning.route+"/{$DUO_INDEX}", arguments = arrayListOf(navArgument(
+            DUO_INDEX
+        ){ type = NavType.IntType })){
+            DuoMeaningScreen(controller = controller, navBackStackEntry = it)
+        }
+        composable(Screen.Namoz.route){
+            NamozScreen(controller = controller)
+        }
+        composable(
+            Screen.NamozMeaning.route+"/{$NAMOZ_INDEX}", arguments = arrayListOf(navArgument(
+            NAMOZ_INDEX
+            ){ type = NavType.IntType })){
+            NamozMeaningScreen(modifier, controller = controller, navBackStackEntry = it)
         }
         composable(Qazo.route){
             QazoScreen(controller = controller)
@@ -52,7 +77,8 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
             AllahNameScreen(controller = controller)
         }
         composable(AllahNameMeaning.route+"/{$ALLAH_NAME_INDEX}", arguments = arrayListOf(navArgument(
-            ALLAH_NAME_INDEX){ type = NavType.IntType })){
+            ALLAH_NAME_INDEX
+        ){ type = NavType.IntType })){
             AllahNameMeaningScreen(controller = controller, navBackStackEntry =  it)
         }
     }

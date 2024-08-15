@@ -25,6 +25,7 @@
     <string name="allow">Ruxsat berish</string>
     <string name="dayMonth">kun/oy</string>
     <string name="all">"Jami: "</string>
+    <string name="region">"Shahar: "</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>
