@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -28,9 +29,11 @@ fun NamozScreen(modifier: Modifier = Modifier, controller: NavHostController) {
 
 @Composable
 fun Namoz(modifier: Modifier, controller: NavHostController) {
-    LazyColumn(modifier.fillMaxSize()) {
-        itemsIndexed(namozList){ index, item ->
-            NamozItem(modifier, item, index, controller)
+    Scaffold(modifier.fillMaxSize()) {
+        LazyColumn(modifier.fillMaxSize().padding(it)) {
+            itemsIndexed(namozList){ index, item ->
+                NamozItem(modifier, item, index, controller)
+            }
         }
     }
     BackHandler {
@@ -39,9 +42,14 @@ fun Namoz(modifier: Modifier, controller: NavHostController) {
 }
 @Composable
 fun NamozItem(modifier: Modifier, item: Namoz, index: Int, controller: NavHostController) {
-    Card(onClick = { controller.navigate(NamozMeaning.route+"/$index") }, modifier.fillMaxWidth().padding(8.dp), shape = RoundedCornerShape(25.dp), colors = CardDefaults.cardColors(
+    Card(onClick = { controller.navigate(NamozMeaning.route+"/$index") },
+        modifier
+            .fillMaxWidth()
+            .padding(8.dp), shape = RoundedCornerShape(25.dp), colors = CardDefaults.cardColors(
         Light_Blue
     )) {
-        Text(item.name, modifier = modifier.padding(16.dp).fillMaxSize(), color = White, fontSize = 20.sp)
+        Text(item.name, modifier = modifier
+            .padding(16.dp)
+            .fillMaxSize(), color = White, fontSize = 20.sp)
     }
 }

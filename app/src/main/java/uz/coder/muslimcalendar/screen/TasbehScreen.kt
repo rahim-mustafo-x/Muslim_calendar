@@ -33,6 +33,8 @@ import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
+import uz.coder.muslimcalendar.todo.ALL_TASBEH
+import uz.coder.muslimcalendar.todo.TASBEH
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.viewModel.CalendarViewModel
@@ -110,5 +112,7 @@ fun Screen(modifier: Modifier = Modifier, paddingValues: PaddingValues, controll
     }
     BackHandler {
         controller.popBackStack()
+        viewModel.saveInt(TASBEH, tasbeh)
+        viewModel.saveInt(ALL_TASBEH, allTasbeh)
     }
 }

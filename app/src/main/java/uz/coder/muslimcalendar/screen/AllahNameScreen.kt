@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,9 +27,11 @@ fun AllahNameScreen(modifier: Modifier = Modifier, controller: NavHostController
 
 @Composable
 fun AllahName(modifier: Modifier = Modifier, controller: NavHostController) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        itemsIndexed(allahNames){index, item->
-            Name(index = index, item = item, controller = controller)
+    Scaffold(modifier.fillMaxSize()) {
+        LazyColumn(modifier = modifier.fillMaxSize().padding(it)) {
+            itemsIndexed(allahNames){index, item->
+                Name(index = index, item = item, controller = controller)
+            }
         }
     }
 }
@@ -38,6 +41,8 @@ fun Name(modifier: Modifier = Modifier, index: Int, item: AllahName, controller:
     Card(onClick = { controller.navigate(Screen.AllahNameMeaning.route + "/$index") }, elevation = CardDefaults.elevatedCardElevation(8.dp), modifier = modifier
         .fillMaxWidth()
         .padding(8.dp), colors = CardDefaults.cardColors(Light_Blue)) {
-        Text(item.name, modifier = modifier.padding(16.dp).fillMaxSize(), color = White, fontSize = 20.sp)
+        Text(item.name, modifier = modifier
+            .padding(16.dp)
+            .fillMaxSize(), color = White, fontSize = 20.sp)
     }
 }

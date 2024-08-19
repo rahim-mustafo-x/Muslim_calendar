@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,9 +28,11 @@ fun ChooseRegionScreen(modifier: Modifier = Modifier, controller: NavHostControl
 @Composable
 fun ChooseRegion(modifier: Modifier = Modifier, controller: NavHostController) {
     val viewModel = viewModel<CalendarViewModel>()
-    LazyColumn(modifier.fillMaxSize()) {
-        itemsIndexed(regionList){_,item->
-            Region(item = item, controller = controller, viewModel = viewModel)
+    Scaffold(modifier.fillMaxSize()) {
+        LazyColumn(modifier.fillMaxSize().padding(it)) {
+            itemsIndexed(regionList){_,item->
+                Region(item = item, controller = controller, viewModel = viewModel)
+            }
         }
     }
 }
@@ -41,8 +44,12 @@ fun Region(
     controller: NavHostController,
     viewModel: CalendarViewModel
 ) {
-    Card(onClick = { controller.popBackStack(); viewModel.region(item); viewModel.loading() }, modifier = modifier.padding(5.dp).fillMaxWidth(), colors = CardDefaults.cardColors(
+    Card(onClick = { controller.popBackStack(); viewModel.region(item); viewModel.loading() }, modifier = modifier
+        .padding(5.dp)
+        .fillMaxWidth(), colors = CardDefaults.cardColors(
         Light_Blue)) {
-        Text(text = item, modifier = modifier.padding(16.dp).fillMaxSize(), color = White, fontSize = 20.sp)
+        Text(text = item, modifier = modifier
+            .padding(16.dp)
+            .fillMaxSize(), color = White, fontSize = 20.sp)
     }
 }

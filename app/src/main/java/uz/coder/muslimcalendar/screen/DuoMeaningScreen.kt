@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,21 +46,24 @@ fun DuoMeaning(
     val index = navBackStackEntry.arguments?.getInt(DUO_INDEX, 0)?:0
     val duo = dualist[index]
     val state = rememberScrollState()
-    Column(modifier = modifier
-        .verticalScroll(state)
-        .background(Light_Blue)
-        .fillMaxSize()) {
-        Card(modifier = modifier
-            .fillMaxWidth()
-            .padding(5.dp)
-            .height(180.dp), colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(10.dp)) {
-            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                Text(duo.name, color = Color.Black, modifier = modifier
-                    .fillMaxSize()
-                    .wrapContentSize(Alignment.Center), textAlign = TextAlign.Center, fontSize = 40.sp)
+    Scaffold(modifier.fillMaxSize()) {
+        Column(modifier = modifier
+            .padding(it)
+            .verticalScroll(state)
+            .background(Light_Blue)
+            .fillMaxSize()) {
+            Card(modifier = modifier
+                .fillMaxWidth()
+                .padding(5.dp)
+                .height(180.dp), colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(10.dp)) {
+                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    Text(duo.name, color = Color.Black, modifier = modifier
+                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center), textAlign = TextAlign.Center, fontSize = 40.sp)
+                }
             }
+            Text(duo.duo, color = Color.White, fontSize = 20.sp, modifier = modifier.fillMaxSize())
         }
-        Text(duo.duo, color = Color.White, fontSize = 20.sp, modifier = modifier.fillMaxSize())
     }
     BackHandler {
         controller.popBackStack()
