@@ -3,6 +3,8 @@ package uz.coder.muslimcalendar.screen
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,8 @@ import uz.coder.muslimcalendar.models.sealed.Screen.Namoz
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
@@ -184,7 +188,7 @@ private fun Screen(
         ScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
             modifier = modifier.fillMaxWidth(), containerColor = White,
-            indicator = { Box(modifier) {} }) {
+            indicator = { Box {} }) {
             listOf(
                 stringResource(R.string.bomdod),
                 stringResource(R.string.quyosh),
@@ -220,7 +224,7 @@ fun Bottom(
             Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]};", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
             Text("${date.hijriDay} - ${date.hijriMonth}.", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
         }
-        Column(modifier.fillMaxWidth().weight(9.5f)) {
+        Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).weight(9.5f)) {
             Row(modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)) {
                 MainButton(resId = R.drawable.book, text = stringResource(R.string.blessing)) {
                     controller.navigate(Duo.route)

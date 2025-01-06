@@ -46,24 +46,21 @@ fun DuoMeaning(
     val index = navBackStackEntry.arguments?.getInt(DUO_INDEX, 0)?:0
     val duo = dualist[index]
     val state = rememberScrollState()
-    Scaffold(modifier.fillMaxSize()) {
-        Column(modifier = modifier
-            .padding(it)
-            .verticalScroll(state)
-            .background(Light_Blue)
-            .fillMaxSize()) {
-            Card(modifier = modifier
-                .fillMaxWidth()
-                .padding(5.dp)
-                .height(180.dp), colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(10.dp)) {
-                Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    Text(duo.name, color = Color.Black, modifier = modifier
-                        .fillMaxSize()
-                        .wrapContentSize(Alignment.Center), textAlign = TextAlign.Center, fontSize = 40.sp)
-                }
+    Column(modifier = modifier
+        .verticalScroll(state)
+        .background(Light_Blue)
+        .fillMaxSize()) {
+        Card(modifier = modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .height(180.dp), colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(10.dp)) {
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Text(duo.name, color = Color.Black, modifier = modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center), textAlign = TextAlign.Center, fontSize = 40.sp)
             }
-            Text(duo.duo, color = Color.White, fontSize = 20.sp, modifier = modifier.fillMaxSize())
         }
+        Text(duo.duo, color = Color.White, fontSize = 20.sp, modifier = modifier.fillMaxSize())
     }
     BackHandler {
         controller.popBackStack()

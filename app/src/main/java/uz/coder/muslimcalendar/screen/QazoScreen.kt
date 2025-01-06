@@ -96,7 +96,6 @@ fun Qazo(modifier: Modifier = Modifier, controller: NavHostController, paddingVa
     }
     Column(modifier = modifier
         .fillMaxSize()
-        .background(White)
         .padding(paddingValues), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         QazoCount(text = stringResource(R.string.bomdod), count = bomdod, minus = { viewModel.setBomdod(if (bomdod <=0){ 0 } else --bomdod) }, plus = { viewModel.setBomdod(++bomdod) }) {
             showDialog = true
@@ -147,7 +146,7 @@ fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
 
     if (showDialog){
         Dialog(onDismissRequest = { showDialog = false }) {
-            OutlinedCard(modifier, colors = CardDefaults.cardColors(White), elevation = CardDefaults.cardElevation(10.dp)) {
+            OutlinedCard(modifier.padding(5.dp), colors = CardDefaults.cardColors(White), elevation = CardDefaults.cardElevation(10.dp)) {
                 Column {
                     OutlinedTextField(value = numberOfQazo.toString(), onValueChange = { numberOfQazo = try {
                         it.toInt()

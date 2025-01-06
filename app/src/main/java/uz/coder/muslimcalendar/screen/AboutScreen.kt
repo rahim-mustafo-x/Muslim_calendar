@@ -9,11 +9,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 
 @Composable
@@ -33,7 +33,7 @@ fun About(modifier: Modifier = Modifier) {
                 context.getString(R.string.about_text),
                 modifier.fillMaxSize().padding(horizontal = 5.dp).verticalScroll(state),
                 fontSize = 25.sp,
-                color = Light_Blue
+                color = Black
             )
         }
     }
