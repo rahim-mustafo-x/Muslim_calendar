@@ -7,14 +7,15 @@ plugins {
 
 android {
     namespace = "uz.coder.muslimcalendar"
-    compileSdk = 34
+    compileSdk = 351
 
     defaultConfig {
         applicationId = "uz.coder.muslimcalendar"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        //noinspection EditedTargetSdkVersion
+        targetSdk = 35
+        versionCode = 3
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

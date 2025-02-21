@@ -1,6 +1,6 @@
 [versions]
 accompanistSwiperefresh = "0.27.0"
-agp = "8.5.2"
+agp = "8.8.1"
 hiltAndroidGradlePlugin = "2.44"
 hiltCompiler = "1.2.0"
 hiltLifecycleViewmodel = "1.0.0-alpha03"
