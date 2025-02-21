@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "uz.coder.muslimcalendar"
-    compileSdk = 351
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "uz.coder.muslimcalendar"
