@@ -28,6 +28,10 @@ import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
+import androidx.core.content.edit
+import kotlinx.coroutines.flow.Flow
+import uz.coder.muslimcalendar.models.model.quran.Quran
+import uz.coder.muslimcalendar.models.model.quran.Surah
 
 data class CalendarViewModel(private val application: Application):AndroidViewModel(application){
     private val repo = CalendarRepositoryImpl(application)
@@ -161,7 +165,7 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
     }
 
     fun region(region:String){
-        preferences.edit().putString(REGION, region).apply()
+        preferences.edit { putString(REGION, region) }
     }
 
     fun itemList() = flow{
@@ -179,12 +183,22 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
 
     fun day() = flow {
         repo.presentDay().collect{
-            emit(Date(it.day, it.month-1, it.weekday, it.hijriDay+1, it.hijriMonth, it.region))
+            emit(Date(it.day, it.month-1, it.weekday, it.hijriDay, it.hijriMonth, it.region))
         }
     }
 
     fun saveInt(key:String, value:Int){
-        preferences.edit().putInt(key,value).apply()
+        preferences.edit { putInt(key, value) }
     }
     private fun getInt(key:String, defValue:Int = 0) = preferences.getInt(key, defValue)
+    fun getQuranArab() = flow{
+        if (application.isConnected()){
+            emit(repo.getQuranArab())
+        }
+    }
+    fun getSura(surahNumber: Int) = flow{
+        if (application.isConnected()){
+            emit(repo.getSura(surahNumber))
+        }
+    }
 }

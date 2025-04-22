@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
@@ -65,6 +66,12 @@ fun Tasbeh(modifier: Modifier = Modifier, controller: NavHostController) {
         }
     } }) {
         Screen(modifier, it, controller, viewModel)
+    }
+    LifecycleResumeEffect(Unit) {
+        onPauseOrDispose {
+            viewModel.saveInt(TASBEH, tasbeh)
+            viewModel.saveInt(ALL_TASBEH, allTasbeh)
+        }
     }
 }
 var allTasbeh by

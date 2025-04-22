@@ -31,7 +31,6 @@ import uz.coder.muslimcalendar.viewModel.CalendarViewModel
 
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: CalendarViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,18 +39,6 @@ class MainActivity : ComponentActivity() {
                     Greeting()
                 }
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        viewModel.saveInt(BOMDOD, bomdod)
-        viewModel.saveInt(PESHIN, peshin)
-        viewModel.saveInt(ASR, asr)
-        viewModel.saveInt(SHOM, shom)
-        viewModel.saveInt(XUFTON, xufton)
-        viewModel.saveInt(VITR, vitr)
-        viewModel.saveInt(TASBEH, tasbeh)
-        viewModel.saveInt(ALL_TASBEH, allTasbeh)
     }
 }
 

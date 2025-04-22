@@ -33,15 +33,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
+import uz.coder.muslimcalendar.todo.ALL_TASBEH
 import uz.coder.muslimcalendar.todo.ASR
 import uz.coder.muslimcalendar.todo.BOMDOD
 import uz.coder.muslimcalendar.todo.PESHIN
 import uz.coder.muslimcalendar.todo.SHOM
+import uz.coder.muslimcalendar.todo.TASBEH
 import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
@@ -69,6 +72,16 @@ fun QazoScreen(modifier: Modifier = Modifier, controller: NavHostController) {
         }
     } }) {
         Qazo(modifier = modifier, controller = controller, paddingValues = it, viewModel = viewModel)
+    }
+    LifecycleResumeEffect(Unit){
+        onPauseOrDispose {
+            viewModel.saveInt(BOMDOD, bomdod)
+            viewModel.saveInt(PESHIN, peshin)
+            viewModel.saveInt(ASR, asr)
+            viewModel.saveInt(SHOM, shom)
+            viewModel.saveInt(XUFTON, xufton)
+            viewModel.saveInt(VITR, vitr)
+        }
     }
 }
 var bomdod by

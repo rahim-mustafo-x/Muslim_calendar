@@ -16,10 +16,19 @@ import uz.coder.muslimcalendar.todo.REGION
 import java.util.Calendar.DAY_OF_MONTH
 import java.util.Calendar.MONTH
 import java.util.Calendar.getInstance
+import androidx.core.content.edit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import uz.coder.muslimcalendar.ktor.ApiService.Companion.apiService
+import uz.coder.muslimcalendar.map.CalendarMap
+import uz.coder.muslimcalendar.models.model.quran.Quran
+import uz.coder.muslimcalendar.models.model.quran.Surah
 
 data class CalendarRepositoryImpl(private val application: Application):CalendarRepository {
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
     private val db:MuslimCalendarDatabase by lazy { MuslimCalendarDatabase.instance(application) }
+    private val map = CalendarMap()
 
     override suspend fun loading() {
         try {
@@ -30,19 +39,15 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
                 ) ?: DEFAULT_REGION
             )
             if (result != null){
-                    db.calendarDao().insertMuslimCalendar(mutableListOf<MuslimCalendarDbModel>().apply {
-                        result.forEach {
-                            it.apply {
-                                add(MuslimCalendarDbModel(day, hijriDate.day, hijriDate.month, month, region, weekday, times.asr, times.hufton, times.peshin, times.quyosh, times.shomIftor, times.tongSaharlik))
-                            }
-                        }
-                    })
+                    db.calendarDao().insertMuslimCalendar(
+                        map.toMuslimCalendarDbModel(result)
+                    )
             }
         }catch (_:Exception){}
     }
 
     override suspend fun region(region: String) {
-        preferences.edit().putString(REGION, region).apply()
+        preferences.edit { putString(REGION, region) }
     }
 
     override suspend fun remove() {
@@ -62,51 +67,35 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
             db.calendarDao().presentDay(calendar.get(DAY_OF_MONTH), calendar.get(MONTH) + 1)
            presentDay.collectLatest{
                Log.d("TAG", "presentDay: $it")
-               it.apply {
                    try {
                        send(
-                           MuslimCalendar(
-                               day,
-                               hijriDay,
-                               hijriMonth,
-                               month,
-                               region,
-                               weekday,
-                               asr,
-                               hufton,
-                               peshin,
-                               quyosh,
-                               shomIftor,
-                               tongSaharlik
-                           )
+                           map.toMuslimCalendar(it)
                        )
                    }catch (_:Exception){}
-               }
            }
     }
 
     override fun oneMonth() = channelFlow {
         db.calendarDao().oneMonth().collect{
-            send(mutableListOf<MuslimCalendar>().apply {
-                it.forEach {
-                    add(
-                        MuslimCalendar(
-                            it.day,
-                            it.hijriDay,
-                            it.hijriMonth,
-                            it.month,
-                            it.region,
-                            it.weekday,
-                            it.asr,
-                            it.hufton,
-                            it.peshin,
-                            it.quyosh,
-                            it.shomIftor,
-                            it.tongSaharlik
-                        )
-                    )
-                }
-            })
+            send(map.toMuslimCalendarList(it))
         }
+    }
+
+    override fun getQuranArab() = flow<Quran> {
+        val result = withContext(Dispatchers.IO) { apiService.getQuranArab() }
+        emit(
+            Quran(
+                map.toSuraList(result.data)
+            )
+        )
+    }
+
+    override fun getSura(surahNumber: Int) = flow<Surah> {
+        val result = withContext(Dispatchers.IO) { apiService.getSura(surahNumber) }
+        emit(
+            Surah(
+                map.toSurahList(result.result)
+            )
+        )
     }
 }

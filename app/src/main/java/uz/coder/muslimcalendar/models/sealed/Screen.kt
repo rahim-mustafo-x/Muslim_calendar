@@ -13,6 +13,8 @@ sealed class Screen(val route:String) {
     data object About: Screen(ABOUT)
     data object AllahName: Screen(ALLAH_NAME)
     data object AllahNameMeaning: Screen(ALLAH_NAME_MEANING)
+    data object Quran: Screen(QURAN)
+    data object QuranAyah: Screen(QURAN_AYAH)
 
     companion object{
         private const val HOME = "home"
@@ -27,6 +29,8 @@ sealed class Screen(val route:String) {
         private const val ABOUT = "about"
         private const val ALLAH_NAME = "allah_name"
         private const val ALLAH_NAME_MEANING = "allah_name_meaning"
+        private const val QURAN = "quran"
+        private const val QURAN_AYAH = "quran_ayah"
     }
 
 }

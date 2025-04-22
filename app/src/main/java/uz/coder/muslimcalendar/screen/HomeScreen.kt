@@ -58,6 +58,7 @@ import uz.coder.muslimcalendar.models.sealed.Screen.Duo
 import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
 import uz.coder.muslimcalendar.models.sealed.Screen.ChooseRegion
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
+import uz.coder.muslimcalendar.models.sealed.Screen.Quran
 import uz.coder.muslimcalendar.todo.MONTH
 import uz.coder.muslimcalendar.ui.theme.Blue
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
@@ -245,6 +246,11 @@ fun Bottom(
                 }
                 MainButton(resId = R.drawable.carpet, text = stringResource(R.string.qazo)) {
                     controller.navigate(Qazo.route)
+                }
+            }
+            Row(modifier = modifier.fillMaxWidth()) {
+                MainButton(resId = R.drawable.quran, text = stringResource(R.string.quran)) {
+                    controller.navigate(Quran.route)
                 }
             }
         }

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id ("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.kotlin.compose)
     kotlin("kapt")
 }
 
@@ -42,16 +43,13 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    kapt {
-        correctErrorTypes = true
+    buildFeatures {
+        compose = true
     }
 }
 
@@ -71,8 +69,18 @@ dependencies {
     implementation (libs.ktor.client.content.negotiation)
     implementation (libs.ktor.serialization.kotlinx.json)
 
-    implementation(libs.accompanist.swiperefresh)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.common)
 
+    implementation(libs.latin.to.cyrillic)
+
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    implementation(libs.ui)
+    implementation(libs.androidx.material)
+    implementation(libs.ui.tooling.preview)
+    debugImplementation(libs.ui.tooling)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

@@ -17,6 +17,8 @@ import uz.coder.muslimcalendar.models.sealed.Screen.AllahNameMeaning
 import uz.coder.muslimcalendar.models.sealed.Screen.ChooseRegion
 import uz.coder.muslimcalendar.models.sealed.Screen.Home
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
+import uz.coder.muslimcalendar.models.sealed.Screen.Quran
+import uz.coder.muslimcalendar.models.sealed.Screen.QuranAyah
 import uz.coder.muslimcalendar.screen.AboutScreen
 import uz.coder.muslimcalendar.screen.AllahNameMeaningScreen
 import uz.coder.muslimcalendar.screen.AllahNameScreen
@@ -28,6 +30,8 @@ import uz.coder.muslimcalendar.screen.HomeScreen
 import uz.coder.muslimcalendar.screen.NamozMeaningScreen
 import uz.coder.muslimcalendar.screen.NamozScreen
 import uz.coder.muslimcalendar.screen.QazoScreen
+import uz.coder.muslimcalendar.screen.QuranAyahScreen
+import uz.coder.muslimcalendar.screen.QuranScreen
 import uz.coder.muslimcalendar.screen.TasbehScreen
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.DUO_INDEX
@@ -80,6 +84,12 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
             ALLAH_NAME_INDEX
         ){ type = NavType.IntType })){
             AllahNameMeaningScreen(controller = controller, navBackStackEntry =  it)
+        }
+        composable(Quran.route) {
+            QuranScreen(controller = controller)
+        }
+        composable(QuranAyah.route) {
+            QuranAyahScreen(controller = controller)
         }
     }
 }
