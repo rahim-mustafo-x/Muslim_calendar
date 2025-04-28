@@ -7,10 +7,8 @@ import android.util.Log
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.db.MuslimCalendarDatabase
+import uz.coder.muslimcalendar.db.ApDatabase
 import uz.coder.muslimcalendar.ktor.PrayerTimeService
-import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
-import uz.coder.muslimcalendar.models.model.MuslimCalendar
 import uz.coder.muslimcalendar.todo.DEFAULT_REGION
 import uz.coder.muslimcalendar.todo.REGION
 import java.util.Calendar.DAY_OF_MONTH
@@ -18,16 +16,17 @@ import java.util.Calendar.MONTH
 import java.util.Calendar.getInstance
 import androidx.core.content.edit
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.ktor.ApiService.Companion.apiService
 import uz.coder.muslimcalendar.map.CalendarMap
-import uz.coder.muslimcalendar.models.model.quran.Quran
+import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.Surah
 
 data class CalendarRepositoryImpl(private val application: Application):CalendarRepository {
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
-    private val db:MuslimCalendarDatabase by lazy { MuslimCalendarDatabase.instance(application) }
+    private val db:ApDatabase by lazy { ApDatabase.instance(application) }
     private val map = CalendarMap()
 
     override suspend fun loading() {
@@ -81,13 +80,27 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         }
     }
 
-    override fun getQuranArab() = flow<Quran> {
+    override suspend fun loadQuranArab() {
         val result = withContext(Dispatchers.IO) { apiService.getQuranArab() }
-        emit(
-            Quran(
-                map.toSuraList(result.data)
-            )
+        db.suraDao().insertAll(
+            map.toSuraDbModel(result.data?.surahs)
         )
+    }
+
+    override fun getSurah() = flow<List<Sura>> {
+        db.suraDao().getAllSura().collect{
+            emit(
+                map.toSuraList(it)
+            )
+        }
+    }
+
+    override fun getSurahByNumber(number: Int) = flow<Sura> {
+        db.suraDao().getSuraById(number).collect{
+            emit(
+                map.toSura(it)
+            )
+        }
     }
 
     override fun getSura(surahNumber: Int) = flow<Surah> {

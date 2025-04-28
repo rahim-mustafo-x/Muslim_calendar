@@ -6,8 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SuraDTO(
-    @SerialName("ayahs")
-    val ayahDTOS: List<AyahDTO>? = null,
     @SerialName("englishName")
     val englishName: String? = null,
     @SerialName("englishNameTranslation")

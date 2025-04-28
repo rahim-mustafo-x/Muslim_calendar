@@ -36,6 +36,7 @@ import uz.coder.muslimcalendar.screen.TasbehScreen
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.DUO_INDEX
 import uz.coder.muslimcalendar.todo.NAMOZ_INDEX
+import uz.coder.muslimcalendar.todo.NUMBER
 
 @Composable
 fun CalendarNavigation(modifier: Modifier = Modifier) {
@@ -88,8 +89,9 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         composable(Quran.route) {
             QuranScreen(controller = controller)
         }
-        composable(QuranAyah.route) {
-            QuranAyahScreen(controller = controller)
+        composable(QuranAyah.route+"/{$NUMBER}", arguments = arrayListOf(navArgument(NUMBER){ type =
+            NavType.IntType })) {
+            QuranAyahScreen(controller = controller, navBackStackEntry = it)
         }
     }
 }

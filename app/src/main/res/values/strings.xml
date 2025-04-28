@@ -13,7 +13,7 @@
     <string name="about">Haqida</string>
     <string name="about_text">\nBu ilova Muslim Taqvim bo\'lib bu ilovada Namoz vaqtlari bor va namoz vaqtlari aniq bu ilovani namoz vaqtlarini aniq bilish uchun avval mintaqani tanlab, keyin yangilash tugmasini bosing faqat internet bilan aloqasi bo\'lgan xolatda.\n\n Aytgancha oyning boshida ma\'lumotni yangilang.\n\nBu ilova faqat namoz vaqtlari emas balki Allohning 99 ta ismini ma\'nosi bilan bor, Duolar va namoz o\'qish tartibi ham bor</string>
     <string name="blessing">Duolar</string>
-    <string name="quran">Qur\'an</string>
+    <string name="quran">Qur\'on</string>
     <string name="allah">Alloh</string>
     <string name="rosary">Tasbeh</string>
     <string name="orderOfPrayer">Namoz</string>
@@ -26,6 +26,8 @@
     <string name="dayMonth">kun/oy</string>
     <string name="all">"Jami: "</string>
     <string name="region">"Shahar: "</string>
+    <string name="no_internet">Internet bilan aloqa yo\'q</string>
+    <string name="translation">Tarjimasi</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

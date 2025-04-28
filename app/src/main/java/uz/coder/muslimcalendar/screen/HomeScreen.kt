@@ -87,7 +87,7 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
         )
     )
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        CalendarTopBar(modifier = modifier, menuList){
+        CalendarTopBar(modifier = modifier, list = menuList){
             when(it){
                 MenuScreen.Refresh->{
                     viewModel.loading()

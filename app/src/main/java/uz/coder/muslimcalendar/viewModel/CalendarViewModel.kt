@@ -191,14 +191,4 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
         preferences.edit { putInt(key, value) }
     }
     private fun getInt(key:String, defValue:Int = 0) = preferences.getInt(key, defValue)
-    fun getQuranArab() = flow{
-        if (application.isConnected()){
-            emit(repo.getQuranArab())
-        }
-    }
-    fun getSura(surahNumber: Int) = flow{
-        if (application.isConnected()){
-            emit(repo.getSura(surahNumber))
-        }
-    }
 }

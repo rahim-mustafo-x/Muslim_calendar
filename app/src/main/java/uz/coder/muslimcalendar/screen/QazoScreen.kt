@@ -1,7 +1,6 @@
 package uz.coder.muslimcalendar.screen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,12 +38,10 @@ import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
-import uz.coder.muslimcalendar.todo.ALL_TASBEH
 import uz.coder.muslimcalendar.todo.ASR
 import uz.coder.muslimcalendar.todo.BOMDOD
 import uz.coder.muslimcalendar.todo.PESHIN
 import uz.coder.muslimcalendar.todo.SHOM
-import uz.coder.muslimcalendar.todo.TASBEH
 import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.ui.theme.Light_Blue

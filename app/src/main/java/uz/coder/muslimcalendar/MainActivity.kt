@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MuslimCalendarTheme(darkTheme = false)  {
                     Greeting()
-                }
+            }
         }
     }
 }

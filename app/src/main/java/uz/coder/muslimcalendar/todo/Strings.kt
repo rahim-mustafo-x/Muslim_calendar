@@ -19,6 +19,7 @@ const val XUFTON = "xufton_time"
 const val VITR = "vitr_time"
 const val TASBEH = "tasbeh"
 const val ALL_TASBEH = "all_tasbeh"
+const val NUMBER = "number"
 val MONTH:Array<String> = App.application!!.resources.getStringArray(R.array.months)
 val regionList = listOf(
     "Angren", "Bekobod",
