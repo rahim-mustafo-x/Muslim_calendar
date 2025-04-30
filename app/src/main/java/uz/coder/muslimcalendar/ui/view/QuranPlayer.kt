@@ -1,20 +1,9 @@
 package uz.coder.muslimcalendar.ui.view
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 //noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.Icon
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.IconButton
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.Slider
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.SliderDefaults
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.Surface
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.delay
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.todo.formatTime
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @Composable
@@ -40,12 +30,26 @@ fun QuranPlayer(
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var duration by remember { mutableLongStateOf(1L) }
     var currentPosition by remember { mutableLongStateOf(0L) }
+    var isCompleted by remember { mutableStateOf(false) } // New state to check if audio is completed
+
+    // Update slider, current position, and check if audio is completed
+    LaunchedEffect(exoPlayer) {
+        while (true) {
+            currentPosition = exoPlayer.currentPosition
+            duration = exoPlayer.duration
+
+            // Check if the audio has finished playing
+            isCompleted = currentPosition >= duration
+
+            sliderPosition = (currentPosition.toFloat() / duration.toFloat())
+            delay(500)
+        }
+    }
 
     Surface(
         color = Light_Blue,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -74,13 +78,13 @@ fun QuranPlayer(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = formatTime(currentPosition),
+                    text = currentPosition.formatTime(),
                     color = Color.White,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Start
                 )
                 Text(
-                    text = formatTime(duration),
+                    text = duration.formatTime(),
                     color = Color.White,
                     fontSize = 12.sp,
                     textAlign = TextAlign.End
@@ -95,17 +99,24 @@ fun QuranPlayer(
                 horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier.fillMaxWidth()
             ) {
-
                 IconButton(onClick = { onPreviousClick() }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_previous),
                         contentDescription = "Previous",
-                        tint = Color.White)
+                        tint = Color.White
+                    )
                 }
 
-                IconButton(onClick = { onPlayPauseClick() }) {
+                IconButton(onClick = {
+                    // Check if the audio is completed and restart it
+                    if (isCompleted) {
+                        exoPlayer.seekTo(0) // Restart if completed
+                        exoPlayer.playWhenReady = true // Ensure playback resumes after seeking
+                    }
+                    onPlayPauseClick()
+                }) {
                     Icon(
-                        painter = if (isPlaying) painterResource(R.drawable.ic_pause) else painterResource(R.drawable.ic_play),
+                        painter = if (isPlaying && !isCompleted) painterResource(R.drawable.ic_pause) else painterResource(R.drawable.ic_play),
                         contentDescription = "Play/Pause",
                         tint = Color.White,
                         modifier = Modifier.size(32.dp)
@@ -122,25 +133,4 @@ fun QuranPlayer(
             }
         }
     }
-
-    // 🔄 Slider and Time
-    LaunchedEffect(exoPlayer) {
-        while (true) {
-            currentPosition = exoPlayer.currentPosition
-            val dur = exoPlayer.duration
-            if (dur > 0) {
-                duration = dur
-            }
-            delay(500)
-        }
-    }
 }
-
-fun formatTime(ms: Long): String {
-    val totalSeconds = ms / 1000
-    val hour = totalSeconds / 3600
-    val minutes = (totalSeconds % 3600) /60
-    val seconds = totalSeconds % 60
-    return "%02d:%02d:%02d".format(hour, minutes, seconds)
-}
-
