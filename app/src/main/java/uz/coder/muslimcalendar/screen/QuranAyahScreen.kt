@@ -41,7 +41,7 @@ import uz.coder.muslimcalendar.ui.view.AyahArabicSection
 import uz.coder.muslimcalendar.ui.view.AyahTranslationSection
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar2
 import uz.coder.muslimcalendar.ui.view.QuranPlayer
-import uz.coder.muslimcalendar.viewModel.QuranViewModel
+import uz.coder.muslimcalendar.viewModel.SurahViewModel
 import uz.coder.muslimcalendar.viewModel.state.SurahState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +51,7 @@ fun QuranAyahScreen(
     controller: NavHostController,
     navBackStackEntry: NavBackStackEntry,
 ) {
-    val viewModel = viewModel<QuranViewModel>()
+    val viewModel = viewModel<SurahViewModel>()
     val context = LocalContext.current
     val number = navBackStackEntry.arguments?.getInt(NUMBER) ?: 1
     var showTranslation by remember { mutableStateOf(false) }
@@ -84,7 +84,7 @@ fun QuranAyahScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.surah.collect { state ->
+        viewModel.state.collect { state ->
             when (state) {
                 is SurahState.Loading -> isLoading = true
                 is SurahState.Success -> {
@@ -101,7 +101,7 @@ fun QuranAyahScreen(
         }
     }
 
-    Scaffold(
+    Scaffold(modifier = modifier.fillMaxSize(),
         topBar = {
             CalendarTopBar2(text = nameOfSurah.ifBlank { "Sura" }, list = emptyList()) { }
         },

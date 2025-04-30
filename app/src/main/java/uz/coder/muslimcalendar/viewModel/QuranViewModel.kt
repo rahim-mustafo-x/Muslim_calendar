@@ -10,51 +10,29 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.viewModel.state.QuranState
-import uz.coder.muslimcalendar.viewModel.state.SurahState
 
 class QuranViewModel(private val application: Application) : AndroidViewModel(application) {
     private val repo = CalendarRepositoryImpl(application)
-    private val _surahList = MutableStateFlow<QuranState>(QuranState.Init)
-    val surahList = _surahList.asStateFlow()
-    private val _surah = MutableStateFlow<SurahState>(SurahState.Init)
-    val surah = _surah.asStateFlow()
+    private val _state = MutableStateFlow<QuranState>(QuranState.Init)
+    val state = _state.asStateFlow()
     init {
         loadQuran()
     }
     fun loadQuran() {
         viewModelScope.launch {
-            _surahList.emit(QuranState.Loading)
+            _state.emit(QuranState.Loading)
             if (application.isConnected()){
                 repo.getSurah().collect {
                     if (it.isEmpty()){
                         repo.loadQuranArab()
                         loadQuran()
                     }else{
-                        _surahList.emit(QuranState.Success(it))
+                        _state.emit(QuranState.Success(it))
                     }
                 }
             }else{
-                _surahList.emit(QuranState.Error(application.getString(R.string.no_internet)))
+                _state.emit(QuranState.Error(application.getString(R.string.no_internet)))
             }
         }
-    }
-    fun getSura(surahNumber: Int) {
-        viewModelScope.launch {
-            _surah.emit(SurahState.Loading)
-            if (application.isConnected()){
-                repo.getSura(surahNumber).collect {surah->
-                    repo.getSurahByNumber(surahNumber).collect {
-                        _surah.emit(SurahState.Success(surah.result, it.englishName))
-                    }
-                }
-            }else {
-                _surah.emit(SurahState.Error(application.getString(R.string.no_internet)))
-            }
-        }
-    }
-
-    fun getQuranAudioUrl(number:Int):String {
-        val numberOfSurah = "%03d".format(number)
-        return "https://server16.mp3quran.net/a_binaoun/Rewayat-Hafs-A-n-Assem/${numberOfSurah}.mp3"
     }
 }

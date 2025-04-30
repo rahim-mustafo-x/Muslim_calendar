@@ -1,5 +1,6 @@
 package uz.coder.muslimcalendar.ui.theme
 
+import androidx.annotation.ColorInt
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -12,3 +13,5 @@ val Pink40 = Color(0xFF7D5260)
 
 val Light_Blue = Color(0xFF00AA94)
 val Blue = Color(0xFF00008B)
+@ColorInt
+val LightBlueStatusBar = 0xFF00AA94.toInt()

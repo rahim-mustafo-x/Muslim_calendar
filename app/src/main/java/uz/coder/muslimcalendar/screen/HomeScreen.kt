@@ -24,14 +24,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Black
@@ -65,10 +70,12 @@ import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.ui.view.MainButton
 import uz.coder.muslimcalendar.viewModel.CalendarViewModel
+import uz.coder.muslimcalendar.viewModel.HomeViewModel
+import uz.coder.muslimcalendar.viewModel.state.HomeState
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
-    val viewModel = viewModel<CalendarViewModel>()
+    val viewModel = viewModel<HomeViewModel>()
     val menuList = listOf(
         Menu(
             R.drawable.refresh,
@@ -110,25 +117,58 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
 @Composable
 fun Home(
     controller: NavHostController,
-    viewModel: CalendarViewModel,
+    viewModel: HomeViewModel,
     paddingValues: PaddingValues
 ) {
-    val list by viewModel.itemList().collectAsState(emptyList())
+    viewModel.itemList()
+    var list by remember { mutableStateOf<List<Item>>(emptyList()) }
     val pagerState = rememberPagerState {
         list.size
     }
-    if (list == emptyList<Item>()) {
-        NoInternetScreen(paddingValues = paddingValues)
-    } else {
-        Screen(
-            pagerState = pagerState,
-            paddingValues = paddingValues,
-            list = list,
-            controller = controller,
-            viewModel = viewModel
-        )
+    var showLoadingDialog by remember { mutableStateOf<Boolean>(false) }
+    if (showLoadingDialog){
+        LoadingDialog(modifier = Modifier.padding(paddingValues))
+    }else{
+        if (list == emptyList<Item>()) {
+            NoInternetScreen(paddingValues = paddingValues)
+        } else {
+            Screen(
+                pagerState = pagerState,
+                paddingValues = paddingValues,
+                list = list,
+                controller = controller,
+                viewModel = viewModel
+            )
+        }
+    }
+    LaunchedEffect(viewModel.state) {
+        viewModel.state.collect {
+            when(it){
+                is HomeState.Error -> {
+                    showLoadingDialog = false
+                }
+                HomeState.Init -> {
+                    showLoadingDialog = false
+                }
+                HomeState.Loading -> {
+                    showLoadingDialog = true
+                }
+                is HomeState.Success -> {
+                    showLoadingDialog = false
+                    list = it.data
+                }
+            }
+        }
     }
 }
+
+@Composable
+fun LoadingDialog(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
 @Composable
 fun NoInternetScreen(
     modifier: Modifier = Modifier,
@@ -155,7 +195,7 @@ private fun Screen(
     paddingValues: PaddingValues,
     list: List<Item>,
     controller: NavHostController,
-    viewModel: CalendarViewModel
+    viewModel: HomeViewModel
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -213,20 +253,27 @@ private fun Screen(
 fun Bottom(
     modifier: Modifier,
     controller: NavHostController,
-    viewModel: CalendarViewModel
+    viewModel: HomeViewModel
 ) {
     val date by viewModel.day().collectAsState(initial = Date())
     val context = LocalContext.current
     Column(modifier = modifier
         .fillMaxSize()
         .background(White)) {
-        Column(modifier.fillMaxWidth().weight(2.5f)) {
+        Column(modifier
+            .fillMaxWidth()
+            .weight(2.5f)) {
             Text(text = (context.getString(R.string.region) + date.region), color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
             Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]};", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
             Text("${date.hijriDay} - ${date.hijriMonth}.", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
         }
-        Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState()).weight(9.5f)) {
-            Row(modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)) {
+        Column(modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .weight(9.5f)) {
+            Row(modifier = modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)) {
                 MainButton(resId = R.drawable.book, text = stringResource(R.string.blessing)) {
                     controller.navigate(Duo.route)
                 }
@@ -237,7 +284,9 @@ fun Bottom(
                     controller.navigate(AllahName.route)
                 }
             }
-            Row(modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)) {
+            Row(modifier = modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)) {
                 MainButton(resId = R.drawable.rosary, text = stringResource(R.string.rosary)) {
                     controller.navigate(Tasbeh.route)
                 }

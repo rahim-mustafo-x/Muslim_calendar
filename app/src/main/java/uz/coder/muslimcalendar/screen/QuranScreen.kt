@@ -66,8 +66,8 @@ fun QuranScreen(
             }
         }
     }
-    LaunchedEffect(viewModel.surahList) {
-        viewModel.surahList.collect {
+    LaunchedEffect(viewModel.state) {
+        viewModel.state.collect {
             when(it){
                 is QuranState.Error -> {
                     isLoading = false

@@ -11,7 +11,6 @@ ktorClientContentNegotiation = "2.3.6"
 ktorClientCore = "2.3.6"
 ktorClientLogging = "2.3.6"
 ktorSerializationKotlinxJson = "2.3.6"
-latinToCyrillic = "2.0.0"
 lifecycleRuntimeCompose = "2.8.7"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
@@ -56,7 +55,6 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
-latin-to-cyrillic = { module = "com.michaeltroger:latin-to-cyrillic", version.ref = "latinToCyrillic" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }

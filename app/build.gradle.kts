@@ -73,8 +73,6 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.common)
 
-    implementation(libs.latin.to.cyrillic)
-
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.ui)

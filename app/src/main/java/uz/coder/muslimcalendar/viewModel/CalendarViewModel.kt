@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,6 @@ import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Calendar
 import uz.coder.muslimcalendar.models.model.Date
-import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
 import uz.coder.muslimcalendar.todo.ALL_TASBEH
 import uz.coder.muslimcalendar.todo.ASR
@@ -28,10 +28,6 @@ import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
-import androidx.core.content.edit
-import kotlinx.coroutines.flow.Flow
-import uz.coder.muslimcalendar.models.model.quran.Quran
-import uz.coder.muslimcalendar.models.model.quran.Surah
 
 data class CalendarViewModel(private val application: Application):AndroidViewModel(application){
     private val repo = CalendarRepositoryImpl(application)
@@ -166,19 +162,6 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
 
     fun region(region:String){
         preferences.edit { putString(REGION, region) }
-    }
-
-    fun itemList() = flow{
-        repo.presentDay().collect{
-            emit(listOf(
-                Item(application.getString(R.string.bomdod), it.tongSaharlik),
-                Item(application.getString(R.string.quyosh), it.quyosh),
-                Item(application.getString(R.string.peshin), it.peshin),
-                Item(application.getString(R.string.asr), it.asr),
-                Item(application.getString(R.string.shom), it.shomIftor),
-                Item(application.getString(R.string.xufton), it.hufton))
-            )
-        }
     }
 
     fun day() = flow {

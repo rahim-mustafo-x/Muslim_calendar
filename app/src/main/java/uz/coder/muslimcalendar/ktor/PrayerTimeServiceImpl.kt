@@ -15,6 +15,6 @@ data class PrayerTimeServiceImpl(
     override suspend fun oneMonthByRegionMonth(region: String): List<PrayerTime>? {
         val instance = Calendar.getInstance()
         val month = instance.get(Calendar.MONTH)+1
-        return withContext(Dispatchers.IO){ httpClient.get(ONE_MONTH_BASE_URL+"region=$region&month=$month").body() }
+        return withContext(Dispatchers.IO){ httpClient.get("$ONE_MONTH_BASE_URL?region=$region&month=$month").body() }
     }
 }
