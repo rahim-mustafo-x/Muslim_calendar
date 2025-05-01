@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collectLatest
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.db.AppDatabase
 import uz.coder.muslimcalendar.ktor.PrayerTimeService
@@ -21,6 +20,8 @@ import uz.coder.muslimcalendar.ktor.ApiService.Companion.apiService
 import uz.coder.muslimcalendar.map.CalendarMap
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.Surah
+import java.io.IOException
+import java.time.LocalDate
 
 data class CalendarRepositoryImpl(private val application: Application):CalendarRepository {
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
@@ -29,23 +30,25 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
 
     override suspend fun loading(longitude: Double, latitude: Double) {
         Log.d(TAG, "loading: $longitude/$latitude")
-        try {
-            val result = PrayerTimeService.oneMonth.oneMonth(
-                latitude, longitude
-            )
-            if (result != null){
-                    db.calendarDao().insertMuslimCalendar(
-                        map.toMuslimCalendarDbModel(result.data)
-                )
-                Log.d(TAG, "loading: ${result.data}")
+        if (longitude != 0.0 && latitude != 0.0) {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    PrayerTimeService.oneMonth.oneMonth(latitude, longitude)
+                }
+                result.data?.let {
+                    db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(it))
+                    Log.d(TAG, "loading: $it")
+                } ?: Log.d(TAG, "loading: bo'sh")
+            } catch (e: IOException) {
+                Log.e(TAG, "loading: Tarmoq xatoligi", e)
+            } catch (e: Exception) {
+                Log.e(TAG, "loading: Noma'lum xatolik", e)
             }
-            else{
-                Log.d(TAG, "loading: bosh")
-            }
-        }catch (e:Exception){
-            Log.e(TAG, "loading: 1 oylik namozda", e)
+        } else {
+            Log.d(TAG, "loading: koordinatalar bo'sh")
         }
     }
+
 
     override suspend fun region(region: String) {
         preferences.edit { putString(REGION, region) }
@@ -62,14 +65,14 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         }
     }
 
-    override fun presentDay() = channelFlow {
-        val calendar = getInstance()
+    override fun presentDay() = flow {
+        val localeDate = LocalDate.now()
         val presentDay =
-            db.calendarDao().presentDay(calendar.get(DAY_OF_MONTH), calendar.get(MONTH) + 1)
-           presentDay.collectLatest{
-               Log.d("TAG", "presentDay: $it")
+            db.calendarDao().presentDay(localeDate.dayOfMonth, localeDate.monthValue)
+           presentDay.collect{
+               Log.d(TAG, "presentDay: $it")
                    try {
-                       send(
+                       emit(
                            map.toMuslimCalendar(it)
                        )
                    }catch (_:Exception){}

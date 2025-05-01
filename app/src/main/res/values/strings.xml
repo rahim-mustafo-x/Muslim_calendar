@@ -36,6 +36,7 @@
     <string name="russia">Ruscha</string>
     <string name="english">Inglizcha</string>
     <string name="select_language">Tilni tanlang</string>
+    <string name="quyoshChiqishi">Quyosh chiqishi</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

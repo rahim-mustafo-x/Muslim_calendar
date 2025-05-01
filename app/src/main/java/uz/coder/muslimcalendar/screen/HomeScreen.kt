@@ -227,6 +227,7 @@ private fun Screen(
             indicator = { Box {} }) {
             listOf(
                 stringResource(R.string.bomdod),
+                stringResource(R.string.quyoshChiqishi),
                 stringResource(R.string.peshin),
                 stringResource(R.string.asr),
                 stringResource(R.string.quyoshBotishi),

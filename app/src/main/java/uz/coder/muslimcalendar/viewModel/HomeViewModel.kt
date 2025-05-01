@@ -58,7 +58,7 @@ class HomeViewModel(private val application: Application):AndroidViewModel(appli
             Log.d("TAG", "loadInformationFromInternet: ")
             if (application.isConnected()){
                 _state.value = HomeState.Loading
-                repo.loading(latitude, longitude)
+                repo.loading(longitude, latitude)
             }else{
                 _state.value = HomeState.Error(application.getString(R.string.no_internet))
             }
@@ -70,6 +70,7 @@ class HomeViewModel(private val application: Application):AndroidViewModel(appli
             repo.presentDay().collect{
                 _state.value = HomeState.Success(listOf(
                     Item(application.getString(R.string.bomdod), it.tongSaharlik),
+                    Item(application.getString(R.string.quyoshChiqishi), it.sunRise),
                     Item(application.getString(R.string.peshin), it.peshin),
                     Item(application.getString(R.string.asr), it.asr),
                     Item(application.getString(R.string.quyoshBotishi), it.sunSet),

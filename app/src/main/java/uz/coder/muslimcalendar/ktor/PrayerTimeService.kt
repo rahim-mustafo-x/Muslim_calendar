@@ -10,7 +10,7 @@ import uz.coder.muslimcalendar.models.internet.PrayerResponse
 
 interface PrayerTimeService {
 
-    suspend fun oneMonth(latitude: Double, longitude: Double):PrayerResponse<List<PrayerData>>?
+    suspend fun oneMonth(latitude: Double, longitude: Double):PrayerResponse<List<PrayerData>?>
     companion object{
         private const val BASE_URL = "https://api.aladhan.com/"
         const val ONE_MONTH_BASE_URL = "${BASE_URL}/v1/calendar/"

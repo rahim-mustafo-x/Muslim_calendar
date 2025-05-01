@@ -29,7 +29,7 @@ fun Spinner(modifier: Modifier = Modifier, value: String, list: List<SpinnerMode
             Icon(if (showSpinner) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, null, tint = Light_Blue)
         }
         DropdownMenu(expanded = showSpinner, onDismissRequest = { showSpinner = false }) {
-            list.forEachIndexed {_, item ->
+            list.forEach {item ->
                 DropdownMenuItem({ Text(item.spinnerValue) }, onClick = {
                         showSpinner = false
                         onSelected(item)

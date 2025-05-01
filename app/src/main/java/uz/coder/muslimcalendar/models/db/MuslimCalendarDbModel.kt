@@ -16,5 +16,6 @@ data class MuslimCalendarDbModel(
     val peshin: String = "",
     val shomIftor: String = "",
     val tongSaharlik: String = "",
-    val sunset:String = ""
+    val sunset:String = "",
+    val sunrise:String = ""
 )

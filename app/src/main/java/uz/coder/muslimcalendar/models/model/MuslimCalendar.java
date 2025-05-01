@@ -15,8 +15,9 @@ public class MuslimCalendar {
     private String shomIftor;
     private String tongSaharlik;
     private String sunSet;
+    private String sunRise;
 
-    public MuslimCalendar(int day, int hijriDay, String hijriMonth, int month, String weekday, String asr, String hufton, String peshin, String shomIftor, String tongSaharlik, String sunSet) {
+    public MuslimCalendar(int day, int hijriDay, String hijriMonth, int month, String weekday, String asr, String hufton, String peshin, String shomIftor, String tongSaharlik, String sunSet, String sunRise) {
         this.day = day;
         this.hijriDay = hijriDay;
         this.hijriMonth = hijriMonth;
@@ -28,6 +29,7 @@ public class MuslimCalendar {
         this.shomIftor = shomIftor;
         this.tongSaharlik = tongSaharlik;
         this.sunSet = sunSet;
+        this.sunRise = sunRise;
     }
 
     public MuslimCalendar() {
@@ -78,16 +80,20 @@ public class MuslimCalendar {
         return sunSet;
     }
 
+    public String getSunRise() {
+        return sunRise;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MuslimCalendar that = (MuslimCalendar) o;
-        return day == that.day && hijriDay == that.hijriDay && month == that.month && Objects.equals(hijriMonth, that.hijriMonth) && Objects.equals(weekday, that.weekday) && Objects.equals(asr, that.asr) && Objects.equals(hufton, that.hufton) && Objects.equals(peshin, that.peshin)  && Objects.equals(shomIftor, that.shomIftor) && Objects.equals(tongSaharlik, that.tongSaharlik) && Objects.equals(sunSet, that.sunSet);
+        return day == that.day && hijriDay == that.hijriDay && month == that.month && Objects.equals(hijriMonth, that.hijriMonth) && Objects.equals(weekday, that.weekday) && Objects.equals(asr, that.asr) && Objects.equals(hufton, that.hufton) && Objects.equals(peshin, that.peshin) && Objects.equals(shomIftor, that.shomIftor) && Objects.equals(tongSaharlik, that.tongSaharlik) && Objects.equals(sunSet, that.sunSet) && Objects.equals(sunRise, that.sunRise);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(day, hijriDay, hijriMonth, month, weekday, asr, hufton, peshin, shomIftor, tongSaharlik, sunSet);
+        return Objects.hash(day, hijriDay, hijriMonth, month, weekday, asr, hufton, peshin, shomIftor, tongSaharlik, sunSet, sunRise);
     }
 
     @NonNull
@@ -105,6 +111,7 @@ public class MuslimCalendar {
                 ", shomIftor='" + shomIftor + '\'' +
                 ", tongSaharlik='" + tongSaharlik + '\'' +
                 ", sunSet='" + sunSet + '\'' +
+                ", sunRise='" + sunRise + '\'' +
                 '}';
     }
 }

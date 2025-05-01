@@ -15,7 +15,7 @@ import java.util.Calendar
 data class PrayerTimeServiceImpl(
     private val httpClient: HttpClient
 ):PrayerTimeService{
-    override suspend fun oneMonth(latitude: Double, longitude: Double): PrayerResponse<List<PrayerData>>? {
+    override suspend fun oneMonth(latitude: Double, longitude: Double): PrayerResponse<List<PrayerData>?> {
         val instance = Calendar.getInstance()
         val month = instance.get(Calendar.MONTH)+1
         val year = instance.get(Calendar.YEAR)

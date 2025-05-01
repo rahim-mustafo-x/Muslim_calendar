@@ -30,18 +30,15 @@ fun QuranPlayer(
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var duration by remember { mutableLongStateOf(1L) }
     var currentPosition by remember { mutableLongStateOf(0L) }
-    var isCompleted by remember { mutableStateOf(false) } // New state to check if audio is completed
+    var isCompleted by remember { mutableStateOf(false) }
 
-    // Update slider, current position, and check if audio is completed
+    // 🔄 Update position & completion status
     LaunchedEffect(exoPlayer) {
         while (true) {
             currentPosition = exoPlayer.currentPosition
-            duration = exoPlayer.duration
-
-            // Check if the audio has finished playing
-            isCompleted = currentPosition >= duration
-
-            sliderPosition = (currentPosition.toFloat() / duration.toFloat())
+            duration = exoPlayer.duration.coerceAtLeast(1L)
+            isCompleted = duration > 0 && currentPosition >= duration
+            sliderPosition = currentPosition.toFloat() / duration.toFloat()
             delay(500)
         }
     }
@@ -70,7 +67,7 @@ fun QuranPlayer(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // 🕓 Current time / Total duration
+            // ⏱ Time display
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -97,7 +94,7 @@ fun QuranPlayer(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
             ) {
                 IconButton(onClick = { onPreviousClick() }) {
                     Icon(
@@ -108,15 +105,19 @@ fun QuranPlayer(
                 }
 
                 IconButton(onClick = {
-                    // Check if the audio is completed and restart it
                     if (isCompleted) {
-                        exoPlayer.seekTo(0) // Restart if completed
-                        exoPlayer.playWhenReady = true // Ensure playback resumes after seeking
+                        exoPlayer.seekTo(0)
+                        exoPlayer.playWhenReady = true
+                        isCompleted = false
+                    } else {
+                        onPlayPauseClick()
                     }
-                    onPlayPauseClick()
                 }) {
                     Icon(
-                        painter = if (isPlaying && !isCompleted) painterResource(R.drawable.ic_pause) else painterResource(R.drawable.ic_play),
+                        painter = if (isPlaying && !isCompleted)
+                            painterResource(R.drawable.ic_pause)
+                        else
+                            painterResource(R.drawable.ic_play),
                         contentDescription = "Play/Pause",
                         tint = Color.White,
                         modifier = Modifier.size(32.dp)

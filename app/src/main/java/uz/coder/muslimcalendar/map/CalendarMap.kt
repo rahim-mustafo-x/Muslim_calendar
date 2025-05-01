@@ -8,6 +8,8 @@ import uz.coder.muslimcalendar.models.internet.quran.SurahListDTO
 import uz.coder.muslimcalendar.models.model.MuslimCalendar
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.SurahList
+import uz.coder.muslimcalendar.todo.toNormalTranslate
+import uz.coder.muslimcalendar.todo.toWeakDays
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -23,15 +25,16 @@ class CalendarMap {
             MuslimCalendarDbModel(
                 day = day,
                 hijriDay = prayerData.date.hijri.day.toIntOrNull() ?: 0,
-                hijriMonth = prayerData.date.hijri.month.en,
+                hijriMonth = prayerData.date.hijri.month.en.toNormalTranslate(),
                 month = month,
-                weekday = prayerData.date.gregorian.weekday.en,
+                weekday = prayerData.date.gregorian.weekday.en.toWeakDays(),
                 asr = prayerData.timings.asr.substringBefore(" ").trim(),
                 hufton = prayerData.timings.isha.substringBefore(" ").trim(),
                 peshin = prayerData.timings.dhuhr.substringBefore(" ").trim(),
                 sunset = prayerData.timings.sunset.substringBefore(" ").trim(),   // Quyosh botishi
+                sunrise = prayerData.timings.sunrise.substringBefore(" ").trim(),   // Quyosh botishi
                 shomIftor = prayerData.timings.maghrib.substringBefore(" ").trim(),
-                tongSaharlik = prayerData.timings.sunrise.substringBefore(" ").trim()
+                tongSaharlik = prayerData.timings.fajr.substringBefore(" ").trim()
             )
         }
     }
@@ -47,7 +50,8 @@ class CalendarMap {
         model.peshin,
         model.shomIftor,
         model.tongSaharlik,
-        model.sunset
+        model.sunset,
+        model.sunrise
     )
 
     fun toMuslimCalendarList(models: List<MuslimCalendarDbModel>) = models.map { toMuslimCalendar(it) }

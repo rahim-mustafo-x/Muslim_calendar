@@ -1,5 +1,6 @@
 package uz.coder.muslimcalendar.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -61,9 +61,10 @@ fun SettingsScreen(modifier: Modifier = Modifier, controller: NavHostController)
             Spinner(modifier = modifier, value, list = list) {
                 if (!it.sign.isBlank()){
                     value = it.spinnerValue
-                    viewModel.selectLanguage(it.sign)
+                    Log.d(TAG, "SettingsScreen: $it")
+//                    viewModel.selectLanguage(it.sign)
                 }else{
-                    Toast.makeText(context, stringResource(R.string.select_language), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.select_language), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -72,3 +73,4 @@ fun SettingsScreen(modifier: Modifier = Modifier, controller: NavHostController)
         controller.popBackStack()
     }
 }
+private const val TAG = "SettingsScreen"
