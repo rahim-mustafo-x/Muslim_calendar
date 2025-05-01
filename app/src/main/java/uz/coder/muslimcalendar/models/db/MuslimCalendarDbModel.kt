@@ -10,12 +10,11 @@ data class MuslimCalendarDbModel(
     val hijriDay: Int = 0,
     val hijriMonth: String = "",
     val month: Int = 0,
-    val region: String = "",
     val weekday: String = "",
     val asr: String = "",
     val hufton: String = "",
     val peshin: String = "",
-    val quyosh: String = "",
     val shomIftor: String = "",
-    val tongSaharlik: String = ""
+    val tongSaharlik: String = "",
+    val sunset:String = ""
 )

@@ -1,7 +1,9 @@
 package uz.coder.muslimcalendar.todo
 
+import uz.coder.muslimcalendar.App
+
 private val pref = SharedPref.getInstance(App.application)
-var language: String?
+var appLanguage: String?
     set(value) = pref.saveValue<String>(LANGUAGE, value)
     get() = pref.getString(LANGUAGE, UZB)
 /***

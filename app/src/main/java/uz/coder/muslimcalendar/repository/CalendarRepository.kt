@@ -6,7 +6,7 @@ import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.Surah
 
 interface CalendarRepository {
-    suspend fun loading()
+    suspend fun loading(longitude: Double, latitude: Double)
     suspend fun region(region:String)
     suspend fun remove()
     fun presentDay(): Flow<MuslimCalendar>

@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">Muslim taqvim</string>
+    <string name="app_name">Muslim Taqvim</string>
     <string name="failure">Internet yo\'q internetni yoqib yangilash tugmasini bosing</string>
     <string name="bomdod">Bomdod</string>
-    <string name="quyosh">Quyosh</string>
     <string name="peshin">Peshin</string>
     <string name="asr">Asr</string>
+    <string name="quyoshBotishi">Quyosh botishi</string>
     <string name="shom">Shom</string>
     <string name="xufton">Xufton</string>
     <string name="vitr">Vitr</string>
@@ -25,9 +25,17 @@
     <string name="allow">Ruxsat berish</string>
     <string name="dayMonth">kun/oy</string>
     <string name="all">"Jami: "</string>
-    <string name="region">"Shahar: "</string>
     <string name="no_internet">Internet bilan aloqa yo\'q</string>
     <string name="translation">Tarjimasi</string>
+    <string name="acess">Ruxsat berish</string>
+    <string name="permission_message">Joylashuvni aniqlash uchun ruxsat bering</string>
+    <string name="permission_title">Ruxsat so\'rov</string>
+    <string name="settings">Sozlamalar</string>
+    <string name="unselected">Saqlanmagan</string>
+    <string name="uzbek">O\'zbekcha</string>
+    <string name="russia">Ruscha</string>
+    <string name="english">Inglizcha</string>
+    <string name="select_language">Tilni tanlang</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

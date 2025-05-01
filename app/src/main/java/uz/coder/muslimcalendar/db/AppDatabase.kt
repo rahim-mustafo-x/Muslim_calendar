@@ -7,15 +7,15 @@ import androidx.room.RoomDatabase
 import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
 import uz.coder.muslimcalendar.models.db.SuraDbModel
 
-@Database([MuslimCalendarDbModel::class, SuraDbModel::class], version = 1)
-abstract class ApDatabase:RoomDatabase() {
+@Database([MuslimCalendarDbModel::class, SuraDbModel::class], version = 2)
+abstract class AppDatabase:RoomDatabase() {
     abstract fun calendarDao():MuslimCalendarDao
     abstract fun suraDao():SuraDao
     companion object{
         private const val NAME = "main.db"
         private val LOCK = Any()
-        private var calendarDatabase:ApDatabase? = null
-        fun instance(application: Application):ApDatabase{
+        private var calendarDatabase:AppDatabase? = null
+        fun instance(application: Application):AppDatabase{
             calendarDatabase?.let {
                 return it
             }
@@ -24,7 +24,7 @@ abstract class ApDatabase:RoomDatabase() {
                     return it
                 }
             }
-            val db = Room.databaseBuilder(application,ApDatabase::class.java, NAME).build()
+            val db = Room.databaseBuilder(application,AppDatabase::class.java, NAME).fallbackToDestructiveMigration(true).build()
             calendarDatabase = db
             return db
         }

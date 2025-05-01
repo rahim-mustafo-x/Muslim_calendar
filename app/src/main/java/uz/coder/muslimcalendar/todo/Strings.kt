@@ -1,5 +1,6 @@
 package uz.coder.muslimcalendar.todo
 
+import uz.coder.muslimcalendar.App
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.AllahName
 import uz.coder.muslimcalendar.models.model.Duo
@@ -7,7 +8,6 @@ import uz.coder.muslimcalendar.models.model.Namoz
 
 
 const val REGION = "region"
-const val DEFAULT_REGION = "Urganch"
 const val ALLAH_NAME_INDEX = "allahNameIndex"
 const val DUO_INDEX = "duo_index"
 const val NAMOZ_INDEX = "namoz_index"
@@ -21,20 +21,6 @@ const val TASBEH = "tasbeh"
 const val ALL_TASBEH = "all_tasbeh"
 const val NUMBER = "number"
 val MONTH:Array<String> = App.application!!.resources.getStringArray(R.array.months)
-val regionList = listOf(
-    "Angren", "Bekobod",
-    "Andijon", "Xonobod", "Qo'rg'ontepa", "Shahrixon", "Paxtaobod",
-    "Buxoro", "Olot", "Qorako'l", "Qorovulbozor",
-    "Farg'ona", "Marg'ilon", "Rishton",
-    "Jizzax", "Do'stlik", "G'allaorol", "Zomin",
-    "Urganch", "Xiva", "Xazorasp", "Shovot",
-    "Namangan", "Chortoq", "Kosonsoy", "Chust", "Mingbuloq",
-    "Navoiy", "Zarafshon", "Qiziltepa", "Uchquduq",
-    "Qarshi", "Koson",
-    "Samarqand", "Kattaqo'rg'on", "Urgut",
-    "Guliston",
-    "Termiz", "Denov", "Boysun"
-)
 
 
 val namozList = listOf(

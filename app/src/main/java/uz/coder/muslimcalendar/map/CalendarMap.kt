@@ -2,33 +2,52 @@ package uz.coder.muslimcalendar.map
 
 import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
 import uz.coder.muslimcalendar.models.db.SuraDbModel
-import uz.coder.muslimcalendar.models.internet.PrayerTime
-import uz.coder.muslimcalendar.models.internet.quran.QuranDTO
+import uz.coder.muslimcalendar.models.internet.PrayerData
 import uz.coder.muslimcalendar.models.internet.quran.SuraDTO
 import uz.coder.muslimcalendar.models.internet.quran.SurahListDTO
 import uz.coder.muslimcalendar.models.model.MuslimCalendar
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.SurahList
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class CalendarMap {
 
-    fun toMuslimCalendarDbModel(times: List<PrayerTime>) = times.map {  MuslimCalendarDbModel(
-        it.day, it.hijriDate.day, it.hijriDate.month, it.month, it.region, it.weekday, it.times.asr, it.times.hufton, it.times.peshin, it.times.quyosh, it.times.shomIftor, it.times.tongSaharlik
-    ) }
+    fun toMuslimCalendarDbModel(times: List<PrayerData>): List<MuslimCalendarDbModel> {
+        return times.map { prayerData ->
+            val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+            val date = LocalDate.parse(prayerData.date.gregorian.date, formatter)
+
+            val day = date.dayOfMonth
+            val month = date.monthValue
+            MuslimCalendarDbModel(
+                day = day,
+                hijriDay = prayerData.date.hijri.day.toIntOrNull() ?: 0,
+                hijriMonth = prayerData.date.hijri.month.en,
+                month = month,
+                weekday = prayerData.date.gregorian.weekday.en,
+                asr = prayerData.timings.asr.substringBefore(" ").trim(),
+                hufton = prayerData.timings.isha.substringBefore(" ").trim(),
+                peshin = prayerData.timings.dhuhr.substringBefore(" ").trim(),
+                sunset = prayerData.timings.sunset.substringBefore(" ").trim(),   // Quyosh botishi
+                shomIftor = prayerData.timings.maghrib.substringBefore(" ").trim(),
+                tongSaharlik = prayerData.timings.sunrise.substringBefore(" ").trim()
+            )
+        }
+    }
 
     fun toMuslimCalendar(model: MuslimCalendarDbModel) = MuslimCalendar(
         model.day,
         model.hijriDay,
         model.hijriMonth,
         model.month,
-        model.region,
         model.weekday,
         model.asr,
         model.hufton,
         model.peshin,
-        model.quyosh,
         model.shomIftor,
-        model.tongSaharlik
+        model.tongSaharlik,
+        model.sunset
     )
 
     fun toMuslimCalendarList(models: List<MuslimCalendarDbModel>) = models.map { toMuslimCalendar(it) }

@@ -1,12 +1,16 @@
 package uz.coder.muslimcalendar.viewModel
 
+import android.Manifest
 import android.app.Application
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -31,6 +35,11 @@ import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 data class CalendarViewModel(private val application: Application):AndroidViewModel(application){
     private val repo = CalendarRepositoryImpl(application)
+    private val fusedLocationClient by lazy {
+        LocationServices.getFusedLocationProviderClient(application)
+    }
+    private var latitude = 0.0
+    private var longitude = 0.0
     private val preferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Application.MODE_PRIVATE) }
     private val _bomdod = MutableStateFlow(0)
     val bomdod = _bomdod.asStateFlow()
@@ -49,8 +58,23 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
     private val _tasbeh = MutableStateFlow(0)
     val tasbeh = _tasbeh.asStateFlow()
     init {
-        remove()
+        init()
         loading()
+    }
+    private fun init() {
+        if (ActivityCompat.checkSelfPermission(
+                application,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                application,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.lastLocation.addOnSuccessListener {
+                latitude = it.latitude
+                longitude = it.longitude
+            }
+        }
     }
 
     fun loading(){
@@ -118,13 +142,15 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
         viewModelScope.launch {
             Log.d("TAG", "loadInformationFromInternet: ")
             if (application.isConnected()){
-                repo.loading()
+                repo.loading(longitude, latitude)
             }
         }
     }
     private fun remove(){
-        viewModelScope.launch {
-            repo.remove()
+        if (application.isConnected()){
+            viewModelScope.launch {
+                repo.remove()
+            }
         }
     }
     fun saveTasbeh(tasbeh:Int){
@@ -146,13 +172,13 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
     }
     fun oneMonth() = channelFlow<List<Calendar>> {
         repo.oneMonth().collect{
-            send(mutableListOf(Calendar(application.getString(R.string.dayMonth), White, Light_Blue), Calendar(application.getString(R.string.bomdod), White, Light_Blue),  Calendar(application.getString(R.string.quyosh), White, Light_Blue), Calendar(application.getString(R.string.peshin), White, Light_Blue), Calendar(application.getString(R.string.asr), White, Light_Blue), Calendar(application.getString(R.string.shom), White, Light_Blue), Calendar(application.getString(R.string.xufton), White, Light_Blue)).apply {
+            send(mutableListOf(Calendar(application.getString(R.string.dayMonth), White, Light_Blue), Calendar(application.getString(R.string.bomdod), White, Light_Blue), Calendar(application.getString(R.string.peshin), White, Light_Blue), Calendar(application.getString(R.string.asr), White, Light_Blue), Calendar(application.getString(R.string.quyoshBotishi), White, Light_Blue), Calendar(application.getString(R.string.shom), White, Light_Blue), Calendar(application.getString(R.string.xufton), White, Light_Blue)).apply {
                 it.forEach {
                     add(Calendar(it.day.toString().plus("-${MONTH[it.month-1]}"), White, Light_Blue))
                     add(Calendar(it.tongSaharlik, Black, White))
-                    add(Calendar(it.quyosh, Black, White))
                     add(Calendar(it.peshin, Black, White))
                     add(Calendar(it.asr, Black, White))
+                    add(Calendar(it.sunSet, Black, White))
                     add(Calendar(it.shomIftor, Black, White))
                     add(Calendar(it.hufton, Black, White))
                 }
@@ -166,7 +192,7 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
 
     fun day() = flow {
         repo.presentDay().collect{
-            emit(Date(it.day, it.month-1, it.weekday, it.hijriDay, it.hijriMonth, it.region))
+            emit(Date(it.day, it.month-1, it.weekday, it.hijriDay, it.hijriMonth))
         }
     }
 

@@ -10,23 +10,18 @@ public class Date {
     private String weekDay;
     private int hijriDay;
     private String hijriMonth;
-    private String region;
 
     public Date() {
     }
 
-    public Date(int day, int month, String weekDay, int hijriDay, String hijriMonth, String region) {
+    public Date(int day, int month, String weekDay, int hijriDay, String hijriMonth) {
         this.day = day;
         this.month = month;
         this.weekDay = weekDay;
         this.hijriDay = hijriDay;
         this.hijriMonth = hijriMonth;
-        this.region = region;
     }
 
-    public String getRegion() {
-        return region;
-    }
 
     public int getDay() {
         return day;
@@ -53,12 +48,12 @@ public class Date {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         Date date = (Date) object;
-        return day == date.day && month == date.month && hijriDay == date.hijriDay && Objects.equals(weekDay, date.weekDay) && Objects.equals(hijriMonth, date.hijriMonth) && Objects.equals(region, date.region);
+        return day == date.day && month == date.month && hijriDay == date.hijriDay && Objects.equals(weekDay, date.weekDay) && Objects.equals(hijriMonth, date.hijriMonth);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(day, month, weekDay, hijriDay, hijriMonth, region);
+        return Objects.hash(day, month, weekDay, hijriDay, hijriMonth);
     }
 
     @Override
@@ -70,7 +65,6 @@ public class Date {
                 ", weekDay='" + weekDay + '\'' +
                 ", hijriDay=" + hijriDay +
                 ", hijriMonth='" + hijriMonth + '\'' +
-                ", region='" + region + '\'' +
                 '}';
     }
 }

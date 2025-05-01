@@ -75,6 +75,10 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.runtime.compose)
 
+     implementation(libs.play.services.location)
+
+    implementation(libs.accompanist.permissions)
+
     implementation(libs.ui)
     implementation(libs.androidx.material)
     implementation(libs.ui.tooling.preview)

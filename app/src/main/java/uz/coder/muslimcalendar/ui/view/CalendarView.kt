@@ -31,7 +31,7 @@ fun CalendarView(
     paddingValues: PaddingValues
 ) {
     val list by viewModel.oneMonth().collectAsState(emptyList())
-    LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = modifier.fillMaxSize().padding(paddingValues)) {
+    LazyVerticalGrid(columns = GridCells.Fixed(8), modifier = modifier.fillMaxSize().padding(paddingValues)) {
         itemsIndexed(list){_, item->
             CalendarItem(text = item.text, color = item.color, backgroundColor = item.backgroundColor)
         }
@@ -44,8 +44,8 @@ private fun CalendarItem(modifier: Modifier = Modifier, text:String, color:Color
         Row {
             VerticalDivider()
             Box(modifier = modifier
-                .height(40.dp)
-                .width(80.dp)
+                .height(50.dp)
+                .width(90.dp)
                 .background(backgroundColor), contentAlignment = Alignment.Center){
             Text(text = text, color = color, fontSize = 10.sp)
         }

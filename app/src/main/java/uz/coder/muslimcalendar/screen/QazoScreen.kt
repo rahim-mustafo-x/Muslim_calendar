@@ -56,7 +56,7 @@ fun QazoScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     Scaffold(topBar = { CalendarTopBar(
         list = listOf(
             Menu(
-                R.drawable.setting,
+                R.drawable.settings,
                 MenuScreen.QazoSetting
             )
         )

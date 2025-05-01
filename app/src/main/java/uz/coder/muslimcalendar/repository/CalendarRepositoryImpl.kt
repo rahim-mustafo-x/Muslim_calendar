@@ -7,16 +7,14 @@ import android.util.Log
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.db.ApDatabase
+import uz.coder.muslimcalendar.db.AppDatabase
 import uz.coder.muslimcalendar.ktor.PrayerTimeService
-import uz.coder.muslimcalendar.todo.DEFAULT_REGION
 import uz.coder.muslimcalendar.todo.REGION
 import java.util.Calendar.DAY_OF_MONTH
 import java.util.Calendar.MONTH
 import java.util.Calendar.getInstance
 import androidx.core.content.edit
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.ktor.ApiService.Companion.apiService
@@ -26,23 +24,27 @@ import uz.coder.muslimcalendar.models.model.quran.Surah
 
 data class CalendarRepositoryImpl(private val application: Application):CalendarRepository {
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
-    private val db:ApDatabase by lazy { ApDatabase.instance(application) }
+    private val db:AppDatabase by lazy { AppDatabase.instance(application) }
     private val map = CalendarMap()
 
-    override suspend fun loading() {
+    override suspend fun loading(longitude: Double, latitude: Double) {
+        Log.d(TAG, "loading: $longitude/$latitude")
         try {
-            val result = PrayerTimeService.oneMonth.oneMonthByRegionMonth(
-                preferences.getString(
-                    REGION,
-                    DEFAULT_REGION
-                ) ?: DEFAULT_REGION
+            val result = PrayerTimeService.oneMonth.oneMonth(
+                latitude, longitude
             )
             if (result != null){
                     db.calendarDao().insertMuslimCalendar(
-                        map.toMuslimCalendarDbModel(result)
-                    )
+                        map.toMuslimCalendarDbModel(result.data)
+                )
+                Log.d(TAG, "loading: ${result.data}")
             }
-        }catch (_:Exception){}
+            else{
+                Log.d(TAG, "loading: bosh")
+            }
+        }catch (e:Exception){
+            Log.e(TAG, "loading: 1 oylik namozda", e)
+        }
     }
 
     override suspend fun region(region: String) {
@@ -112,3 +114,5 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         )
     }
 }
+
+private const val TAG = "CalendarRepositoryImpl"

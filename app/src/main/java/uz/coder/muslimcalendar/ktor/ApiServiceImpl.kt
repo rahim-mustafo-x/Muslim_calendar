@@ -11,7 +11,7 @@ import uz.coder.muslimcalendar.models.internet.quran.SurahDTO
 import uz.coder.muslimcalendar.todo.ENG
 import uz.coder.muslimcalendar.todo.RUS
 import uz.coder.muslimcalendar.todo.UZB
-import uz.coder.muslimcalendar.todo.language
+import uz.coder.muslimcalendar.todo.appLanguage
 
 data class ApiServiceImpl(private val httpClient: HttpClient): ApiService {
 
@@ -22,7 +22,7 @@ data class ApiServiceImpl(private val httpClient: HttpClient): ApiService {
     }
 
     override suspend fun getSura(surahNumber: Int):SurahDTO {
-        return when(language){
+        return when(appLanguage){
             UZB->{
                 val url = ApiService.BASE_URL_OF_PERFECT_TRANSLATION + ApiService.UZB_TRANSLATION+"/$surahNumber"
                 val response = withContext(Dispatchers.IO) { httpClient.get(url).body<SurahDTO>() }

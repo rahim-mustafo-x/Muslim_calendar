@@ -1,10 +1,9 @@
 package uz.coder.muslimcalendar.screen
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,9 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
-import uz.coder.muslimcalendar.models.sealed.Screen.Namoz
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -42,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Date
@@ -57,19 +54,19 @@ import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuScreen
 import uz.coder.muslimcalendar.models.sealed.Screen.About
-import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
 import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
-import uz.coder.muslimcalendar.models.sealed.Screen.Duo
 import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
-import uz.coder.muslimcalendar.models.sealed.Screen.ChooseRegion
+import uz.coder.muslimcalendar.models.sealed.Screen.Duo
+import uz.coder.muslimcalendar.models.sealed.Screen.Namoz
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.models.sealed.Screen.Quran
+import uz.coder.muslimcalendar.models.sealed.Screen.Settings
+import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
 import uz.coder.muslimcalendar.todo.MONTH
 import uz.coder.muslimcalendar.ui.theme.Blue
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.ui.view.MainButton
-import uz.coder.muslimcalendar.viewModel.CalendarViewModel
 import uz.coder.muslimcalendar.viewModel.HomeViewModel
 import uz.coder.muslimcalendar.viewModel.state.HomeState
 
@@ -81,11 +78,10 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
             R.drawable.refresh,
             stringResource(R.string.refresh),
             MenuScreen.Refresh
-        ),
-        Menu(
-            R.drawable.region,
-            stringResource(R.string.chooseRegion),
-            MenuScreen.ChangeRegion
+        ),Menu(
+            R.drawable.settings,
+            stringResource(R.string.settings),
+            MenuScreen.Settings
         ),
         Menu(
             R.drawable.about,
@@ -97,10 +93,10 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
         CalendarTopBar(modifier = modifier, list = menuList){
             when(it){
                 MenuScreen.Refresh->{
-                    viewModel.loading()
+                    viewModel.loadInfo()
                 }
-                MenuScreen.ChangeRegion->{
-                    controller.navigate(ChooseRegion.route)
+                MenuScreen.Settings->{
+                    controller.navigate(Settings.route)
                 }
                 MenuScreen.About->{
                     controller.navigate(About.route)
@@ -113,7 +109,7 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun Home(
     controller: NavHostController,
@@ -122,9 +118,6 @@ fun Home(
 ) {
     viewModel.itemList()
     var list by remember { mutableStateOf<List<Item>>(emptyList()) }
-    val pagerState = rememberPagerState {
-        list.size
-    }
     var showLoadingDialog by remember { mutableStateOf<Boolean>(false) }
     if (showLoadingDialog){
         LoadingDialog(modifier = Modifier.padding(paddingValues))
@@ -133,7 +126,6 @@ fun Home(
             NoInternetScreen(paddingValues = paddingValues)
         } else {
             Screen(
-                pagerState = pagerState,
                 paddingValues = paddingValues,
                 list = list,
                 controller = controller,
@@ -156,6 +148,7 @@ fun Home(
                 is HomeState.Success -> {
                     showLoadingDialog = false
                     list = it.data
+                    Log.d(TAG, "Home: ${it.data}")
                 }
             }
         }
@@ -191,12 +184,14 @@ fun NoInternetScreen(
 @Composable
 private fun Screen(
     modifier: Modifier = Modifier,
-    pagerState: PagerState,
     paddingValues: PaddingValues,
     list: List<Item>,
     controller: NavHostController,
     viewModel: HomeViewModel
 ) {
+    val pagerState = rememberPagerState {
+        list.size
+    }
     val scope = rememberCoroutineScope()
     Column(
         modifier = modifier
@@ -232,9 +227,9 @@ private fun Screen(
             indicator = { Box {} }) {
             listOf(
                 stringResource(R.string.bomdod),
-                stringResource(R.string.quyosh),
                 stringResource(R.string.peshin),
                 stringResource(R.string.asr),
+                stringResource(R.string.quyoshBotishi),
                 stringResource(R.string.shom),
                 stringResource(R.string.xufton)
             ).forEachIndexed { index, item ->
@@ -256,14 +251,12 @@ fun Bottom(
     viewModel: HomeViewModel
 ) {
     val date by viewModel.day().collectAsState(initial = Date())
-    val context = LocalContext.current
     Column(modifier = modifier
         .fillMaxSize()
         .background(White)) {
         Column(modifier
             .fillMaxWidth()
             .weight(2.5f)) {
-            Text(text = (context.getString(R.string.region) + date.region), color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
             Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]};", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
             Text("${date.hijriDay} - ${date.hijriMonth}.", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
         }
@@ -306,3 +299,4 @@ fun Bottom(
     }
 
 }
+private const val TAG = "HomeScreen"

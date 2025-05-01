@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.todo
+package uz.coder.muslimcalendar
 
 import android.app.Application
 

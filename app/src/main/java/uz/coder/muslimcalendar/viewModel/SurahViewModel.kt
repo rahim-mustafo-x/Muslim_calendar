@@ -13,7 +13,7 @@ import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
 import uz.coder.muslimcalendar.todo.UZB
 import uz.coder.muslimcalendar.todo.cyrillicToLatin
 import uz.coder.muslimcalendar.todo.isConnected
-import uz.coder.muslimcalendar.todo.language
+import uz.coder.muslimcalendar.todo.appLanguage
 import uz.coder.muslimcalendar.viewModel.state.SurahState
 
 class SurahViewModel(private val application: Application): AndroidViewModel(application) {
@@ -26,7 +26,7 @@ class SurahViewModel(private val application: Application): AndroidViewModel(app
             if (application.isConnected()){
                 repo.getSura(surahNumber).collect {surah->
                     repo.getSurahByNumber(surahNumber).collect {
-                        if (language != UZB){
+                        if (appLanguage != UZB){
                             _state.emit(SurahState.Success(surah.result, it.englishName))
                         }
                         _state.emit(SurahState.Success(surah.result.map {

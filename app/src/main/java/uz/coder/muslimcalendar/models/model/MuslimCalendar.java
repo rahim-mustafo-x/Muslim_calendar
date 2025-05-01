@@ -1,7 +1,6 @@
 package uz.coder.muslimcalendar.models.model;
 
-import org.jetbrains.annotations.NotNull;
-
+import androidx.annotation.NonNull;
 import java.util.Objects;
 
 public class MuslimCalendar {
@@ -9,28 +8,26 @@ public class MuslimCalendar {
     private int hijriDay;
     private String hijriMonth;
     private int month;
-    private String region;
     private String weekday;
     private String asr;
     private String hufton;
     private String peshin;
-    private String quyosh;
     private String shomIftor;
     private String tongSaharlik;
+    private String sunSet;
 
-    public MuslimCalendar(int day, int hijriDay, String hijriMonth, int month, String region, String weekday, String asr, String hufton, String peshin, String quyosh, String shomIftor, String tongSaharlik) {
+    public MuslimCalendar(int day, int hijriDay, String hijriMonth, int month, String weekday, String asr, String hufton, String peshin, String shomIftor, String tongSaharlik, String sunSet) {
         this.day = day;
         this.hijriDay = hijriDay;
         this.hijriMonth = hijriMonth;
         this.month = month;
-        this.region = region;
         this.weekday = weekday;
         this.asr = asr;
         this.hufton = hufton;
         this.peshin = peshin;
-        this.quyosh = quyosh;
         this.shomIftor = shomIftor;
         this.tongSaharlik = tongSaharlik;
+        this.sunSet = sunSet;
     }
 
     public MuslimCalendar() {
@@ -40,15 +37,10 @@ public class MuslimCalendar {
         return day;
     }
 
-    public void setDay(int day) {
-        this.day = day;
-    }
-
     public int getHijriDay() {
         return hijriDay;
     }
 
-    @NotNull
     public String getHijriMonth() {
         return hijriMonth;
     }
@@ -57,78 +49,48 @@ public class MuslimCalendar {
         return month;
     }
 
-    public void setMonth(int month) {
-        this.month = month;
-    }
-
-    @NotNull
-    public String getRegion() {
-        return region;
-    }
-
-    public void setRegion(String region) {
-        this.region = region;
-    }
-
-
-    @NotNull
     public String getWeekday() {
         return weekday;
     }
 
-    @NotNull
     public String getAsr() {
         return asr;
     }
 
-    public void setAsr(String asr) {
-        this.asr = asr;
-    }
-
-    @NotNull
     public String getHufton() {
         return hufton;
     }
 
-
-    @NotNull
     public String getPeshin() {
         return peshin;
     }
 
-    public void setPeshin(String peshin) {
-        this.peshin = peshin;
-    }
-
-    @NotNull
-    public String getQuyosh() {
-        return quyosh;
-    }
-
-    @NotNull
     public String getShomIftor() {
         return shomIftor;
     }
 
-    @NotNull
     public String getTongSaharlik() {
         return tongSaharlik;
     }
 
+
+    public String getSunSet() {
+        return sunSet;
+    }
+
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        MuslimCalendar that = (MuslimCalendar) object;
-        return day == that.day && hijriDay == that.hijriDay && month == that.month && Objects.equals(hijriMonth, that.hijriMonth) && Objects.equals(region, that.region) && Objects.equals(weekday, that.weekday) && Objects.equals(asr, that.asr) && Objects.equals(hufton, that.hufton) && Objects.equals(peshin, that.peshin) && Objects.equals(quyosh, that.quyosh) && Objects.equals(shomIftor, that.shomIftor) && Objects.equals(tongSaharlik, that.tongSaharlik);
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        MuslimCalendar that = (MuslimCalendar) o;
+        return day == that.day && hijriDay == that.hijriDay && month == that.month && Objects.equals(hijriMonth, that.hijriMonth) && Objects.equals(weekday, that.weekday) && Objects.equals(asr, that.asr) && Objects.equals(hufton, that.hufton) && Objects.equals(peshin, that.peshin)  && Objects.equals(shomIftor, that.shomIftor) && Objects.equals(tongSaharlik, that.tongSaharlik) && Objects.equals(sunSet, that.sunSet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(day, hijriDay, hijriMonth, month, region, weekday, asr, hufton, peshin, quyosh, shomIftor, tongSaharlik);
+        return Objects.hash(day, hijriDay, hijriMonth, month, weekday, asr, hufton, peshin, shomIftor, tongSaharlik, sunSet);
     }
 
-    @NotNull
+    @NonNull
     @Override
     public String toString() {
         return "MuslimCalendar{" +
@@ -136,14 +98,13 @@ public class MuslimCalendar {
                 ", hijriDay=" + hijriDay +
                 ", hijriMonth='" + hijriMonth + '\'' +
                 ", month=" + month +
-                ", region='" + region + '\'' +
                 ", weekday='" + weekday + '\'' +
                 ", asr='" + asr + '\'' +
                 ", hufton='" + hufton + '\'' +
                 ", peshin='" + peshin + '\'' +
-                ", quyosh='" + quyosh + '\'' +
                 ", shomIftor='" + shomIftor + '\'' +
                 ", tongSaharlik='" + tongSaharlik + '\'' +
+                ", sunSet='" + sunSet + '\'' +
                 '}';
     }
 }
