@@ -1,6 +1,7 @@
 package uz.coder.muslimcalendar.db
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,7 +16,7 @@ abstract class AppDatabase:RoomDatabase() {
         private const val NAME = "main.db"
         private val LOCK = Any()
         private var calendarDatabase:AppDatabase? = null
-        fun instance(application: Application):AppDatabase{
+        fun instance(context: Context):AppDatabase{
             calendarDatabase?.let {
                 return it
             }
@@ -24,7 +25,7 @@ abstract class AppDatabase:RoomDatabase() {
                     return it
                 }
             }
-            val db = Room.databaseBuilder(application,AppDatabase::class.java, NAME).fallbackToDestructiveMigration(true).build()
+            val db = Room.databaseBuilder(context,AppDatabase::class.java, NAME).fallbackToDestructiveMigration(true).build()
             calendarDatabase = db
             return db
         }

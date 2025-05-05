@@ -15,4 +15,6 @@ interface SuraDao{
     fun getSuraById(number: Int): Flow<SuraDbModel>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(suraDbModels: List<SuraDbModel>)
+    @Query("DELETE FROM sura")
+    suspend fun deleteAll()
 }
