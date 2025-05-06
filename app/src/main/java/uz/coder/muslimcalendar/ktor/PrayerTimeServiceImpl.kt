@@ -8,8 +8,8 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.ktor.PrayerTimeService.Companion.ONE_MONTH_BASE_URL
-import uz.coder.muslimcalendar.models.internet.PrayerData
-import uz.coder.muslimcalendar.models.internet.PrayerResponse
+import uz.coder.muslimcalendar.ktor.internet.PrayerData
+import uz.coder.muslimcalendar.ktor.internet.PrayerResponse
 import java.util.Calendar
 
 data class PrayerTimeServiceImpl(

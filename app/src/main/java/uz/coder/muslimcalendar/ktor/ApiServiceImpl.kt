@@ -5,9 +5,9 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uz.coder.muslimcalendar.models.internet.quran.QuranDTO
-import uz.coder.muslimcalendar.models.internet.quran.ResultDTO
-import uz.coder.muslimcalendar.models.internet.quran.SurahDTO
+import uz.coder.muslimcalendar.ktor.internet.quran.QuranDTO
+import uz.coder.muslimcalendar.ktor.internet.quran.ResultDTO
+import uz.coder.muslimcalendar.ktor.internet.quran.SurahDTO
 import uz.coder.muslimcalendar.todo.ENG
 import uz.coder.muslimcalendar.todo.RUS
 import uz.coder.muslimcalendar.todo.UZB

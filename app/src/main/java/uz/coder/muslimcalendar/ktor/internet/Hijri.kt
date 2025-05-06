@@ -1,10 +1,10 @@
-package uz.coder.muslimcalendar.models.internet
+package uz.coder.muslimcalendar.ktor.internet
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Gregorian(
+data class Hijri(
     @SerialName("date")
     val date: String,
     @SerialName("format")
@@ -19,6 +19,10 @@ data class Gregorian(
     val year: String,
     @SerialName("designation")
     val designation: Designation,
-    @SerialName("lunarSighting")
-    val lunarSighting: Boolean
+    @SerialName("holidays")
+    val holidays: List<String>,
+    @SerialName("adjustedHolidays")
+    val adjustedHolidays: List<String>,
+    @SerialName("method")
+    val method: String
 )

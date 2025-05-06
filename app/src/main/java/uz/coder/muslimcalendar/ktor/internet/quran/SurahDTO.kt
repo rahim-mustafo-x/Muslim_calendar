@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.models.internet.quran
+package uz.coder.muslimcalendar.ktor.internet.quran
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

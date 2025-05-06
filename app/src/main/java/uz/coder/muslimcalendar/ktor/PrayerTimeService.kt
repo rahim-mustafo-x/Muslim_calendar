@@ -5,8 +5,8 @@ import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import uz.coder.muslimcalendar.models.internet.PrayerData
-import uz.coder.muslimcalendar.models.internet.PrayerResponse
+import uz.coder.muslimcalendar.ktor.internet.PrayerData
+import uz.coder.muslimcalendar.ktor.internet.PrayerResponse
 
 interface PrayerTimeService {
 

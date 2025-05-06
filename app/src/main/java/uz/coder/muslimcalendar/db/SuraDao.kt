@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import uz.coder.muslimcalendar.models.db.SuraDbModel
+import uz.coder.muslimcalendar.db.model.SuraDbModel
 
 @Dao
 interface SuraDao{

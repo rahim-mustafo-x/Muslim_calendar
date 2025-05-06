@@ -1,10 +1,10 @@
 package uz.coder.muslimcalendar.map
 
-import uz.coder.muslimcalendar.models.db.MuslimCalendarDbModel
-import uz.coder.muslimcalendar.models.db.SuraDbModel
-import uz.coder.muslimcalendar.models.internet.PrayerData
-import uz.coder.muslimcalendar.models.internet.quran.SuraDTO
-import uz.coder.muslimcalendar.models.internet.quran.SurahListDTO
+import uz.coder.muslimcalendar.db.model.MuslimCalendarDbModel
+import uz.coder.muslimcalendar.db.model.SuraDbModel
+import uz.coder.muslimcalendar.ktor.internet.PrayerData
+import uz.coder.muslimcalendar.ktor.internet.quran.SuraDTO
+import uz.coder.muslimcalendar.ktor.internet.quran.SurahListDTO
 import uz.coder.muslimcalendar.models.model.MuslimCalendar
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.SurahList

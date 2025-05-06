@@ -5,9 +5,9 @@ import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import uz.coder.muslimcalendar.models.internet.quran.QuranDTO
-import uz.coder.muslimcalendar.models.internet.quran.ResultDTO
-import uz.coder.muslimcalendar.models.internet.quran.SurahDTO
+import uz.coder.muslimcalendar.ktor.internet.quran.QuranDTO
+import uz.coder.muslimcalendar.ktor.internet.quran.ResultDTO
+import uz.coder.muslimcalendar.ktor.internet.quran.SurahDTO
 
 interface ApiService {
     suspend fun getQuranArab(): ResultDTO<QuranDTO>
