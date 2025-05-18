@@ -5,15 +5,15 @@ import androidx.annotation.NonNull;
 public class Menu {
     private int img;
     private String text;
-    private MenuScreen menu;
+    private MenuSetting menu;
 
-    public Menu(int img, String text, MenuScreen menu) {
+    public Menu(int img, String text, MenuSetting menu) {
         this.img = img;
         this.text = text;
         this.menu = menu;
     }
 
-    public Menu(int img, MenuScreen menu) {
+    public Menu(int img, MenuSetting menu) {
         this.img = img;
         this.menu = menu;
     }
@@ -37,11 +37,11 @@ public class Menu {
         this.text = text;
     }
 
-    public MenuScreen getMenu() {
+    public MenuSetting getMenu() {
         return menu;
     }
 
-    public void setMenu(MenuScreen menu) {
+    public void setMenu(MenuSetting menu) {
         this.menu = menu;
     }
 

@@ -33,7 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuScreen
+import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.todo.ALL_TASBEH
 import uz.coder.muslimcalendar.todo.TASBEH
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
@@ -52,12 +52,12 @@ fun Tasbeh(modifier: Modifier = Modifier, controller: NavHostController) {
     val list = listOf(
         Menu(
             R.drawable.refresh,
-            MenuScreen.RefreshTasbeh
+            MenuSetting.RefreshTasbeh
         )
     )
     Scaffold(topBar = { CalendarTopBar(list = list) {
         when(it){
-            MenuScreen.RefreshTasbeh->{
+            MenuSetting.RefreshTasbeh->{
                 viewModel.refreshTasbehAndAllTasbeh()
                 allTasbeh = viewModel.allTasbeh.value
                 tasbeh = viewModel.tasbeh.value

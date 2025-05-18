@@ -2,8 +2,10 @@ package uz.coder.muslimcalendar.repository
 
 import kotlinx.coroutines.flow.Flow
 import uz.coder.muslimcalendar.models.model.MuslimCalendar
+import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.Surah
+import uz.coder.muslimcalendar.models.model.quran.SurahList
 
 interface CalendarRepository {
     suspend fun loading(longitude: Double, latitude: Double)
@@ -13,6 +15,7 @@ interface CalendarRepository {
     fun oneMonth():Flow<List<MuslimCalendar>>
     suspend fun loadQuranArab()
     fun getSurah(): Flow<List<Sura>>
-    fun getSurahByNumber(number: Int): Flow<Sura>
-    fun getSura(surahNumber: Int): Flow<Surah>
+    suspend fun downloadSurah(suraAyahs: List<SurahList>)
+    fun getSurahById(sura:String):Flow<List<SuraAyah>>
+    fun getSura(number:Int):Flow<Surah>
 }

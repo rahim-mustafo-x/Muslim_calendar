@@ -37,7 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuScreen
+import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.todo.ASR
 import uz.coder.muslimcalendar.todo.BOMDOD
 import uz.coder.muslimcalendar.todo.PESHIN
@@ -57,12 +57,12 @@ fun QazoScreen(modifier: Modifier = Modifier, controller: NavHostController) {
         list = listOf(
             Menu(
                 R.drawable.settings,
-                MenuScreen.QazoSetting
+                MenuSetting.QazoSetting
             )
         )
     ) {
         when(it){
-            MenuScreen.QazoSetting->{
+            MenuSetting.QazoSetting->{
                 showDialog = true
             }
             else->{}

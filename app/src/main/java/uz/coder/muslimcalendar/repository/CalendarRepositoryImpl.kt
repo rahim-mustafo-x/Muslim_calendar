@@ -24,8 +24,10 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.db.AppDatabase
 import uz.coder.muslimcalendar.ktor.ApiService.Companion.apiService
 import uz.coder.muslimcalendar.map.CalendarMap
+import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.Surah
+import uz.coder.muslimcalendar.models.model.quran.SurahList
 import uz.coder.muslimcalendar.service.PrayerTimeJobService
 import uz.coder.muslimcalendar.service.QuranWorkManager
 import uz.coder.muslimcalendar.todo.REGION
@@ -128,21 +130,23 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         }
     }
 
-    override fun getSurahByNumber(number: Int) = flow<Sura> {
-        db.suraDao().getSuraById(number).collect{
-            emit(
-                map.toSura(it)
-            )
+    override suspend fun downloadSurah(suraAyahs: List<SurahList>) {
+        Log.d(TAG, "downloadSurah: $suraAyahs")
+        db.surahAyahDao().insertAll(map.toSuraAyahDbModels(suraAyahs))
+    }
+
+    override fun getSurahById(sura: String) = flow<List<SuraAyah>> {
+        db.surahAyahDao().getSurahAyahsById(sura).collect {
+            val sortedBy = map.toSuraAyahList(it).sortedBy { it.aya }
+            emit(sortedBy)
         }
     }
 
-    override fun getSura(surahNumber: Int) = flow<Surah> {
-        val result = withContext(Dispatchers.IO) { apiService.getSura(surahNumber) }
-        emit(
-            Surah(
-                map.toSurahList(result.result)
-            )
-        )
+    override fun getSura(number: Int) = flow<Surah> {
+        apiService.getSura(number).result?.let {
+            val surah = withContext(Dispatchers.IO) { Surah(map.toSurahList(it)) }
+            emit(surah)
+        }
     }
 }
 

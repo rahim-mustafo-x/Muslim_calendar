@@ -21,18 +21,18 @@ class QuranViewModel(private val application: Application) : AndroidViewModel(ap
     fun loadQuran() {
         viewModelScope.launch {
             _state.emit(QuranState.Loading)
-            if (application.isConnected()){
                 repo.getSurah().collect {
                     if (it.isEmpty()){
+                        if (application.isConnected()){
                         repo.loadQuranArab()
                         loadQuran()
+                    }else{
+                        _state.emit(QuranState.Error(application.getString(R.string.no_internet)))
+                    }
                     }else{
                         _state.emit(QuranState.Success(it))
                     }
                 }
-            }else{
-                _state.emit(QuranState.Error(application.getString(R.string.no_internet)))
-            }
         }
     }
 }

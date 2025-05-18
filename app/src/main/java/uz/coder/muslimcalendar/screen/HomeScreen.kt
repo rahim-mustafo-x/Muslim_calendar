@@ -52,7 +52,7 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Date
 import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuScreen
+import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.models.sealed.Screen.About
 import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
 import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
@@ -77,28 +77,28 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
         Menu(
             R.drawable.refresh,
             stringResource(R.string.refresh),
-            MenuScreen.Refresh
+            MenuSetting.Refresh
         ),Menu(
             R.drawable.settings,
             stringResource(R.string.settings),
-            MenuScreen.Settings
+            MenuSetting.Settings
         ),
         Menu(
             R.drawable.about,
             stringResource(R.string.about),
-            MenuScreen.About
+            MenuSetting.About
         )
     )
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         CalendarTopBar(modifier = modifier, list = menuList){
             when(it){
-                MenuScreen.Refresh->{
+                MenuSetting.Refresh->{
                     viewModel.loadInfo()
                 }
-                MenuScreen.Settings->{
+                MenuSetting.Settings->{
                     controller.navigate(Settings.route)
                 }
-                MenuScreen.About->{
+                MenuSetting.About->{
                     controller.navigate(About.route)
                 }
                 else->{}

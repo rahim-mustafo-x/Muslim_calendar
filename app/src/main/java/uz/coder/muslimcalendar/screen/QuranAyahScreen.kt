@@ -35,11 +35,14 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.models.model.Menu
+import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.models.model.quran.SurahList
 import uz.coder.muslimcalendar.todo.NUMBER
+import uz.coder.muslimcalendar.todo.toAyahList
 import uz.coder.muslimcalendar.ui.view.AyahArabicSection
 import uz.coder.muslimcalendar.ui.view.AyahTranslationSection
-import uz.coder.muslimcalendar.ui.view.CalendarTopBar2
+import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.ui.view.QuranPlayer
 import uz.coder.muslimcalendar.viewModel.SurahViewModel
 import uz.coder.muslimcalendar.viewModel.state.SurahState
@@ -57,7 +60,6 @@ fun QuranAyahScreen(
     var showTranslation by remember { mutableStateOf(false) }
     var ayahList by remember { mutableStateOf<List<SurahList>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
-    var nameOfSurah by remember { mutableStateOf("") }
 
     // 🎬 ExoPlayer
     val exoPlayer = remember {
@@ -73,100 +75,80 @@ fun QuranAyahScreen(
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     val duration = exoPlayer.duration.coerceAtLeast(1L)
 
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
-
-    LaunchedEffect(number) {
-        viewModel.getSura(number)
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.state.collect { state ->
-            when (state) {
-                is SurahState.Loading -> isLoading = true
-                is SurahState.Success -> {
-                    isLoading = false
-                    ayahList = state.data
-                    nameOfSurah = state.nameOfSurah
+    Scaffold(topBar = {
+        CalendarTopBar(list = listOf(Menu(R.drawable.ic_download,
+            MenuSetting.Download))){ screen->
+            when(screen.ordinal){
+                MenuSetting.Download.ordinal->{
+                    Log.d(TAG, "QuranAyahScreen: $ayahList")
+                    viewModel.downloadSurah(ayahList)
                 }
-                is SurahState.Error -> {
-                    isLoading = false
-                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-                }
-                SurahState.Init -> isLoading = false
+                else -> {}
             }
         }
-    }
-
-    Scaffold(modifier = modifier.fillMaxSize(),
-        topBar = {
-            CalendarTopBar2(text = nameOfSurah.ifBlank { "Sura" }, list = emptyList()) { }
-        },
-        bottomBar = {
-                QuranPlayer(
-                    exoPlayer = exoPlayer,
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = {
-                        if (exoPlayer.isPlaying) {
-                            exoPlayer.pause()
-                        } else {
-                            exoPlayer.play()
-                        }
-                        isPlaying = !isPlaying
-                    },
-                    onNextClick = {
-                        exoPlayer.seekTo((exoPlayer.currentPosition + 5000).coerceAtMost(exoPlayer.duration))
-                    },
-                    onPreviousClick = {
-                        exoPlayer.seekTo((exoPlayer.currentPosition - 5000).coerceAtLeast(0))
+    }, bottomBar = {
+        QuranPlayer(
+            exoPlayer = exoPlayer,
+            isPlaying = isPlaying,
+            onPlayPauseClick = {
+                if (exoPlayer.isPlaying) {
+                    exoPlayer.pause()
+                } else {
+                    exoPlayer.play()
+                }
+                isPlaying = !isPlaying
+            },
+            onNextClick = {
+                exoPlayer.seekTo((exoPlayer.currentPosition + 5000).coerceAtMost(exoPlayer.duration))
+            },
+            onPreviousClick = {
+                exoPlayer.seekTo((exoPlayer.currentPosition - 5000).coerceAtLeast(0))
+            }
+        )
+    }) {
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(it)
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 5.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    item {
+                        AyahArabicSection(ayahList)
                     }
-                )
-        }
-    ) { paddingValues ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 5.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                item {
-                    AyahArabicSection(ayahList)
-                }
-                item {
-                    Text(
-                        text = stringResource(R.string.translation),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp).clickable{
-                            showTranslation = !showTranslation
+                    item {
+                        Text(
+                            text = stringResource(R.string.translation),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .clickable {
+                                    showTranslation = !showTranslation
+                                }
+                        )
+                        if (showTranslation) {
+                            AyahTranslationSection(ayahList)
                         }
-                    )
-                    if (showTranslation) {
-                        AyahTranslationSection(ayahList)
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
             }
         }
-    }
 
-        BackHandler {
+    BackHandler {
         controller.popBackStack()
     }
 
@@ -176,4 +158,33 @@ fun QuranAyahScreen(
             kotlinx.coroutines.delay(500)
         }
     }
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(number) {
+        viewModel.getSura(number)
+        Log.d(TAG, "QuranAyahScreen: $number")
+    }
+
+    LaunchedEffect(viewModel.state) {
+        viewModel.state.collect { state ->
+            when (state) {
+                is SurahState.Loading -> isLoading = true
+                is SurahState.Success -> {
+                    Log.d(TAG, "QuranAyahScreen: ${state.data}")
+                    isLoading = false
+                    ayahList = state.data.toAyahList()
+                }
+                is SurahState.Error -> {
+                    isLoading = true
+                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                }
+                SurahState.Init -> isLoading = false
+            }
+        }
+    }
 }
+private const val TAG = "QuranAyahScreen"

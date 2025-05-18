@@ -2,12 +2,15 @@ package uz.coder.muslimcalendar.map
 
 import uz.coder.muslimcalendar.db.model.MuslimCalendarDbModel
 import uz.coder.muslimcalendar.db.model.SuraDbModel
+import uz.coder.muslimcalendar.db.model.SurahAyahDbModel
 import uz.coder.muslimcalendar.ktor.internet.PrayerData
 import uz.coder.muslimcalendar.ktor.internet.quran.SuraDTO
 import uz.coder.muslimcalendar.ktor.internet.quran.SurahListDTO
 import uz.coder.muslimcalendar.models.model.MuslimCalendar
+import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.SurahList
+import uz.coder.muslimcalendar.todo.cyrillicToLatin
 import uz.coder.muslimcalendar.todo.toNormalTranslate
 import uz.coder.muslimcalendar.todo.toWeakDays
 import java.time.LocalDate
@@ -62,12 +65,12 @@ class CalendarMap {
 
     private fun toSurah(dto: SurahListDTO) =
         SurahList(
-            dto.arabicText?:"",
-            dto.aya?:"",
-            dto.footnotes?:"",
-            dto.id?:"",
-            dto.sura?:"",
-            dto.translation?:""
+            arabicText = dto.arabicText?:"",
+            aya = dto.aya?:"",
+            footnotes = dto.footnotes?:"",
+            id = dto.id?:"",
+            sura = dto.sura?:"",
+            translation = dto.translation?.cyrillicToLatin()?:""
         )
 
     fun toSuraDbModel(dTOS: List<SuraDTO>?) = dTOS?.map {
@@ -92,4 +95,7 @@ class CalendarMap {
         revelationType = model.revelationType
     )
 
+    private fun toSuraAyah(model: SurahAyahDbModel) = SuraAyah(arabicText = model.arabicText, aya =  model.aya, footnotes =  model.footnotes, sura =  model.sura, translation =  model.translation.cyrillicToLatin(), id =  model.id)
+    fun toSuraAyahList(list: List<SurahAyahDbModel>) = list.map { toSuraAyah(it) }
+    fun toSuraAyahDbModels(model: List<SurahList>) = model.map { SurahAyahDbModel(it.arabicText, it.aya, it.footnotes, it.sura, it.translation, "", it.id) }
 }

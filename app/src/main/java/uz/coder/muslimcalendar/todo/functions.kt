@@ -6,6 +6,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.ConnectivityManager
+import uz.coder.muslimcalendar.models.model.SuraAyah
+import uz.coder.muslimcalendar.models.model.quran.SurahList
 
 fun Context.isConnected():Boolean{
     val info =
@@ -46,4 +48,10 @@ fun Long.formatTime(): String {
     } else {
         "%02d:%02d".format(minutes, seconds)
     }
+}
+fun List<SuraAyah>.toAyahList(): List<SurahList> {
+    return this.map { SurahList(arabicText = it.arabicText, aya = it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
+}
+fun List<SurahList>.toSuraAyah(): List<SuraAyah> {
+    return this.map { SuraAyah(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
 }

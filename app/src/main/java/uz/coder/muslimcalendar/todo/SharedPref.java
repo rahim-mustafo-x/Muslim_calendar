@@ -6,7 +6,7 @@ import uz.coder.muslimcalendar.R;
 
 public class SharedPref {
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
+    private static SharedPreferences.Editor editor;
     private static SharedPref sharedPref;
     private SharedPref(){}
 
@@ -19,25 +19,25 @@ public class SharedPref {
     }
     public <T> void saveValue(String key, T value){
         if (value instanceof String){
-            sharedPref.editor.putString(key, String.valueOf(value)).apply();
+            editor.putString(key, String.valueOf(value)).apply();
         }else if (value instanceof Integer){
-            sharedPref.editor.putInt(key, (Integer) value).apply();
+            editor.putInt(key, (Integer) value).apply();
         }else if (value instanceof Boolean){
-            sharedPref.editor.putBoolean(key, (Boolean) value).apply();
+            editor.putBoolean(key, (Boolean) value).apply();
         }else if (value instanceof Float){
-            sharedPref.editor.putFloat(key, (Float) value).apply();
+            editor.putFloat(key, (Float) value).apply();
         }
         else if (value instanceof Long){
-            sharedPref.editor.putLong(key, (Long) value).apply();
+            editor.putLong(key, (Long) value).apply();
         }else {
             throw new RuntimeException("Unsupported type");
         }
     }
     public void removeValue(String key){
-        sharedPref.editor.remove(key).apply();
+        editor.remove(key).apply();
     }
     public void clear(){
-        sharedPref.editor.clear().apply();
+        editor.clear().apply();
     }
     public String getString(String key, String defaultValue){
         return sharedPref.sharedPreferences.getString(key, defaultValue);

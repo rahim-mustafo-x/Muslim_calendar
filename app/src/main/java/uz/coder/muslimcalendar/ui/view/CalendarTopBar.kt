@@ -23,12 +23,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuScreen
+import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarTopBar(modifier:Modifier = Modifier, stringResource:Int = R.string.app_name, list: List<Menu>, onClick:(MenuScreen)->Unit){
+fun CalendarTopBar(modifier:Modifier = Modifier, stringResource:Int = R.string.app_name, list: List<Menu>, onClick:(MenuSetting)->Unit){
     TopAppBar(title = { Text(text = stringResource(stringResource), fontSize = 20.sp, modifier = modifier, color = White) }, colors = TopAppBarDefaults.topAppBarColors(
         Light_Blue), actions = {
             var showMenu by remember {
@@ -59,7 +59,7 @@ fun CalendarTopBar(modifier:Modifier = Modifier, stringResource:Int = R.string.a
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarTopBar2(modifier:Modifier = Modifier, text: String = "", list: List<Menu>, onClick:(MenuScreen)->Unit){
+fun CalendarTopBar2(modifier:Modifier = Modifier, text: String = "", list: List<Menu>, onClick:(MenuSetting)->Unit){
     TopAppBar(title = { Text(text = text, fontSize = 20.sp, modifier = modifier, color = White) }, colors = TopAppBarDefaults.topAppBarColors(
         Light_Blue), actions = {
             var showMenu by remember {

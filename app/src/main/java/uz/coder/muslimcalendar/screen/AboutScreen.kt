@@ -14,8 +14,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.models.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuScreen
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 
 @Composable
