@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.quran.SurahList
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
-import uz.coder.muslimcalendar.todo.getQuranAudioUrl
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.todo.toSuraAyah
 import uz.coder.muslimcalendar.viewModel.state.SurahState
@@ -49,6 +48,10 @@ class SurahViewModel(private val application: Application): AndroidViewModel(app
         viewModelScope.launch(Dispatchers.IO) {
             repo.downloadSurah(suraAyahs, url)
         }
+    }
+    private fun getQuranAudioUrl(number:Int):String {
+        val numberOfSurah = "%03d".format(number)
+        return "https://server16.mp3quran.net/a_binaoun/Rewayat-Hafs-A-n-Assem/${numberOfSurah}.mp3"
     }
 }
 private const val TAG = "SurahViewModel"
