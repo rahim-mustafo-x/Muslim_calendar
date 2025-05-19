@@ -28,38 +28,7 @@ import uz.coder.muslimcalendar.ui.theme.Light_Blue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarTopBar(modifier:Modifier = Modifier, stringResource:Int = R.string.app_name, list: List<Menu>, onClick:(MenuSetting)->Unit){
-    TopAppBar(title = { Text(text = stringResource(stringResource), fontSize = 20.sp, modifier = modifier, color = White) }, colors = TopAppBarDefaults.topAppBarColors(
-        Light_Blue), actions = {
-            var showMenu by remember {
-                mutableStateOf(false)
-            }
-            if (list.size>1){
-                IconButton(onClick = { showMenu = !showMenu }) {
-                    Icon(Icons.Default.Menu, null, tint = White)
-                }
-                DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                    list.forEachIndexed { _, menu ->
-                        DropdownMenuItem(text = { Text(menu.text, fontSize = 15.sp, color = Black) }, onClick = { onClick(menu.menu); showMenu = false }, leadingIcon = { Icon(
-                            painterResource(menu.img),
-                            contentDescription = null,
-                            tint = Black
-                        ) })
-                    }
-                }
-            }else if(list.size == 1){
-                list.forEachIndexed {_,item->
-                    IconButton(onClick = { onClick(item.menu) }) {
-                        Icon(painterResource(item.img), null, tint = White)
-                    }
-                }
-            }
-            else return@TopAppBar
-    })
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CalendarTopBar2(modifier:Modifier = Modifier, text: String = "", list: List<Menu>, onClick:(MenuSetting)->Unit){
+fun CalendarTopBar(modifier:Modifier = Modifier, text: String = stringResource(R.string.app_name), list: List<Menu>, onClick:(MenuSetting)->Unit){
     TopAppBar(title = { Text(text = text, fontSize = 20.sp, modifier = modifier, color = White) }, colors = TopAppBarDefaults.topAppBarColors(
         Light_Blue), actions = {
             var showMenu by remember {

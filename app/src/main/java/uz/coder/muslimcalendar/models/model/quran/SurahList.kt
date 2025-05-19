@@ -6,5 +6,5 @@ data class SurahList(
     val aya: String,
     val arabicText: String,
     val translation: String,
-    val footnotes: String
-)
+    val footnotes: String,
+    val audioPath:String)

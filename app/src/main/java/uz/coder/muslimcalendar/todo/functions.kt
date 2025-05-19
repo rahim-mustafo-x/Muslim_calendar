@@ -50,8 +50,12 @@ fun Long.formatTime(): String {
     }
 }
 fun List<SuraAyah>.toAyahList(): List<SurahList> {
-    return this.map { SurahList(arabicText = it.arabicText, aya = it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
+    return this.map { SurahList(arabicText = it.arabicText, aya = it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation, audioPath = it.audioPath) }
 }
 fun List<SurahList>.toSuraAyah(): List<SuraAyah> {
-    return this.map { SuraAyah(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
+    return this.map { SuraAyah(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation, audioPath = it.audioPath) }
+}
+fun getQuranAudioUrl(number:Int):String {
+    val numberOfSurah = "%03d".format(number)
+    return "https://server16.mp3quran.net/a_binaoun/Rewayat-Hafs-A-n-Assem/${numberOfSurah}.mp3"
 }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -39,8 +40,7 @@ fun QuranScreen(
     var suraList by remember { mutableStateOf<List<Sura>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     val context = LocalContext.current
-    Scaffold(
-        topBar = {CalendarTopBar(modifier = modifier, stringResource = R.string.quran, list =  emptyList()) {}
+    Scaffold(topBar = {CalendarTopBar(modifier = modifier, text = stringResource(R.string.quran), list =  emptyList()) {}
         },
         modifier = modifier.fillMaxSize()
     ) { padding ->

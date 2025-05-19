@@ -15,7 +15,7 @@ interface CalendarRepository {
     fun oneMonth():Flow<List<MuslimCalendar>>
     suspend fun loadQuranArab()
     fun getSurah(): Flow<List<Sura>>
-    suspend fun downloadSurah(suraAyahs: List<SurahList>)
+    suspend fun downloadSurah(suraAyahs: List<SurahList>, url: String)
     fun getSurahById(sura:String):Flow<List<SuraAyah>>
-    fun getSura(number:Int):Flow<Surah>
+    fun getSura(number:Int, audioPath:String):Flow<Surah>
 }

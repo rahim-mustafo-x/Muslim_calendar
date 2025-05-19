@@ -60,28 +60,36 @@ fun QuranAyahScreen(
     var showTranslation by remember { mutableStateOf(false) }
     var ayahList by remember { mutableStateOf<List<SurahList>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var audioPath by remember { mutableStateOf("") }
 
     // 🎬 ExoPlayer
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.fromUri(viewModel.getQuranAudioUrl(number))
-            setMediaItem(mediaItem)
-            prepare()
-        }
-    }
-    Log.d("TAG", "QuranAyahScreen: ${viewModel.getQuranAudioUrl(number)}")
-
+    val exoPlayer = remember { ExoPlayer.Builder(context).build().apply {
+        val mediaItem = MediaItem.fromUri(audioPath)
+        setMediaItem(mediaItem)
+        prepare()
+    } }
     var isPlaying by remember { mutableStateOf(false) }
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     val duration = exoPlayer.duration.coerceAtLeast(1L)
 
+    // Update ExoPlayer when audioPath changes
+    LaunchedEffect(audioPath) {
+        if (audioPath.isNotEmpty()) {
+            exoPlayer.apply {
+                setMediaItem(MediaItem.fromUri(audioPath))
+                prepare()
+                if (isPlaying) play()
+            }
+        }
+    }
+
     Scaffold(topBar = {
         CalendarTopBar(list = listOf(Menu(R.drawable.ic_download,
-            MenuSetting.Download))){ screen->
-            when(screen.ordinal){
-                MenuSetting.Download.ordinal->{
+            MenuSetting.Download))) { screen ->
+            when (screen.ordinal) {
+                MenuSetting.Download.ordinal -> {
                     Log.d(TAG, "QuranAyahScreen: $ayahList")
-                    viewModel.downloadSurah(ayahList)
+                    viewModel.downloadSurah(ayahList, audioPath)
                 }
                 else -> {}
             }
@@ -106,47 +114,47 @@ fun QuranAyahScreen(
             }
         )
     }) {
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(it)
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 5.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                item {
+                    AyahArabicSection(ayahList)
                 }
-            } else {
-                LazyColumn(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(it)
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 5.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    item {
-                        AyahArabicSection(ayahList)
+                item {
+                    Text(
+                        text = stringResource(R.string.translation),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .padding(bottom = 8.dp)
+                            .clickable {
+                                showTranslation = !showTranslation
+                            }
+                    )
+                    if (showTranslation) {
+                        AyahTranslationSection(ayahList)
                     }
-                    item {
-                        Text(
-                            text = stringResource(R.string.translation),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier
-                                .padding(bottom = 8.dp)
-                                .clickable {
-                                    showTranslation = !showTranslation
-                                }
-                        )
-                        if (showTranslation) {
-                            AyahTranslationSection(ayahList)
-                        }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
+    }
 
     BackHandler {
         controller.popBackStack()
@@ -158,6 +166,7 @@ fun QuranAyahScreen(
             kotlinx.coroutines.delay(500)
         }
     }
+
     DisposableEffect(Unit) {
         onDispose {
             exoPlayer.release()
@@ -165,7 +174,7 @@ fun QuranAyahScreen(
     }
 
     LaunchedEffect(number) {
-        viewModel.getSura(number)
+        viewModel.getSura(number, audioPath)
         Log.d(TAG, "QuranAyahScreen: $number")
     }
 
@@ -176,6 +185,7 @@ fun QuranAyahScreen(
                 is SurahState.Success -> {
                     Log.d(TAG, "QuranAyahScreen: ${state.data}")
                     isLoading = false
+                    audioPath = state.data.first().audioPath
                     ayahList = state.data.toAyahList()
                 }
                 is SurahState.Error -> {
@@ -184,6 +194,13 @@ fun QuranAyahScreen(
                 }
                 SurahState.Init -> isLoading = false
             }
+        }
+    }
+
+    LaunchedEffect(viewModel.audioPath) {
+        viewModel.audioPath.collect {
+            audioPath = it
+            Log.d(TAG, "QuranAyahScreen: $it")
         }
     }
 }

@@ -6,4 +6,5 @@ data class SuraAyah(
     var aya: String = "",
     var arabicText: String = "",
     var translation: String = "",
-    var footnotes: String = "")
+    var footnotes: String = "",
+    var audioPath: String)

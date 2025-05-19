@@ -17,6 +17,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
@@ -31,6 +32,7 @@ import uz.coder.muslimcalendar.models.model.quran.SurahList
 import uz.coder.muslimcalendar.service.PrayerTimeJobService
 import uz.coder.muslimcalendar.service.QuranWorkManager
 import uz.coder.muslimcalendar.todo.REGION
+import uz.coder.muslimcalendar.todo.isConnected
 import java.time.LocalDate
 import java.util.Calendar.DAY_OF_MONTH
 import java.util.Calendar.MONTH
@@ -41,6 +43,7 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
     private val db:AppDatabase by lazy { AppDatabase.instance(application) }
     private val map = CalendarMap()
+    private val downloadFile = DownloadFile()
 
     override suspend fun loading(longitude: Double, latitude: Double) {
         if (latitude!=0.0 && longitude !=0.0){
@@ -130,9 +133,10 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         }
     }
 
-    override suspend fun downloadSurah(suraAyahs: List<SurahList>) {
+    override suspend fun downloadSurah(suraAyahs: List<SurahList>, url: String) {
         Log.d(TAG, "downloadSurah: $suraAyahs")
-        db.surahAyahDao().insertAll(map.toSuraAyahDbModels(suraAyahs))
+        val path = downloadFile.downloadFile(application, url)?:""
+        db.surahAyahDao().insertAll(map.toSuraAyahDbModels(suraAyahs, path))
     }
 
     override fun getSurahById(sura: String) = flow<List<SuraAyah>> {
@@ -142,9 +146,9 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         }
     }
 
-    override fun getSura(number: Int) = flow<Surah> {
+    override fun getSura(number: Int, audioPath:String) = flow<Surah> {
         apiService.getSura(number).result?.let {
-            val surah = withContext(Dispatchers.IO) { Surah(map.toSurahList(it)) }
+            val surah = withContext(Dispatchers.IO) { Surah(map.toSurahList(it, audioPath)) }
             emit(surah)
         }
     }
