@@ -4,7 +4,6 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -21,34 +20,55 @@ class SurahViewModel(private val application: Application): AndroidViewModel(app
     val state = _state.asStateFlow()
     private val _audioPath = MutableStateFlow<String>("")
     val audioPath = _audioPath.asStateFlow()
-    fun getSura(surahNumber: Int, audioPath:String) {
+    private val _downloadProgress = MutableStateFlow<Int>(0)
+    val downloadProgress = _downloadProgress.asStateFlow()
+    fun getSura(surahNumber: Int) {
         Log.d(TAG, "getSura: tushdi")
         viewModelScope.launch {
             _state.emit(SurahState.Loading)
                 repo.getSurahById(surahNumber.toString()).collect {
+                    getAudioPath(surahNumber.toString())
                     Log.d(TAG, "getSura: $it")
                     if (it.isEmpty()){
                         if (application.isConnected()) {
-                            repo.getSura(surahNumber, audioPath).collect {
+                            repo.getSura(surahNumber).collect {
                                 _state.emit(SurahState.Success(it.result.toSuraAyah()))
-                                _audioPath.emit(getQuranAudioUrl(surahNumber))
-                                Log.d(TAG, "getSura: ${getQuranAudioUrl(surahNumber)}")
                             }
                         }else {
                                 _state.emit(SurahState.Error(application.getString(R.string.no_internet)))
                         }
                     }else{
-                        _audioPath.emit(it.first().audioPath)
                         _state.emit(SurahState.Success(it))
                     }
                 }
             }
-        }
-    fun downloadSurah(suraAyahs: List<SurahList>, url: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repo.downloadSurah(suraAyahs, url)
+    }
+    fun getNameOfSura(surahNumber: Int) = repo.getSuraByNumber(surahNumber)
+    fun getAudioPath(sura:String) {
+        viewModelScope.launch {
+            repo.getAudioPath(sura).collect {
+                if (it.path!=null){
+                    Log.d(TAG, "getAudioPath: ${it.path}")
+                    _audioPath.emit(it.path)
+                }else{
+                    if (application.isConnected()){
+                        _audioPath.emit(getQuranAudioUrl(sura.toInt()))
+                    }
+                }
+            }
         }
     }
+    fun downloadSurah(suraAyahs: List<SurahList>, url: String) {
+        viewModelScope.launch {
+            repo.downloadSurah(suraAyahs, url).collect {
+                repo.observeProgress(it).collect { progress ->
+                    _downloadProgress.value = progress
+                }
+            }
+
+        }
+    }
+
     private fun getQuranAudioUrl(number:Int):String {
         val numberOfSurah = "%03d".format(number)
         return "https://server16.mp3quran.net/a_binaoun/Rewayat-Hafs-A-n-Assem/${numberOfSurah}.mp3"

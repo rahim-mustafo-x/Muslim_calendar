@@ -51,6 +51,9 @@ android {
     buildFeatures {
         compose = true
     }
+    kapt{
+        correctErrorTypes = true
+    }
 }
 
 dependencies {
@@ -80,6 +83,8 @@ dependencies {
     implementation(libs.accompanist.permissions)
 
     implementation(libs.androidx.work.runtime.ktx)
+
+    implementation(libs.logging.interceptor)
 
     implementation(libs.ui)
     implementation(libs.androidx.material)

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +64,8 @@ fun QuranAyahScreen(
     var ayahList by remember { mutableStateOf<List<SurahList>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var audioPath by remember { mutableStateOf("") }
+    var nameOfSura by remember { mutableStateOf(context.getString(R.string.app_name)) }
+    val progress by viewModel.downloadProgress.collectAsState()
 
     // 🎬 ExoPlayer
     val exoPlayer = remember { ExoPlayer.Builder(context).build().apply {
@@ -84,7 +89,7 @@ fun QuranAyahScreen(
     }
 
     Scaffold(topBar = {
-        CalendarTopBar(list = listOf(Menu(R.drawable.ic_download,
+        CalendarTopBar(text = nameOfSura, list = listOf(Menu(R.drawable.ic_download,
             MenuSetting.Download))) { screen ->
             when (screen.ordinal) {
                 MenuSetting.Download.ordinal -> {
@@ -124,6 +129,9 @@ fun QuranAyahScreen(
                 CircularProgressIndicator()
             }
         } else {
+            if (progress in 1..99){
+                DownloadDialog(progress=progress)
+            }
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize()
@@ -174,8 +182,15 @@ fun QuranAyahScreen(
     }
 
     LaunchedEffect(number) {
-        viewModel.getSura(number, audioPath)
+        viewModel.getSura(number)
+        viewModel.getAudioPath(number.toString())
         Log.d(TAG, "QuranAyahScreen: $number")
+    }
+
+    LaunchedEffect(viewModel.getSura(number)) {
+        viewModel.getNameOfSura(number).collect{
+            nameOfSura = it.englishName
+        }
     }
 
     LaunchedEffect(viewModel.state) {
@@ -185,7 +200,6 @@ fun QuranAyahScreen(
                 is SurahState.Success -> {
                     Log.d(TAG, "QuranAyahScreen: ${state.data}")
                     isLoading = false
-                    audioPath = state.data.first().audioPath
                     ayahList = state.data.toAyahList()
                 }
                 is SurahState.Error -> {
@@ -197,6 +211,7 @@ fun QuranAyahScreen(
         }
     }
 
+
     LaunchedEffect(viewModel.audioPath) {
         viewModel.audioPath.collect {
             audioPath = it
@@ -204,4 +219,15 @@ fun QuranAyahScreen(
         }
     }
 }
+
+@Composable
+fun DownloadDialog(modifier: Modifier = Modifier, progress:Int) {
+    AlertDialog(
+        onDismissRequest = { },
+        text = { Text(stringResource(R.string.downloading)+"  $progress%") },
+        buttons = {},
+        modifier = modifier
+    )
+}
+
 private const val TAG = "QuranAyahScreen"

@@ -1,6 +1,8 @@
 package uz.coder.muslimcalendar.models.model;
 
 import androidx.annotation.NonNull;
+
+import java.util.List;
 import java.util.Objects;
 
 public class MuslimCalendar {
@@ -94,6 +96,9 @@ public class MuslimCalendar {
     @Override
     public int hashCode() {
         return Objects.hash(day, hijriDay, hijriMonth, month, weekday, asr, hufton, peshin, shomIftor, tongSaharlik, sunSet, sunRise);
+    }
+    public List<String> getItem(){
+        return List.of(tongSaharlik, sunRise, peshin, asr, shomIftor, sunSet, hufton);
     }
 
     @NonNull

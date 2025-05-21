@@ -10,7 +10,6 @@ sealed class Screen(val route:String) {
     data object Calendar: Screen(CALENDAR)
     data object Qazo: Screen(QAZO)
     data object About: Screen(ABOUT)
-    data object Settings: Screen(SETTINGS)
     data object AllahName: Screen(ALLAH_NAME)
     data object AllahNameMeaning: Screen(ALLAH_NAME_MEANING)
     data object Quran: Screen(QURAN)
@@ -26,7 +25,6 @@ sealed class Screen(val route:String) {
         private const val CALENDAR = "calendar"
         private const val QAZO = "qazo"
         private const val ABOUT = "about"
-        private const val SETTINGS = "settings"
         private const val ALLAH_NAME = "allah_name"
         private const val ALLAH_NAME_MEANING = "allah_name_meaning"
         private const val QURAN = "quran"

@@ -18,8 +18,6 @@ interface ApiService {
         //surah
         const val BASE_URL_OF_PERFECT_TRANSLATION = "https://quranenc.com/"
         const val UZB_TRANSLATION = "api/v1/translation/sura/uzbek_mansour"
-        const val ENG_TRANSLATION = "api/v1/translation/sura/english_saheeh"
-        const val RUS_TRANSLATION = "api/v1/translation/sura/russian_kuliev"
         val apiService: ApiService = ApiServiceImpl(HttpClient(Android) {
             install(ContentNegotiation) {
                 json(Json { ignoreUnknownKeys = true })

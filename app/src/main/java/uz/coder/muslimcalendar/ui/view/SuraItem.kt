@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import uz.coder.muslimcalendar.models.model.quran.Sura
+import uz.coder.muslimcalendar.R
 
 @Composable
 fun SuraItem(modifier: Modifier = Modifier, sura: Sura, onClick: () -> Unit) {
@@ -28,7 +30,7 @@ fun SuraItem(modifier: Modifier = Modifier, sura: Sura, onClick: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Revelation: ${sura.revelationType}",
+                text = String.format(stringResource(R.string.revelation), sura.revelationType),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -28,15 +28,15 @@
     <string name="no_internet">Internet bilan aloqa yo\'q</string>
     <string name="translation">Tarjimasi</string>
     <string name="acess">Ruxsat berish</string>
-    <string name="permission_message">Joylashuvni aniqlash uchun ruxsat bering</string>
+    <string name="permission_location_message">Joylashuvni aniqlash uchun ruxsat bering</string>
     <string name="permission_title">Ruxsat so\'rov</string>
     <string name="settings">Sozlamalar</string>
     <string name="unselected">Saqlanmagan</string>
-    <string name="uzbek">O\'zbekcha</string>
-    <string name="russia">Ruscha</string>
-    <string name="english">Inglizcha</string>
     <string name="select_language">Tilni tanlang</string>
     <string name="quyoshChiqishi">Quyosh chiqishi</string>
+    <string name="downloading">Yuklanmoqda…</string>
+    <string name="permission_post_notification_message">Bildirishnoma yuborish uchun ruxsat bering</string>
+    <string name="revelation">Vaxiy bo\'lgan joyi: %s</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

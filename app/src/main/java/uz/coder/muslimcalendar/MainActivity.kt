@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
     private fun showRationaleDialog() {
         val dialog = AlertDialog.Builder(this)
             .setTitle(getString(R.string.permission_title))
-            .setMessage(getString(R.string.permission_message))
+            .setMessage(getString(R.string.permission_location_message))
             .setPositiveButton(getString(R.string.acess)) { _, _ ->
                 locationPermissionLauncher.launch(
                     arrayOf(

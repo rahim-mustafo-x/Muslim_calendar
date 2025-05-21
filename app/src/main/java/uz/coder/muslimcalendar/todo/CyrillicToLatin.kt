@@ -85,15 +85,9 @@ private val cyrillicToLatinMap = mapOf<Char, String>(
 fun String.cyrillicToLatin(): String {
     val builder = StringBuilder()
     thread(start = true) {
-        if (appLanguage==UZB){
-            this.forEach {
-                builder.append(cyrillicToLatinMap[it] ?: it)
-            }
-        }else{
-            this.forEach {
-                builder.append(it)
-            }
-        }
+    this.forEach {
+        builder.append(cyrillicToLatinMap[it] ?: it)
+    }
     }.join()
     return builder.toString()
 }

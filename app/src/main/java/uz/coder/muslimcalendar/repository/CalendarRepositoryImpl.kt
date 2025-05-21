@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
+import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -19,31 +20,37 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.db.AppDatabase
 import uz.coder.muslimcalendar.ktor.ApiService.Companion.apiService
 import uz.coder.muslimcalendar.map.CalendarMap
+import uz.coder.muslimcalendar.models.model.AudioPath
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.Surah
 import uz.coder.muslimcalendar.models.model.quran.SurahList
+import uz.coder.muslimcalendar.service.DownloadWorker
 import uz.coder.muslimcalendar.service.PrayerTimeJobService
 import uz.coder.muslimcalendar.service.QuranWorkManager
 import uz.coder.muslimcalendar.todo.REGION
-import uz.coder.muslimcalendar.todo.isConnected
 import java.time.LocalDate
 import java.util.Calendar.DAY_OF_MONTH
 import java.util.Calendar.MONTH
 import java.util.Calendar.getInstance
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 data class CalendarRepositoryImpl(private val application: Application):CalendarRepository {
     private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
     private val db:AppDatabase by lazy { AppDatabase.instance(application) }
     private val map = CalendarMap()
-    private val downloadFile = DownloadFile()
 
     override suspend fun loading(longitude: Double, latitude: Double) {
         if (latitude!=0.0 && longitude !=0.0){
@@ -79,19 +86,18 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         }
     }
 
-    override fun presentDay() = flow {
-        val localeDate = LocalDate.now()
-        val presentDay =
-            db.calendarDao().presentDay(localeDate.dayOfMonth, localeDate.monthValue)
-           presentDay.collect{
-               Log.d(TAG, "presentDay: $it")
-                   try {
-                       emit(
-                           map.toMuslimCalendar(it)
-                       )
-                   }catch (_:Exception){}
-           }
-    }
+    override fun presentDay() =
+        db.calendarDao().presentDay(LocalDate.now().dayOfMonth, LocalDate.now().monthValue)
+            .map {
+                try {
+                    map.toMuslimCalendar(it)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error mapping calendar data", e)
+                    null
+                }
+            }
+            .filterNotNull()
+
 
     override fun oneMonth() = channelFlow {
         db.calendarDao().oneMonth().collect{
@@ -133,23 +139,79 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
         }
     }
 
-    override suspend fun downloadSurah(suraAyahs: List<SurahList>, url: String) {
-        Log.d(TAG, "downloadSurah: $suraAyahs")
-        val path = downloadFile.downloadFile(application, url)?:""
-        db.surahAyahDao().insertAll(map.toSuraAyahDbModels(suraAyahs, path))
+    override fun downloadSurah(
+        suraAyahs: List<SurahList>,
+        url: String
+    ): Flow<UUID> = flow {
+        // --- WorkRequest tayyorlash ---
+        val inputData = Data.Builder()
+            .putString(DownloadWorker.KEY_FILE_URL, url)
+            .putString(DownloadWorker.KEY_SURA, suraAyahs.first().sura)
+            .build()
+
+        val workRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+            .setInputData(inputData)
+            .build()
+
+        val workManager = WorkManager.getInstance(application)
+
+        // Ishni navbatga qo‘yish
+        workManager.enqueue(workRequest)
+
+        // --- Worker kerakli holatga yetishini kutamiz ---
+        workManager
+            .getWorkInfoByIdFlow(workRequest.id)          // Flow<WorkInfo>
+            .filter { info ->                             // faqat RUNNING yoki ENQUEUED
+                info?.state == WorkInfo.State.RUNNING ||
+                        info?.state == WorkInfo.State.ENQUEUED
+            }
+            .first()                                      // birinchi marta shu holat bo‘lsa — kutib turadi
+        // (suspend bo‘ladi)
+        // <-- shu yerda kutish tugadi
+
+        // --- Maʼlumotlar bazasiga yozib qo‘yish ---
+        db.surahAyahDao().insertAll(
+            map.toSuraAyahDbModels(suraAyahs)
+        )
+
+        // --- Natijani emit qilamiz ---
+        emit(workRequest.id)
+    }.flowOn(Dispatchers.IO)
+
+    fun observeProgress(id: UUID): Flow<Int> {
+        return WorkManager.getInstance(application)
+            .getWorkInfoByIdFlow(id)
+            .map { it?.progress?.getInt(DownloadWorker.KEY_PROGRESS, 0)?:0 }
+    }
+
+
+    override fun getSuraByNumber(number: Int) = flow<Sura> {
+        db.suraDao().getSuraById(number).collect {
+            emit(map.toSura(it))
+        }
     }
 
     override fun getSurahById(sura: String) = flow<List<SuraAyah>> {
         db.surahAyahDao().getSurahAyahsById(sura).collect {
-            val sortedBy = map.toSuraAyahList(it).sortedBy { it.aya }
-            emit(sortedBy)
+            emit(map.toSuraAyahList(it))
         }
     }
 
-    override fun getSura(number: Int, audioPath:String) = flow<Surah> {
+    override fun getSura(number: Int) = flow<Surah> {
         apiService.getSura(number).result?.let {
-            val surah = withContext(Dispatchers.IO) { Surah(map.toSurahList(it, audioPath)) }
+            val surah = withContext(Dispatchers.IO) { Surah(map.toSurahList(it)) }
             emit(surah)
+        }
+    }
+    override fun getAudioPath(sura: String) = flow<AudioPath> {
+        try{
+            Log.d(TAG, "getAudioPath: bo'sh emas")
+            db.audioPathDao().getAudioPathBySura(sura).collect{
+                emit(AudioPath(it.audioPath, it.sura))
+            }
+        }catch(_ :Exception){
+            Log.d(TAG, "getAudioPath: bo'sh")
+            emit(AudioPath(null, sura))
         }
     }
 }

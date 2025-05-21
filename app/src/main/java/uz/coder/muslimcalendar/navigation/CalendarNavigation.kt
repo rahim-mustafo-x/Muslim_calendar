@@ -18,7 +18,6 @@ import uz.coder.muslimcalendar.models.sealed.Screen.Home
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.models.sealed.Screen.Quran
 import uz.coder.muslimcalendar.models.sealed.Screen.QuranAyah
-import uz.coder.muslimcalendar.models.sealed.Screen.Settings
 import uz.coder.muslimcalendar.screen.AboutScreen
 import uz.coder.muslimcalendar.screen.AllahNameMeaningScreen
 import uz.coder.muslimcalendar.screen.AllahNameScreen
@@ -31,7 +30,6 @@ import uz.coder.muslimcalendar.screen.NamozScreen
 import uz.coder.muslimcalendar.screen.QazoScreen
 import uz.coder.muslimcalendar.screen.QuranAyahScreen
 import uz.coder.muslimcalendar.screen.QuranScreen
-import uz.coder.muslimcalendar.screen.SettingsScreen
 import uz.coder.muslimcalendar.screen.TasbehScreen
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.DUO_INDEX
@@ -71,9 +69,6 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         }
         composable(Calendar.route){
             CalendarScreen(controller = controller)
-        }
-        composable(Settings.route) {
-            SettingsScreen(controller = controller)
         }
         composable(About.route){
             AboutScreen()

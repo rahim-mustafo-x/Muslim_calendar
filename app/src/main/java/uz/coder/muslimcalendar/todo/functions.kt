@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.ConnectivityManager
+import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.models.model.quran.SurahList
 
@@ -22,22 +23,16 @@ fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 fun String.toArabicNumbers(): String {
-    val result = StringBuilder()
-
-    // Har bir belgini tekshirib chiqamiz
-    for (c in this.toCharArray()) {
-        // Agar belgi raqam bo'lsa, uni arab raqamiga o'zgartiramiz
-        if (Character.isDigit(c)) {
-            // '0' belgisining unicode qiymatiga 0x0660 ni qo'shish orqali arab raqamlariga o'tamiz
-            result.append((c.code + 0x0660 - '0'.code).toChar())
+    return this.map { char ->
+        if (char in '0'..'9') {
+            // Arab raqamlarining unicode boshlanishi: 0x0660
+            ('\u0660' + (char - '0'))
         } else {
-            // Agar belgi raqam bo'lmasa, uni o'zgartirmay qo'yamiz
-            result.append(c)
+            char
         }
-    }
-
-    return result.toString()
+    }.joinToString("")
 }
+
 fun Long.formatTime(): String {
     val totalSeconds = this / 1000
     val hours = totalSeconds / 3600
@@ -50,8 +45,40 @@ fun Long.formatTime(): String {
     }
 }
 fun List<SuraAyah>.toAyahList(): List<SurahList> {
-    return this.map { SurahList(arabicText = it.arabicText, aya = it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation, audioPath = it.audioPath) }
+    return this.map { SurahList(arabicText = it.arabicText, aya = it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
 }
 fun List<SurahList>.toSuraAyah(): List<SuraAyah> {
-    return this.map { SuraAyah(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation, audioPath = it.audioPath) }
+    return this.map { SuraAyah(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
+}
+fun Pair<List<String>, List<String>>.toItems(): List<Item> {
+    return listOf(
+        Item(
+            this.first[0],
+            this.second[0]
+        ),
+        Item(
+            this.first[1],
+            this.second[1]
+        ),
+        Item(
+            this.first[2],
+            this.second[2]
+        ),
+        Item(
+            this.first[3],
+            this.second[3]
+        ),
+        Item(
+            this.first[4],
+            this.second[4]
+        ),
+        Item(
+            this.first[5],
+            this.second[5]
+        ),
+        Item(
+            this.first[6],
+            this.second[6]
+        )
+    )
 }

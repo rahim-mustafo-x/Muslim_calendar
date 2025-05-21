@@ -6,13 +6,13 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Date
-import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.viewModel.state.HomeState
@@ -65,17 +65,10 @@ class HomeViewModel(private val application: Application):AndroidViewModel(appli
         }
     }
     fun itemList() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _state.value = HomeState.Loading
             repo.presentDay().collect{
-                _state.value = HomeState.Success(listOf(
-                    Item(application.getString(R.string.bomdod), it.tongSaharlik),
-                    Item(application.getString(R.string.quyoshChiqishi), it.sunRise),
-                    Item(application.getString(R.string.peshin), it.peshin),
-                    Item(application.getString(R.string.asr), it.asr),
-                    Item(application.getString(R.string.quyoshBotishi), it.sunSet),
-                    Item(application.getString(R.string.shom), it.shomIftor),
-                    Item(application.getString(R.string.xufton), it.hufton)))
+                _state.value = HomeState.Success(it)
             }
         }
     }

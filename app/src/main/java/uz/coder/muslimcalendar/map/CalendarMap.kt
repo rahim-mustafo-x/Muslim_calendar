@@ -59,19 +59,18 @@ class CalendarMap {
 
     fun toMuslimCalendarList(models: List<MuslimCalendarDbModel>) = models.map { toMuslimCalendar(it) }
 
-    fun toSurahList(dTOS: List<SurahListDTO>?, audioPath: String) = dTOS?.map {
-        toSurah(it, audioPath)
+    fun toSurahList(dTOS: List<SurahListDTO>?) = dTOS?.map {
+        toSurah(it)
     }?:emptyList()
 
-    private fun toSurah(dto: SurahListDTO, audioPath: String) =
+    private fun toSurah(dto: SurahListDTO) =
         SurahList(
             arabicText = dto.arabicText?:"",
             aya = dto.aya?:"",
             footnotes = dto.footnotes?:"",
             id = dto.id?:"",
             sura = dto.sura?:"",
-            translation = dto.translation?.cyrillicToLatin()?:"",
-            audioPath = audioPath
+            translation = dto.translation?.cyrillicToLatin()?:""
         )
 
     fun toSuraDbModel(dTOS: List<SuraDTO>?) = dTOS?.map {
@@ -96,7 +95,7 @@ class CalendarMap {
         revelationType = model.revelationType
     )
 
-    private fun toSuraAyah(model: SurahAyahDbModel) = SuraAyah(arabicText = model.arabicText, aya =  model.aya, footnotes =  model.footnotes, sura =  model.sura, translation =  model.translation.cyrillicToLatin(), id =  model.id, audioPath = model.surahAudioPath)
+    private fun toSuraAyah(model: SurahAyahDbModel) = SuraAyah(arabicText = model.arabicText, aya =  model.aya, footnotes =  model.footnotes, sura =  model.sura, translation =  model.translation.cyrillicToLatin(), id =  model.id)
     fun toSuraAyahList(list: List<SurahAyahDbModel>) = list.map { toSuraAyah(it) }
-    fun toSuraAyahDbModels(model: List<SurahList>, path: String) = model.map { SurahAyahDbModel(it.arabicText, it.aya, it.footnotes, it.sura, it.translation, path, it.id) }
+    fun toSuraAyahDbModels(model: List<SurahList>) = model.map { SurahAyahDbModel(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, sura =  it.sura, translation =  it.translation, id = it.id) }
 }

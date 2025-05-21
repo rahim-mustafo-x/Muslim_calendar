@@ -50,9 +50,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Date
-import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuSetting
+import uz.coder.muslimcalendar.models.model.MuslimCalendar
 import uz.coder.muslimcalendar.models.sealed.Screen.About
 import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
 import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
@@ -60,9 +60,9 @@ import uz.coder.muslimcalendar.models.sealed.Screen.Duo
 import uz.coder.muslimcalendar.models.sealed.Screen.Namoz
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.models.sealed.Screen.Quran
-import uz.coder.muslimcalendar.models.sealed.Screen.Settings
 import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
 import uz.coder.muslimcalendar.todo.MONTH
+import uz.coder.muslimcalendar.todo.toItems
 import uz.coder.muslimcalendar.ui.theme.Blue
 import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
@@ -75,15 +75,6 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     val viewModel = viewModel<HomeViewModel>()
     val menuList = listOf(
         Menu(
-            R.drawable.refresh,
-            stringResource(R.string.refresh),
-            MenuSetting.Refresh
-        ),Menu(
-            R.drawable.settings,
-            stringResource(R.string.settings),
-            MenuSetting.Settings
-        ),
-        Menu(
             R.drawable.about,
             stringResource(R.string.about),
             MenuSetting.About
@@ -92,12 +83,6 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         CalendarTopBar(modifier = modifier, list = menuList){
             when(it){
-                MenuSetting.Refresh->{
-                    viewModel.loadInfo()
-                }
-                MenuSetting.Settings->{
-                    controller.navigate(Settings.route)
-                }
                 MenuSetting.About->{
                     controller.navigate(About.route)
                 }
@@ -117,17 +102,17 @@ fun Home(
     paddingValues: PaddingValues
 ) {
     viewModel.itemList()
-    var list by remember { mutableStateOf<List<Item>>(emptyList()) }
+    var muslimCalendar by remember { mutableStateOf<MuslimCalendar>(MuslimCalendar()) }
     var showLoadingDialog by remember { mutableStateOf<Boolean>(false) }
     if (showLoadingDialog){
         LoadingDialog(modifier = Modifier.padding(paddingValues))
     }else{
-        if (list == emptyList<Item>()) {
+        if (muslimCalendar == MuslimCalendar()) {
             NoInternetScreen(paddingValues = paddingValues)
         } else {
             Screen(
                 paddingValues = paddingValues,
-                list = list,
+                muslimCalendar = muslimCalendar,
                 controller = controller,
                 viewModel = viewModel
             )
@@ -147,8 +132,8 @@ fun Home(
                 }
                 is HomeState.Success -> {
                     showLoadingDialog = false
-                    list = it.data
-                    Log.d(TAG, "Home: ${it.data}")
+                    muslimCalendar = it.data
+                    Log.d(TAG, "Home Success: ${it.data}")
                 }
             }
         }
@@ -185,14 +170,24 @@ fun NoInternetScreen(
 private fun Screen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    list: List<Item>,
+    muslimCalendar: MuslimCalendar,
     controller: NavHostController,
     viewModel: HomeViewModel
 ) {
     val pagerState = rememberPagerState {
-        list.size
+        muslimCalendar.item.size
     }
     val scope = rememberCoroutineScope()
+    val list = listOf(
+        stringResource(R.string.bomdod),
+        stringResource(R.string.quyoshChiqishi),
+        stringResource(R.string.peshin),
+        stringResource(R.string.asr),
+        stringResource(R.string.shom),
+        stringResource(R.string.quyoshBotishi),
+        stringResource(R.string.xufton)
+    )
+    val myTime = Pair(list, muslimCalendar.item).toItems()
     Column(
         modifier = modifier
             .padding(paddingValues)
@@ -213,8 +208,8 @@ private fun Screen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(list[it].name, color = White, fontSize = 25.sp)
-                        Text(list[it].time, color = White, fontSize = 25.sp)
+                        Text(myTime[it].name, color = White, fontSize = 25.sp)
+                        Text(myTime[it].time, color = White, fontSize = 25.sp)
                     }
                 }
 
@@ -225,15 +220,7 @@ private fun Screen(
             selectedTabIndex = pagerState.currentPage,
             modifier = modifier.fillMaxWidth(), containerColor = White,
             indicator = { Box {} }) {
-            listOf(
-                stringResource(R.string.bomdod),
-                stringResource(R.string.quyoshChiqishi),
-                stringResource(R.string.peshin),
-                stringResource(R.string.asr),
-                stringResource(R.string.quyoshBotishi),
-                stringResource(R.string.shom),
-                stringResource(R.string.xufton)
-            ).forEachIndexed { index, item ->
+            list.forEachIndexed { index, item ->
                 Tab(selected = index == pagerState.currentPage, onClick = {
                     scope.launch { pagerState.animateScrollToPage(index) }
                 }, text = {
