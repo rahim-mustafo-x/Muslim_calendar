@@ -6,9 +6,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.ConnectivityManager
+import uz.coder.muslimcalendar.db.model.SuraDbModel
 import uz.coder.muslimcalendar.models.model.Item
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.models.model.quran.SurahList
+import uz.coder.muslimcalendar.repository.TranslateToUzbek
+import kotlin.concurrent.thread
 
 fun Context.isConnected():Boolean{
     val info =
@@ -81,4 +84,45 @@ fun Pair<List<String>, List<String>>.toItems(): List<Item> {
             this.second[6]
         )
     )
+}
+fun List<SuraDbModel>.translate(): List<SuraDbModel> {
+    val list = mutableListOf<SuraDbModel>()
+    thread(start = true) {
+        this.forEach {
+            val englishName = formatStrings(TranslateToUzbek.translateArabicToUzbek(it.englishName))?:""
+            val englishNameTranslation = TranslateToUzbek.translateEnglishToUzbek(it.englishNameTranslation)
+            val revelationType = when(it.revelationType){
+                "Meccan"-> "Makka"
+                "Medinan"-> "Madina"
+                else -> {
+                    "Makka"
+                }
+            }
+            list.add(SuraDbModel(it.number,englishName,englishNameTranslation,it.name,revelationType))
+        }
+    }.join()
+    return list
+}
+
+fun formatStrings(input: String?): String? {
+    if (input.isNullOrEmpty()) return input
+
+    var trimmed = input.trim().replace("\\s+".toRegex(), " ").replace("\\s*-\\s*".toRegex(), "-")
+
+    if (trimmed.lowercase().startsWith("aal-i-")) {
+        trimmed = "Al-" + trimmed.substring(6)
+    }
+
+    trimmed = trimmed.replace("aa", "a", ignoreCase = true)
+        .replace('w', 'v', ignoreCase = false)
+        .replace('W', 'V')
+
+    val parts = trimmed.split("-")
+    val result = parts.filter { it.isNotEmpty() }
+        .joinToString("-") { part ->
+            if (part.length == 1) part.uppercase()
+            else part.substring(0, 1).uppercase() + part.substring(1).lowercase()
+        }
+
+    return result
 }

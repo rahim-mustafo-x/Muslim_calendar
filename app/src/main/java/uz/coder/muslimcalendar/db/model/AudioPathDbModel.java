@@ -2,6 +2,7 @@ package uz.coder.muslimcalendar.db.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,7 @@ public class AudioPathDbModel {
         this.audioPath = audioPath;
     }
 
+    @Ignore
     public AudioPathDbModel() {
         sura = "";
         audioPath = "";

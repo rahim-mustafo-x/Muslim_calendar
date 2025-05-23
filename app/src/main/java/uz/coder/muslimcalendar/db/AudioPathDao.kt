@@ -2,7 +2,6 @@ package uz.coder.muslimcalendar.db
 
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import uz.coder.muslimcalendar.db.model.AudioPathDbModel
@@ -13,7 +12,7 @@ interface AudioPathDao {
     @Query("SELECT * FROM audioPath WHERE sura = :sura")
     fun getAudioPathBySura(sura: String): Flow<AudioPathDbModel>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     suspend fun insertAudioPath(audioPathDbModel: AudioPathDbModel)
 
     @Query("DELETE FROM audioPath")

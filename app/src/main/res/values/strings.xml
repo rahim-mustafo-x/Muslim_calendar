@@ -36,7 +36,8 @@
     <string name="quyoshChiqishi">Quyosh chiqishi</string>
     <string name="downloading">Yuklanmoqda…</string>
     <string name="permission_post_notification_message">Bildirishnoma yuborish uchun ruxsat bering</string>
-    <string name="revelation">Vaxiy bo\'lgan joyi: %s</string>
+    <string name="revelation">%sda nozil bo\'lgan</string>
+    <string name="searchSura">Sura qidirish</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

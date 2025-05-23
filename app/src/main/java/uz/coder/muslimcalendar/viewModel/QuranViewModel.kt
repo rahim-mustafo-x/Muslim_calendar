@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.models.model.quran.Sura
 import uz.coder.muslimcalendar.repository.CalendarRepositoryImpl
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.viewModel.state.QuranState
@@ -34,5 +35,10 @@ class QuranViewModel(private val application: Application) : AndroidViewModel(ap
                     }
                 }
         }
+    }
+
+    fun searchSura(text: String, suraList: List<Sura>) = suraList.filter {
+        it.englishName.lowercase().contains(text.lowercase().trim()) ||
+        it.englishNameTranslation.lowercase().contains(text.lowercase().trim())
     }
 }

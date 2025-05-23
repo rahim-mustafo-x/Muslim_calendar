@@ -13,6 +13,7 @@ import uz.coder.muslimcalendar.models.model.quran.SurahList
 import uz.coder.muslimcalendar.todo.cyrillicToLatin
 import uz.coder.muslimcalendar.todo.toNormalTranslate
 import uz.coder.muslimcalendar.todo.toWeakDays
+import uz.coder.muslimcalendar.todo.translate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -81,7 +82,7 @@ class CalendarMap {
             it.name?:"",
             it.revelationType?:""
         )
-    }?:emptyList()
+    }?.translate()?:emptyList()
 
     fun toSuraList(models: List<SuraDbModel>) = models.map {
         toSura(it)
