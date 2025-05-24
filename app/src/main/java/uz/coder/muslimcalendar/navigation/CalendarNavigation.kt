@@ -27,6 +27,7 @@ import uz.coder.muslimcalendar.screen.DuoScreen
 import uz.coder.muslimcalendar.screen.HomeScreen
 import uz.coder.muslimcalendar.screen.NamozMeaningScreen
 import uz.coder.muslimcalendar.screen.NamozScreen
+import uz.coder.muslimcalendar.screen.NotificationScreen
 import uz.coder.muslimcalendar.screen.QazoScreen
 import uz.coder.muslimcalendar.screen.QuranAyahScreen
 import uz.coder.muslimcalendar.screen.QuranScreen
@@ -87,6 +88,9 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         composable(QuranAyah.route+"/{$NUMBER}", arguments = arrayListOf(navArgument(NUMBER){ type =
             NavType.IntType })) {
             QuranAyahScreen(controller = controller, navBackStackEntry = it)
+        }
+        composable(Screen.Notification.route){
+            NotificationScreen(controller = controller)
         }
     }
 }

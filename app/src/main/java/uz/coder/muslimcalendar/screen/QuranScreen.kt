@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -49,7 +47,6 @@ fun QuranScreen(
     controller: NavHostController,
 ) {
     val viewModel= viewModel<QuranViewModel>()
-    val keyboardController = LocalSoftwareKeyboardController.current
     var suraList by remember { mutableStateOf<List<Sura>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var searchText by remember { mutableStateOf("") }
@@ -76,12 +73,8 @@ fun QuranScreen(
                         color = Light_Blue
                     )
                 }, modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp), colors = TextFieldDefaults.colors(focusedTextColor = Light_Blue, unfocusedTextColor = Light_Blue, disabledTextColor = Light_Blue, focusedIndicatorColor = Light_Blue, unfocusedIndicatorColor = Light_Blue, focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent),
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            keyboardController?.hide()
-                        }) {
-                            Icon(Icons.Default.Search, contentDescription = null, tint = Light_Blue)
-                        }
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null, tint = Light_Blue)
                     })
                 LazyColumn(
                     modifier = modifier

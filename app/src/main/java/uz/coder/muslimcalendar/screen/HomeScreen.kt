@@ -58,6 +58,7 @@ import uz.coder.muslimcalendar.models.sealed.Screen.AllahName
 import uz.coder.muslimcalendar.models.sealed.Screen.Calendar
 import uz.coder.muslimcalendar.models.sealed.Screen.Duo
 import uz.coder.muslimcalendar.models.sealed.Screen.Namoz
+import uz.coder.muslimcalendar.models.sealed.Screen.Notification
 import uz.coder.muslimcalendar.models.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.models.sealed.Screen.Quran
 import uz.coder.muslimcalendar.models.sealed.Screen.Tasbeh
@@ -75,6 +76,11 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     val viewModel = viewModel<HomeViewModel>()
     val menuList = listOf(
         Menu(
+            R.drawable.ic_bell,
+            stringResource(R.string.notification),
+            MenuSetting.Notification
+        ),
+        Menu(
             R.drawable.about,
             stringResource(R.string.about),
             MenuSetting.About
@@ -85,6 +91,9 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
             when(it){
                 MenuSetting.About->{
                     controller.navigate(About.route)
+                }
+                MenuSetting.Notification->{
+                    controller.navigate(Notification.route)
                 }
                 else->{}
             }
@@ -184,7 +193,6 @@ private fun Screen(
         stringResource(R.string.peshin),
         stringResource(R.string.asr),
         stringResource(R.string.shom),
-        stringResource(R.string.quyoshBotishi),
         stringResource(R.string.xufton)
     )
     val myTime = Pair(list, muslimCalendar.item).toItems()

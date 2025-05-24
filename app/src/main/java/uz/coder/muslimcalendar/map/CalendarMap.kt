@@ -35,7 +35,6 @@ class CalendarMap {
                 asr = prayerData.timings.asr.substringBefore(" ").trim(),
                 hufton = prayerData.timings.isha.substringBefore(" ").trim(),
                 peshin = prayerData.timings.dhuhr.substringBefore(" ").trim(),
-                sunset = prayerData.timings.sunset.substringBefore(" ").trim(),   // Quyosh botishi
                 sunrise = prayerData.timings.sunrise.substringBefore(" ").trim(),   // Quyosh botishi
                 shomIftor = prayerData.timings.maghrib.substringBefore(" ").trim(),
                 tongSaharlik = prayerData.timings.fajr.substringBefore(" ").trim()
@@ -54,7 +53,6 @@ class CalendarMap {
         model.peshin,
         model.shomIftor,
         model.tongSaharlik,
-        model.sunset,
         model.sunrise
     )
 

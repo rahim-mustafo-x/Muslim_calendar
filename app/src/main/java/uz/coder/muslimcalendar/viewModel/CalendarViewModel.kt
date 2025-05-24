@@ -166,14 +166,13 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
     }
     fun oneMonth() = channelFlow<List<Calendar>> {
         repo.oneMonth().collect{
-            send(mutableListOf(Calendar(application.getString(R.string.dayMonth), White, Light_Blue), Calendar(application.getString(R.string.bomdod), White, Light_Blue), Calendar(application.getString(R.string.quyoshChiqishi), White, Light_Blue), Calendar(application.getString(R.string.peshin), White, Light_Blue), Calendar(application.getString(R.string.asr), White, Light_Blue), Calendar(application.getString(R.string.quyoshBotishi), White, Light_Blue), Calendar(application.getString(R.string.shom), White, Light_Blue), Calendar(application.getString(R.string.xufton), White, Light_Blue)).apply {
+            send(mutableListOf(Calendar(application.getString(R.string.dayMonth), White, Light_Blue), Calendar(application.getString(R.string.bomdod), White, Light_Blue), Calendar(application.getString(R.string.quyoshChiqishi), White, Light_Blue), Calendar(application.getString(R.string.peshin), White, Light_Blue), Calendar(application.getString(R.string.asr), White, Light_Blue), Calendar(application.getString(R.string.shom), White, Light_Blue), Calendar(application.getString(R.string.xufton), White, Light_Blue)).apply {
                 it.forEach {
                     add(Calendar(it.day.toString().plus("-${MONTH[it.month-1]}"), White, Light_Blue))
                     add(Calendar(it.tongSaharlik, Black, White))
                     add(Calendar(it.sunRise, Black, White))
                     add(Calendar(it.peshin, Black, White))
                     add(Calendar(it.asr, Black, White))
-                    add(Calendar(it.sunSet, Black, White))
                     add(Calendar(it.shomIftor, Black, White))
                     add(Calendar(it.hufton, Black, White))
                 }

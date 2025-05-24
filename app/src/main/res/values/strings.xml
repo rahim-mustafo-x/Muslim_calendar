@@ -4,7 +4,6 @@
     <string name="bomdod">Bomdod</string>
     <string name="peshin">Peshin</string>
     <string name="asr">Asr</string>
-    <string name="quyoshBotishi">Quyosh botishi</string>
     <string name="shom">Shom</string>
     <string name="xufton">Xufton</string>
     <string name="vitr">Vitr</string>
@@ -38,6 +37,10 @@
     <string name="permission_post_notification_message">Bildirishnoma yuborish uchun ruxsat bering</string>
     <string name="revelation">%sda nozil bo\'lgan</string>
     <string name="searchSura">Sura qidirish</string>
+    <string name="notification">Eslatmalar</string>
+    <string name="speaker_on">Eslatilsin</string>
+    <string name="speaker_off">Eslatilmasin</string>
+    <string name="bell">Faqat xabarnoma yuborilsin</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

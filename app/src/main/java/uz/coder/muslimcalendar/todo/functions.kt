@@ -54,36 +54,12 @@ fun List<SurahList>.toSuraAyah(): List<SuraAyah> {
     return this.map { SuraAyah(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
 }
 fun Pair<List<String>, List<String>>.toItems(): List<Item> {
-    return listOf(
-        Item(
-            this.first[0],
-            this.second[0]
-        ),
-        Item(
-            this.first[1],
-            this.second[1]
-        ),
-        Item(
-            this.first[2],
-            this.second[2]
-        ),
-        Item(
-            this.first[3],
-            this.second[3]
-        ),
-        Item(
-            this.first[4],
-            this.second[4]
-        ),
-        Item(
-            this.first[5],
-            this.second[5]
-        ),
-        Item(
-            this.first[6],
-            this.second[6]
-        )
-    )
+    val list = mutableListOf<Item>()
+    list.clear()
+    repeat(this.first.size){
+        list.add(Item(this.first[it], this.second[it]))
+    }
+    return list
 }
 fun List<SuraDbModel>.translate(): List<SuraDbModel> {
     val list = mutableListOf<SuraDbModel>()
