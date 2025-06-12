@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -59,7 +60,7 @@ class SurahViewModel(private val application: Application): AndroidViewModel(app
         }
     }
     fun downloadSurah(suraAyahs: List<SurahList>, url: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repo.downloadSurah(suraAyahs, url).collect {
                 repo.observeProgress(it).collect { progress ->
                     _downloadProgress.value = progress

@@ -41,6 +41,7 @@
     <string name="speaker_on">Eslatilsin</string>
     <string name="speaker_off">Eslatilmasin</string>
     <string name="bell">Faqat xabarnoma yuborilsin</string>
+    <string name="prayingTimeCome">Namoz vaqti bo\'ldi</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

@@ -45,6 +45,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.delay
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuSetting
@@ -180,7 +181,7 @@ fun QuranAyahScreen(
     LaunchedEffect(exoPlayer) {
         while (true) {
             sliderPosition = if (duration != 0L) exoPlayer.currentPosition.toFloat() / duration else 0f
-            kotlinx.coroutines.delay(500)
+            delay(500)
         }
     }
 
@@ -250,7 +251,7 @@ fun DownloadDialog(
                 Text(
                     text = stringResource(R.string.downloading) + "  $progress%",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.Black,
+                    color = Color.White,
                     textAlign = TextAlign.Center
                 )
                 LinearProgressIndicator(

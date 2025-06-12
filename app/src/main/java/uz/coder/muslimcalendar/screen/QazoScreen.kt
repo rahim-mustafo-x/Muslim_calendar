@@ -156,26 +156,28 @@ fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
 
     if (showDialog){
         Dialog(onDismissRequest = { showDialog = false }) {
-            OutlinedCard(modifier.padding(5.dp), colors = CardDefaults.cardColors(White), elevation = CardDefaults.cardElevation(10.dp)) {
+            OutlinedCard(modifier.padding(10.dp), colors = CardDefaults.cardColors(White), elevation = CardDefaults.cardElevation(10.dp)) {
                 Column {
                     OutlinedTextField(value = numberOfQazo.toString(), onValueChange = { numberOfQazo = try {
                         it.toInt()
                     }catch (_:Exception){ 0 } }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = modifier
                         .fillMaxWidth()
-                        .padding(5.dp, 2.5.dp))
+                        .padding(10.dp))
                     Row(modifier.fillMaxWidth()) {
                         OutlinedButton(onClick = { showDialog =false; id = -1; numberOfQazo = 0 }, modifier = modifier
                             .fillMaxWidth()
-                            .weight(1f), colors = ButtonDefaults.buttonColors(Light_Blue)) {
+                            .weight(1f)
+                            .padding(10.dp), colors = ButtonDefaults.buttonColors(Light_Blue)) {
                             Box(modifier = modifier.fillMaxWidth()){
-                                Text(stringResource(R.string.cancel), color = White, fontSize = 20.sp)
+                                Text(stringResource(R.string.cancel), color = White)
                             }
                         }
                         OutlinedButton(onClick = { try{ showDialog =false; buttonClicked(numberOfQazo, viewModel); id = -1; numberOfQazo = 0 }catch (_:Exception){  } }, modifier = modifier
                             .fillMaxWidth()
-                            .weight(1f), colors = ButtonDefaults.buttonColors(Light_Blue)) {
+                            .weight(1f)
+                            .padding(10.dp), colors = ButtonDefaults.buttonColors(Light_Blue)) {
                             Box(modifier = modifier.fillMaxWidth()){
-                                Text(stringResource(R.string.save), color = White, fontSize = 20.sp)
+                                Text(stringResource(R.string.save), color = White)
                             }
                         }
                     }

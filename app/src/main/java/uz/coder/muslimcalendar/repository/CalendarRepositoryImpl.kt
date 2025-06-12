@@ -100,11 +100,8 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
             .filterNotNull()
 
 
-    override fun oneMonth() = channelFlow {
-        db.calendarDao().oneMonth().collect{
-            send(map.toMuslimCalendarList(it))
-        }
-    }
+    override fun oneMonth() = db.calendarDao().oneMonth().map { map.toMuslimCalendarList(it) }
+
 
     override suspend fun loadQuranArab() {
         val constraints = Constraints.Builder()
@@ -118,18 +115,6 @@ data class CalendarRepositoryImpl(private val application: Application):Calendar
 
         WorkManager.getInstance(application)
             .enqueueUniqueWork("QuranWork", ExistingWorkPolicy.KEEP, workRequest)
-
-        // Observe the work status
-        WorkManager.getInstance(application)
-            .getWorkInfoByIdLiveData(workRequest.id)
-            .observeForever { workInfo ->
-                when (workInfo?.state) {
-                    WorkInfo.State.SUCCEEDED -> Log.d(TAG, "Work completed successfully")
-                    WorkInfo.State.FAILED -> Log.d(TAG, "Work failed")
-                    WorkInfo.State.CANCELLED -> Log.d(TAG, "Work cancelled")
-                    else -> Log.d(TAG, "Work state: ${workInfo?.state}")
-                }
-            }
     }
 
     override fun getSurah() = flow<List<Sura>> {

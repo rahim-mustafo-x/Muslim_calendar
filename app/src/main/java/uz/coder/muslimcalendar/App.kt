@@ -9,7 +9,7 @@ class App : Application() {
     }
 
     companion object {
-        var application: Application? = null
+        lateinit var application: Application
             private set
     }
 }

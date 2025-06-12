@@ -1,6 +1,8 @@
 package uz.coder.muslimcalendar.screen
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,14 +41,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.models.model.Date
@@ -69,11 +75,30 @@ import uz.coder.muslimcalendar.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.ui.view.MainButton
 import uz.coder.muslimcalendar.viewModel.HomeViewModel
+import uz.coder.muslimcalendar.viewModel.NotificationViewModel
 import uz.coder.muslimcalendar.viewModel.state.HomeState
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     val viewModel = viewModel<HomeViewModel>()
+    val notificationViewModel = viewModel<NotificationViewModel>()
+    notificationViewModel.setAlarm()
+    val permissionState = rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
+
+    // Permission dialog ko'rsatiladi (faqat bir marta)
+    LaunchedEffect(Unit) {
+        permissionState.launchPermissionRequest()
+    }
+
+    // Faqat ruxsat berilgan bo'lsa setAlarm chaqiriladi
+    LaunchedEffect(permissionState.status) {
+        if (permissionState.status.isGranted) {
+            notificationViewModel.setAlarm()
+        }
+    }
+
     val menuList = listOf(
         Menu(
             R.drawable.ic_bell,
@@ -86,19 +111,16 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
             MenuSetting.About
         )
     )
+
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         CalendarTopBar(modifier = modifier, list = menuList){
             when(it){
-                MenuSetting.About->{
-                    controller.navigate(About.route)
-                }
-                MenuSetting.Notification->{
-                    controller.navigate(Notification.route)
-                }
-                else->{}
+                MenuSetting.About -> controller.navigate(About.route)
+                MenuSetting.Notification -> controller.navigate(Notification.route)
+                else -> {}
             }
         }
-    }){
+    }) {
         Home(controller = controller, viewModel = viewModel, it)
     }
 }
@@ -110,6 +132,7 @@ fun Home(
     viewModel: HomeViewModel,
     paddingValues: PaddingValues
 ) {
+    val notificationViewModel = viewModel<NotificationViewModel>()
     viewModel.itemList()
     var muslimCalendar by remember { mutableStateOf<MuslimCalendar>(MuslimCalendar()) }
     var showLoadingDialog by remember { mutableStateOf<Boolean>(false) }
@@ -142,6 +165,7 @@ fun Home(
                 is HomeState.Success -> {
                     showLoadingDialog = false
                     muslimCalendar = it.data
+                    notificationViewModel.setAlarm()
                     Log.d(TAG, "Home Success: ${it.data}")
                 }
             }
@@ -253,8 +277,8 @@ fun Bottom(
         Column(modifier
             .fillMaxWidth()
             .weight(2.5f)) {
-            Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]};", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
-            Text("${date.hijriDay} - ${date.hijriMonth}.", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
+            Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
+            Text("${date.hijriDay} ${date.hijriMonth}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
         }
         Column(modifier
             .fillMaxWidth()

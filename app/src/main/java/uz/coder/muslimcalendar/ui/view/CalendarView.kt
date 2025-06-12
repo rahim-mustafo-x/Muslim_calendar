@@ -31,7 +31,7 @@ fun CalendarView(
     paddingValues: PaddingValues
 ) {
     val list by viewModel.oneMonth().collectAsState(emptyList())
-    LazyVerticalGrid(columns = GridCells.Fixed(8), modifier = modifier.fillMaxSize().padding(paddingValues)) {
+    LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = modifier.fillMaxSize().padding(paddingValues)) {
         itemsIndexed(list){_, item->
             CalendarItem(text = item.text, color = item.color, backgroundColor = item.backgroundColor)
         }
