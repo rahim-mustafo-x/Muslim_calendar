@@ -6,12 +6,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.ConnectivityManager
-import uz.coder.muslimcalendar.db.model.SuraDbModel
-import uz.coder.muslimcalendar.models.model.Item
+import uz.coder.muslimcalendar.domain.model.Item
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.models.model.quran.SurahList
-import uz.coder.muslimcalendar.repository.TranslateToUzbek
-import kotlin.concurrent.thread
 
 fun Context.isConnected():Boolean{
     val info =

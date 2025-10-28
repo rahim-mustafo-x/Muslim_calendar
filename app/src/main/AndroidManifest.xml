@@ -33,15 +33,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".service.PrayerTimeJobService"
+        <service android:name=".data.service.PrayerTimeJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <receiver android:name=".receiver.AlarmBroadCast"
+        <receiver android:name=".data.receiver.AlarmBroadCast"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.StopAlarmBroadCast"
+        <receiver android:name=".data.receiver.StopAlarmBroadCast"
             android:exported="false"/>
     </application>
 

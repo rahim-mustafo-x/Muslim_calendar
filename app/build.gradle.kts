@@ -3,18 +3,18 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id ("org.jetbrains.kotlin.plugin.serialization")
     alias(libs.plugins.kotlin.compose)
-    kotlin("kapt")
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
     namespace = "uz.coder.muslimcalendar"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "uz.coder.muslimcalendar"
         minSdk = 26
-        //noinspection EditedTargetSdkVersion
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 4
         versionName = "1.3"
 
@@ -51,41 +51,32 @@ android {
     buildFeatures {
         compose = true
     }
-    kapt{
-        correctErrorTypes = true
-    }
 }
 
 dependencies {
-
-
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.okhttp)
+    implementation (libs.logging.interceptor.v500alpha14)
+    implementation (libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-
     implementation(libs.androidx.navigation.compose)
-
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
-
+    ksp(libs.androidx.room.compiler)
     implementation (libs.ktor.client.android)
     implementation (libs.ktor.client.core)
     implementation (libs.ktor.client.logging)
     implementation (libs.ktor.client.content.negotiation)
     implementation (libs.ktor.serialization.kotlinx.json)
-
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.common)
-
     implementation(libs.androidx.lifecycle.runtime.compose)
-
-     implementation(libs.play.services.location)
-
+    implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)
-
     implementation(libs.androidx.work.runtime.ktx)
-
     implementation(libs.logging.interceptor)
-
     implementation(libs.ui)
     implementation(libs.androidx.material)
     implementation(libs.ui.tooling.preview)

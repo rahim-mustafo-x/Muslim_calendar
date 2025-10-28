@@ -2,9 +2,9 @@ package uz.coder.muslimcalendar.todo
 
 import uz.coder.muslimcalendar.App
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.models.model.AllahName
-import uz.coder.muslimcalendar.models.model.Duo
-import uz.coder.muslimcalendar.models.model.Namoz
+import uz.coder.muslimcalendar.domain.model.AllahName
+import uz.coder.muslimcalendar.domain.model.Duo
+import uz.coder.muslimcalendar.domain.model.Namoz
 
 
 const val REGION = "region"

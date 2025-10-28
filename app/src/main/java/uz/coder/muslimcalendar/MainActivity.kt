@@ -22,10 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import uz.coder.muslimcalendar.navigation.CalendarNavigation
-import uz.coder.muslimcalendar.ui.theme.LightBlueStatusBar
-import uz.coder.muslimcalendar.ui.theme.MuslimCalendarTheme
-import uz.coder.muslimcalendar.viewModel.HomeViewModel
+import uz.coder.muslimcalendar.presentation.navigation.CalendarNavigation
+import uz.coder.muslimcalendar.presentation.ui.theme.LightBlueStatusBar
+import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
+import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 
 class MainActivity : ComponentActivity() {
 

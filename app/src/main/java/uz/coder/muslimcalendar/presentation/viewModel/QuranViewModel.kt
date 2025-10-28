@@ -1,0 +1,45 @@
+package uz.coder.muslimcalendar.presentation.viewModel
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.domain.model.quran.Sura
+import uz.coder.muslimcalendar.data.repository.CalendarRepositoryImpl
+import uz.coder.muslimcalendar.todo.isConnected
+import uz.coder.muslimcalendar.presentation.viewModel.state.QuranState
+
+class QuranViewModel(private val application: Application) : AndroidViewModel(application) {
+    private val repo = CalendarRepositoryImpl(application)
+    private val _state = MutableStateFlow<QuranState>(QuranState.Init)
+    val state = _state.asStateFlow()
+    init {
+        loadQuran()
+    }
+    fun loadQuran() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.emit(QuranState.Loading)
+                repo.getSurah().collect {
+                    if (it.isEmpty()){
+                        if (application.isConnected()){
+                            repo.loadQuranArab()
+                            loadQuran()
+                        }else{
+                        _state.value = QuranState.Error(application.getString(R.string.no_internet))
+                        }
+                    }else{
+                        _state.value = QuranState.Success(it)
+                    }
+                }
+        }
+    }
+
+    fun searchSura(text: String, suraList: List<Sura>) = suraList.filter {
+        it.englishName.lowercase().contains(text.lowercase().trim()) ||
+        it.englishNameTranslation.lowercase().contains(text.lowercase().trim())
+    }
+}
