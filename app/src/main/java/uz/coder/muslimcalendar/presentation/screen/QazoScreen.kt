@@ -31,26 +31,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuSetting
+import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
+import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
+import uz.coder.muslimcalendar.presentation.ui.view.QazoCount
+import uz.coder.muslimcalendar.presentation.viewModel.CalendarViewModel
 import uz.coder.muslimcalendar.todo.ASR
 import uz.coder.muslimcalendar.todo.BOMDOD
 import uz.coder.muslimcalendar.todo.PESHIN
 import uz.coder.muslimcalendar.todo.SHOM
 import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
-import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
-import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
-import uz.coder.muslimcalendar.presentation.ui.view.QazoCount
-import uz.coder.muslimcalendar.presentation.viewModel.CalendarViewModel
 
 @Composable
 fun QazoScreen(modifier: Modifier = Modifier, controller: NavHostController) {
-    val viewModel = viewModel<CalendarViewModel>()
+    val viewModel = hiltViewModel<CalendarViewModel>()
     viewModel.fromPreferencesQazo()
     Scaffold(topBar = { CalendarTopBar(
         list = listOf(

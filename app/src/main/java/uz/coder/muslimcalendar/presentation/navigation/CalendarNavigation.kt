@@ -80,7 +80,7 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         composable(AllahNameMeaning.route+"/{$ALLAH_NAME_INDEX}", arguments = arrayListOf(navArgument(
             ALLAH_NAME_INDEX
         ){ type = NavType.IntType })){
-            AllahNameMeaningScreen(controller = controller, navBackStackEntry =  it)
+            AllahNameMeaningScreen(navBackStackEntry =  it)
         }
         composable(Quran.route) {
             QuranScreen(controller = controller)

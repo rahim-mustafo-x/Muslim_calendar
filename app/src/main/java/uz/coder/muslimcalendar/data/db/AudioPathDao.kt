@@ -1,10 +1,10 @@
-package uz.coder.muslimcalendar.db
+package uz.coder.muslimcalendar.data.db
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import uz.coder.muslimcalendar.db.model.AudioPathDbModel
+import uz.coder.muslimcalendar.data.db.model.AudioPathDbModel
 
 @Dao
 interface AudioPathDao {

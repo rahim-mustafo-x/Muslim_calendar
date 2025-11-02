@@ -2,33 +2,34 @@ package uz.coder.muslimcalendar.data.service
 
 import android.content.Context
 import android.util.Log
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import uz.coder.muslimcalendar.db.AppDatabase
-import uz.coder.muslimcalendar.db.model.AudioPathDbModel
+import uz.coder.muslimcalendar.data.db.AppDatabase
+import uz.coder.muslimcalendar.data.db.model.AudioPathDbModel
 import java.io.File
 import java.io.FileOutputStream
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-class DownloadWorker(
-    private val context: Context,
-    workerParams: WorkerParameters
+@HiltWorker
+class DownloadWorker @AssistedInject constructor(
+    @Assisted private val context: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val db: AppDatabase,
+    private val okHttpClient: OkHttpClient
 ) : CoroutineWorker(context, workerParams) {
 
-    private val db = AppDatabase.instance(context)
-    private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        val fileUrl = inputData.getString(KEY_FILE_URL) ?: return@withContext Result.failure()
+        val sura = inputData.getString(KEY_SURA) ?: return@withContext Result.failure()
 
-    override suspend fun doWork(): Result {
-        val fileUrl = inputData.getString(KEY_FILE_URL) ?: return Result.failure()
-        val sura = inputData.getString(KEY_SURA) ?: return Result.failure()
-
-        return try {
+        try {
             val filePath = downloadFile(fileUrl) { progress ->
                 setProgress(workDataOf(KEY_PROGRESS to progress))
             }
@@ -38,7 +39,7 @@ class DownloadWorker(
                 Log.d(TAG, "File downloaded and saved: $filePath")
                 Result.success(workDataOf("filePath" to filePath))
             } else {
-                Log.e(TAG, "File path is empty or failed")
+                Log.e(TAG, "File download failed")
                 Result.retry()
             }
         } catch (e: Exception) {
@@ -47,20 +48,16 @@ class DownloadWorker(
         }
     }
 
-    /**
-     * @param progressCallback progress foizini qaytaradi (0‒100)
-     * @return saqlangan faylning to‘liq yo‘li yoki "" (xato)
-     */
     private suspend fun downloadFile(
         fileUrl: String,
         progressCallback: suspend (Int) -> Unit
-    ): String {
+    ): String = withContext(Dispatchers.IO) {
         val fileName = fileUrl.substringAfterLast("/")
         val file = File(context.getExternalFilesDir(null), fileName)
 
         if (file.exists()) {
-            progressCallback(100) // allaqachon bor ⇒ 100 %
-            return file.absolutePath
+            progressCallback(100)
+            return@withContext file.absolutePath
         }
 
         try {
@@ -69,7 +66,7 @@ class DownloadWorker(
 
             if (!response.isSuccessful) {
                 Log.e(TAG, "HTTP error code: ${response.code}")
-                return ""
+                return@withContext ""
             }
 
             val body = response.body
@@ -84,33 +81,26 @@ class DownloadWorker(
                         fos.write(buffer, 0, count)
                         totalRead += count
 
-                        val percent = if (fileLength != null) {
-                            (totalRead * 100 / fileLength).toInt()
-                        } else {
-                            // Fayl uzunligi noma'lum bo'lsa, progressni minimal qilib yuboramiz
-                            0
-                        }
-
+                        val percent = fileLength?.let { (totalRead * 100 / it).toInt() } ?: 0
                         progressCallback(percent)
                     }
                     fos.flush()
                 }
             }
 
-            progressCallback(100) // tugagani haqida signal
-            return file.absolutePath
+            progressCallback(100)
+            return@withContext file.absolutePath
         } catch (e: Exception) {
             file.delete()
             Log.e(TAG, "Exception while downloading: ${e.message}", e)
-            return ""
-        } finally {
-            // OkHttp automatically closes the response body when using 'use'
+            return@withContext ""
         }
     }
+
     companion object {
         const val KEY_FILE_URL = "KEY_FILE_URL"
         const val KEY_SURA = "KEY_SURA"
-        const val KEY_PROGRESS = "progress" // UI kuzatadigan kalit
+        const val KEY_PROGRESS = "progress"
         private const val TAG = "DownloadWorker"
     }
 }

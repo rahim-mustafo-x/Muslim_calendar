@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.quran.Sura
@@ -47,7 +47,7 @@ fun QuranScreen(
     modifier: Modifier = Modifier,
     controller: NavHostController,
 ) {
-    val viewModel= viewModel<QuranViewModel>()
+    val viewModel= hiltViewModel<QuranViewModel>()
     var suraList by remember { mutableStateOf<List<Sura>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var searchText by remember { mutableStateOf("") }

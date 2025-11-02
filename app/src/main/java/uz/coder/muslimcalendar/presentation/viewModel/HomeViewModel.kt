@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,12 +14,20 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Date
-import uz.coder.muslimcalendar.data.repository.CalendarRepositoryImpl
-import uz.coder.muslimcalendar.todo.isConnected
+import uz.coder.muslimcalendar.domain.usecase.LoadingUseCase
+import uz.coder.muslimcalendar.domain.usecase.PresentDayUseCase
+import uz.coder.muslimcalendar.domain.usecase.RemoveUseCase
 import uz.coder.muslimcalendar.presentation.viewModel.state.HomeState
+import uz.coder.muslimcalendar.todo.isConnected
+import javax.inject.Inject
 
-class HomeViewModel(private val application: Application):AndroidViewModel(application) {
-    private val repo = CalendarRepositoryImpl(application)
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val application: Application,
+    private val removeUseCase: RemoveUseCase,
+    private val presentDayUseCase: PresentDayUseCase,
+    private val loadingUseCase: LoadingUseCase
+):AndroidViewModel(application) {
     private val _state = MutableStateFlow<HomeState>(HomeState.Init)
     val state = _state.asStateFlow()
     private var latitude = 0.0
@@ -49,7 +58,7 @@ class HomeViewModel(private val application: Application):AndroidViewModel(appli
     private fun remove(){
         if (application.isConnected()){
             viewModelScope.launch {
-                repo.remove()
+                removeUseCase()
             }
         }
     }
@@ -58,7 +67,7 @@ class HomeViewModel(private val application: Application):AndroidViewModel(appli
             Log.d("TAG", "loadInformationFromInternet: ")
             if (application.isConnected()){
                 _state.value = HomeState.Loading
-                repo.loading(longitude, latitude)
+                loadingUseCase(longitude, latitude)
             }else{
                 _state.value = HomeState.Error(application.getString(R.string.no_internet))
             }
@@ -67,14 +76,14 @@ class HomeViewModel(private val application: Application):AndroidViewModel(appli
     fun itemList() {
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = HomeState.Loading
-            repo.presentDay().collect{
+            presentDayUseCase().collect{
                 _state.value = HomeState.Success(it)
             }
         }
     }
 
     fun day() = flow {
-        repo.presentDay().collect{
+        presentDayUseCase().collect{
             emit(Date(it.day, it.month-1, it.weekday, it.hijriDay, it.hijriMonth))
         }
     }

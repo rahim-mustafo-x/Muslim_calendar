@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import uz.coder.muslimcalendar.R
 
@@ -38,19 +37,16 @@ class AlarmBroadCast : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Faqat Android 8.0+ uchun kanal yaratish
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(
-                channelId,
-                "Alarm Channel",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Alarm notifications"
-            }
-            notificationManager.createNotificationChannel(channel)
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(
+            channelId,
+            "Alarm Channel",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Alarm notifications"
         }
+        notificationManager.createNotificationChannel(channel)
 
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_alarm)
@@ -59,9 +55,6 @@ class AlarmBroadCast : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .addAction(R.drawable.ic_close, "O‘chirish", stopPendingIntent)
-
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (musicResId == R.raw.azan || musicResId == -2) {
             notificationManager.notify(notificationId, notificationBuilder.build())

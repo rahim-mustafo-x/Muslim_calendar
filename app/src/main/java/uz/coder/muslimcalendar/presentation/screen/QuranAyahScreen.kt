@@ -15,10 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,7 +26,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,7 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavBackStackEntry
@@ -50,8 +48,6 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
 import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.models.model.quran.SurahList
-import uz.coder.muslimcalendar.todo.NUMBER
-import uz.coder.muslimcalendar.todo.toAyahList
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.AyahArabicSection
 import uz.coder.muslimcalendar.presentation.ui.view.AyahTranslationSection
@@ -59,6 +55,8 @@ import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.ui.view.QuranPlayer
 import uz.coder.muslimcalendar.presentation.viewModel.SurahViewModel
 import uz.coder.muslimcalendar.presentation.viewModel.state.SurahState
+import uz.coder.muslimcalendar.todo.NUMBER
+import uz.coder.muslimcalendar.todo.toAyahList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +65,7 @@ fun QuranAyahScreen(
     controller: NavHostController,
     navBackStackEntry: NavBackStackEntry,
 ) {
-    val viewModel = viewModel<SurahViewModel>()
+    val viewModel = hiltViewModel<SurahViewModel>()
     val context = LocalContext.current
     val number = navBackStackEntry.arguments?.getInt(NUMBER) ?: 1
     var showTranslation by remember { mutableStateOf(false) }
@@ -84,8 +82,7 @@ fun QuranAyahScreen(
         prepare()
     } }
     var isPlaying by remember { mutableStateOf(false) }
-    var sliderPosition by remember { mutableFloatStateOf(0f) }
-    val duration = exoPlayer.duration.coerceAtLeast(1L)
+    exoPlayer.duration.coerceAtLeast(1L)
 
     // Update ExoPlayer when audioPath changes
     LaunchedEffect(audioPath) {
@@ -180,7 +177,6 @@ fun QuranAyahScreen(
 
     LaunchedEffect(exoPlayer) {
         while (true) {
-            sliderPosition = if (duration != 0L) exoPlayer.currentPosition.toFloat() / duration else 0f
             delay(500)
         }
     }
@@ -254,15 +250,13 @@ fun DownloadDialog(
                     color = Color.White,
                     textAlign = TextAlign.Center
                 )
-                LinearProgressIndicator(
-                    progress = progress / 100f,
+                LinearProgressIndicator(progress = {progress / 100f},
                     modifier = modifier
                         .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(4.dp)),
                     color = Color.Blue,
-                    backgroundColor = Color.White
-                )
+                    trackColor = Color.White)
             }
         }
     }

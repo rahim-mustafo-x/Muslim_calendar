@@ -1,11 +1,11 @@
-package uz.coder.muslimcalendar.db
+package uz.coder.muslimcalendar.data.db
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import uz.coder.muslimcalendar.db.model.SurahAyahDbModel
+import uz.coder.muslimcalendar.data.db.model.SurahAyahDbModel
 
 @Dao
 interface SurahAyahDao{

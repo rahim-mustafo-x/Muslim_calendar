@@ -21,13 +21,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.allahNames
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 
 @Composable
-fun AllahNameMeaningScreen(modifier: Modifier = Modifier, controller: NavHostController, navBackStackEntry: NavBackStackEntry) {
+fun AllahNameMeaningScreen(modifier: Modifier = Modifier, navBackStackEntry: NavBackStackEntry) {
     val index = navBackStackEntry.arguments?.getInt(ALLAH_NAME_INDEX)?:0
     val allahName = allahNames[index]
     val state = rememberScrollState()

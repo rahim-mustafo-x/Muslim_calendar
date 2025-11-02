@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -80,8 +81,8 @@ import uz.coder.muslimcalendar.presentation.viewModel.state.HomeState
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
-    val viewModel = viewModel<HomeViewModel>()
-    val notificationViewModel = viewModel<NotificationViewModel>()
+    val viewModel = hiltViewModel<HomeViewModel>()
+    val notificationViewModel = hiltViewModel<NotificationViewModel>()
     notificationViewModel.setAlarm()
     val permissionState = rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
 
@@ -132,8 +133,8 @@ fun Home(
 ) {
     val notificationViewModel = viewModel<NotificationViewModel>()
     viewModel.itemList()
-    var muslimCalendar by remember { mutableStateOf<MuslimCalendar>(MuslimCalendar()) }
-    var showLoadingDialog by remember { mutableStateOf<Boolean>(false) }
+    var muslimCalendar by remember { mutableStateOf(MuslimCalendar()) }
+    var showLoadingDialog by remember { mutableStateOf(false) }
     if (showLoadingDialog){
         LoadingDialog(modifier = Modifier.padding(paddingValues))
     }else{
@@ -275,8 +276,10 @@ fun Bottom(
         Column(modifier
             .fillMaxWidth()
             .weight(2.5f)) {
-            Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
-            Text("${date.hijriDay} ${date.hijriMonth}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
+            if (date!= Date()){
+                Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
+                Text("${date.hijriDay} ${date.hijriMonth}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
+            }
         }
         Column(modifier
             .fillMaxWidth()

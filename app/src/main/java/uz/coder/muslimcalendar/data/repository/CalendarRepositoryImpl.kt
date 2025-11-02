@@ -1,44 +1,27 @@
 package uz.coder.muslimcalendar.data.repository
 
-import android.app.Application
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.PersistableBundle
 import android.util.Log
-import androidx.core.content.edit
-import androidx.work.BackoffPolicy
-import androidx.work.Constraints
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
+import androidx.work.*
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
-import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.db.AppDatabase
-import uz.coder.muslimcalendar.data.ktor.ApiService.Companion.apiService
+import uz.coder.muslimcalendar.SharedPref
+import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.map.CalendarMap
-import uz.coder.muslimcalendar.domain.model.AudioPath
-import uz.coder.muslimcalendar.models.model.SuraAyah
-import uz.coder.muslimcalendar.domain.model.quran.Sura
-import uz.coder.muslimcalendar.models.model.quran.Surah
-import uz.coder.muslimcalendar.models.model.quran.SurahList
+import uz.coder.muslimcalendar.data.network.ApiServiceQuranUzbek
 import uz.coder.muslimcalendar.data.service.DownloadWorker
 import uz.coder.muslimcalendar.data.service.PrayerTimeJobService
 import uz.coder.muslimcalendar.data.service.QuranWorkManager
+import uz.coder.muslimcalendar.domain.model.AudioPath
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
+import uz.coder.muslimcalendar.models.model.quran.Surah
+import uz.coder.muslimcalendar.models.model.quran.SurahList
 import uz.coder.muslimcalendar.todo.REGION
 import java.time.LocalDate
 import java.util.Calendar.DAY_OF_MONTH
@@ -46,41 +29,46 @@ import java.util.Calendar.MONTH
 import java.util.Calendar.getInstance
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
-data class CalendarRepositoryImpl(private val application: Application): CalendarRepository {
-    private val preferences:SharedPreferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Context.MODE_PRIVATE) }
-    private val db:AppDatabase by lazy { AppDatabase.instance(application) }
-    private val map = CalendarMap()
+@Singleton
+data class CalendarRepositoryImpl @Inject constructor(
+    private val preferences: SharedPref,
+    private val db: AppDatabase,
+    private val map: CalendarMap,
+    @ApplicationContext private val context: Context,
+    private val apiService: ApiServiceQuranUzbek
+) : CalendarRepository {
 
     override suspend fun loading(longitude: Double, latitude: Double) {
-        if (latitude!=0.0 && longitude !=0.0){
+        if (latitude != 0.0 && longitude != 0.0) {
             val extras = PersistableBundle().apply {
                 putDouble(PrayerTimeJobService.LATITUDE, latitude)
                 putDouble(PrayerTimeJobService.LONGITUDE, longitude)
             }
 
-            val jobInfo = JobInfo.Builder(1, ComponentName(application, PrayerTimeJobService::class.java))
+            val jobInfo = JobInfo.Builder(1, ComponentName(context, PrayerTimeJobService::class.java))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setExtras(extras)
-                .setOverrideDeadline(0) // run immediately
+                .setOverrideDeadline(0)
                 .build()
 
-            val scheduler = application.getSystemService(JobScheduler::class.java)
+            val scheduler = context.getSystemService(JobScheduler::class.java)
             scheduler.schedule(jobInfo)
         }
     }
 
-
     override suspend fun region(region: String) {
-        preferences.edit { putString(REGION, region) }
+        preferences.saveValue(REGION, region)
     }
 
     override suspend fun remove() {
         val calendar = getInstance()
-        val month = calendar.get(MONTH)+1
+        val month = calendar.get(MONTH) + 1
         val day = calendar.get(DAY_OF_MONTH)
-        db.calendarDao().refreshDay().collect{
-            if (it.day == day && it.month == month){
+        db.calendarDao().refreshDay().collect {
+            if (it.day == day && it.month == month) {
                 db.calendarDao().deleteCalendar()
             }
         }
@@ -98,9 +86,7 @@ data class CalendarRepositoryImpl(private val application: Application): Calenda
             }
             .filterNotNull()
 
-
     override fun oneMonth() = db.calendarDao().oneMonth().map { map.toMuslimCalendarList(it) }
-
 
     override suspend fun loadQuranArab() {
         val constraints = Constraints.Builder()
@@ -112,23 +98,11 @@ data class CalendarRepositoryImpl(private val application: Application): Calenda
             .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.MINUTES)
             .build()
 
-        WorkManager.getInstance(application)
+        WorkManager.getInstance(context)
             .enqueueUniqueWork("QuranWork", ExistingWorkPolicy.KEEP, workRequest)
     }
 
-    override fun getSurah() = flow<List<Sura>> {
-        db.suraDao().getAllSura().collect{
-            emit(
-                map.toSuraList(it)
-            )
-        }
-    }
-
-    override fun downloadSurah(
-        suraAyahs: List<SurahList>,
-        url: String
-    ): Flow<UUID> = flow {
-        // --- WorkRequest tayyorlash ---
+    override fun downloadSurah(suraAyahs: List<SurahList>, url: String): Flow<UUID> = flow {
         val inputData = Data.Builder()
             .putString(DownloadWorker.KEY_FILE_URL, url)
             .putString(DownloadWorker.KEY_SURA, suraAyahs.first().sura)
@@ -138,64 +112,51 @@ data class CalendarRepositoryImpl(private val application: Application): Calenda
             .setInputData(inputData)
             .build()
 
-        val workManager = WorkManager.getInstance(application)
-
-        // Ishni navbatga qo‘yish
+        val workManager = WorkManager.getInstance(context)
         workManager.enqueue(workRequest)
 
-        // --- Worker kerakli holatga yetishini kutamiz ---
-        workManager
-            .getWorkInfoByIdFlow(workRequest.id)          // Flow<WorkInfo>
-            .filter { info ->                             // faqat RUNNING yoki ENQUEUED
-                info?.state == WorkInfo.State.RUNNING ||
-                        info?.state == WorkInfo.State.ENQUEUED
-            }
-            .first()                                      // birinchi marta shu holat bo‘lsa — kutib turadi
-        // (suspend bo‘ladi)
-        // <-- shu yerda kutish tugadi
-
-        // --- Maʼlumotlar bazasiga yozib qo‘yish ---
-        db.surahAyahDao().insertAll(
-            map.toSuraAyahDbModels(suraAyahs)
-        )
-
-        // --- Natijani emit qilamiz ---
         emit(workRequest.id)
+
+        withContext(Dispatchers.IO) {
+            db.surahAyahDao().insertAll(map.toSuraAyahDbModels(suraAyahs))
+        }
     }.flowOn(Dispatchers.IO)
 
-    fun observeProgress(id: UUID): Flow<Int> {
-        return WorkManager.getInstance(application)
+    override fun observeProgress(id: UUID): Flow<Int> =
+        WorkManager.getInstance(context)
             .getWorkInfoByIdFlow(id)
-            .map { it?.progress?.getInt(DownloadWorker.KEY_PROGRESS, 0)?:0 }
+            .map { it?.progress?.getInt(DownloadWorker.KEY_PROGRESS, 0) ?: 0 }
+    override fun getSurah() = flow {
+        db.suraDao().getAllSura().collect {
+            emit(map.toSuraList(it))
+        }
     }
 
-
-    override fun getSuraByNumber(number: Int) = flow<Sura> {
+    override fun getSuraByNumber(number: Int) = flow {
         db.suraDao().getSuraById(number).collect {
             emit(map.toSura(it))
         }
     }
 
-    override fun getSurahById(sura: String) = flow<List<SuraAyah>> {
+    override fun getSurahById(sura: String) = flow {
         db.surahAyahDao().getSurahAyahsById(sura).collect {
             emit(map.toSuraAyahList(it))
         }
     }
 
-    override fun getSura(number: Int) = flow<Surah> {
+    override fun getSura(number: Int) = flow {
         apiService.getSura(number).result?.let {
             val surah = withContext(Dispatchers.IO) { Surah(map.toSurahList(it)) }
             emit(surah)
         }
     }
-    override fun getAudioPath(sura: String) = flow<AudioPath> {
-        try{
-            Log.d(TAG, "getAudioPath: bo'sh emas")
-            db.audioPathDao().getAudioPathBySura(sura).collect{
+
+    override fun getAudioPath(sura: String) = flow {
+        try {
+            db.audioPathDao().getAudioPathBySura(sura).collect {
                 emit(AudioPath(it.audioPath, it.sura))
             }
-        }catch(_ :Exception){
-            Log.d(TAG, "getAudioPath: bo'sh")
+        } catch (_: Exception) {
             emit(AudioPath(null, sura))
         }
     }

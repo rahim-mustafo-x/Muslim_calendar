@@ -22,11 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
 import uz.coder.muslimcalendar.presentation.navigation.CalendarNavigation
 import uz.coder.muslimcalendar.presentation.ui.theme.LightBlueStatusBar
 import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
 import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient

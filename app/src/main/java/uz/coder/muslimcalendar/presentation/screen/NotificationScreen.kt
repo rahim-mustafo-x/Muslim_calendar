@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
@@ -54,7 +55,7 @@ import uz.coder.muslimcalendar.presentation.viewModel.state.NotificationState
 fun NotificationScreen(
     controller: NavHostController,
     modifier: Modifier = Modifier,
-    viewModel: NotificationViewModel = viewModel()
+    viewModel: NotificationViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {

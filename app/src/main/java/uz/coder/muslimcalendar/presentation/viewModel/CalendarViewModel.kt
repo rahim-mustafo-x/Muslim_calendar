@@ -11,6 +11,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -19,7 +20,10 @@ import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Calendar
 import uz.coder.muslimcalendar.domain.model.Date
-import uz.coder.muslimcalendar.data.repository.CalendarRepositoryImpl
+import uz.coder.muslimcalendar.domain.usecase.LoadingUseCase
+import uz.coder.muslimcalendar.domain.usecase.OneMonthDayUseCase
+import uz.coder.muslimcalendar.domain.usecase.PresentDayUseCase
+import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.todo.ALL_TASBEH
 import uz.coder.muslimcalendar.todo.ASR
 import uz.coder.muslimcalendar.todo.BOMDOD
@@ -30,10 +34,15 @@ import uz.coder.muslimcalendar.todo.TASBEH
 import uz.coder.muslimcalendar.todo.VITR
 import uz.coder.muslimcalendar.todo.XUFTON
 import uz.coder.muslimcalendar.todo.isConnected
-import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
+import javax.inject.Inject
 
-data class CalendarViewModel(private val application: Application):AndroidViewModel(application){
-    private val repo = CalendarRepositoryImpl(application)
+@HiltViewModel
+data class CalendarViewModel @Inject constructor(
+    private val application: Application,
+    private val oneMonthDayUseCase: OneMonthDayUseCase,
+    private val presentDayUseCase: PresentDayUseCase,
+    private val loadingUseCase: LoadingUseCase
+    ):AndroidViewModel(application){
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(application)
     }
@@ -141,7 +150,7 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
         viewModelScope.launch {
             Log.d("TAG", "loadInformationFromInternet: ")
             if (application.isConnected()){
-                repo.loading(longitude, latitude)
+                loadingUseCase(longitude, latitude)
             }
         }
     }
@@ -164,7 +173,7 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
         }
     }
     fun oneMonth() = channelFlow<List<Calendar>> {
-        repo.oneMonth().collect{
+        oneMonthDayUseCase().collect{ it ->
             send(mutableListOf(Calendar(application.getString(R.string.dayMonth), White, Light_Blue), Calendar(application.getString(R.string.bomdod), White, Light_Blue), Calendar(application.getString(R.string.quyoshChiqishi), White, Light_Blue), Calendar(application.getString(R.string.peshin), White, Light_Blue), Calendar(application.getString(R.string.asr), White, Light_Blue), Calendar(application.getString(R.string.shom), White, Light_Blue), Calendar(application.getString(R.string.xufton), White, Light_Blue)).apply {
                 it.forEach {
                     add(Calendar(it.day.toString().plus("-${MONTH[it.month-1]}"), White, Light_Blue))
@@ -181,7 +190,7 @@ data class CalendarViewModel(private val application: Application):AndroidViewMo
 
 
     fun day() = flow {
-        repo.presentDay().collect{
+        presentDayUseCase().collect{
             emit(Date(it.day, it.month-1, it.weekday, it.hijriDay, it.hijriMonth))
         }
     }

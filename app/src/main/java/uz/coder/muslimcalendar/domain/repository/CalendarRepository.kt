@@ -22,4 +22,5 @@ interface CalendarRepository {
     fun getSurahById(sura:String):Flow<List<SuraAyah>>
     fun getSura(number:Int):Flow<Surah>
     fun getAudioPath(sura:String):Flow<AudioPath>
+    fun observeProgress(id: UUID): Flow<Int>
 }

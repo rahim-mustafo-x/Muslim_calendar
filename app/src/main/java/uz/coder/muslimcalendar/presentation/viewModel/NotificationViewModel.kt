@@ -9,26 +9,29 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.domain.model.Notification
+import uz.coder.muslimcalendar.SharedPref
 import uz.coder.muslimcalendar.data.receiver.AlarmBroadCast
-import uz.coder.muslimcalendar.data.repository.CalendarRepositoryImpl
-import uz.coder.muslimcalendar.todo.SharedPref
+import uz.coder.muslimcalendar.domain.model.Notification
+import uz.coder.muslimcalendar.domain.usecase.OneMonthDayUseCase
 import uz.coder.muslimcalendar.presentation.viewModel.state.NotificationState
 import java.util.Calendar
+import javax.inject.Inject
 
-class NotificationViewModel(
-    private val application: Application
+@HiltViewModel
+class NotificationViewModel @Inject constructor(
+    private val application: Application,
+    private val oneMonthDayUseCase: OneMonthDayUseCase,
+    private val sharedPref: SharedPref
 ) : AndroidViewModel(application) {
     init {
         setAlarm()
     }
-    private val repository = CalendarRepositoryImpl(application)
-    private val sharedPref = SharedPref.getInstance(application.applicationContext)
 
     private val iconFlows = listOf(
         MutableStateFlow(sharedPref.getInt(KEY_BOMDOD, R.drawable.ic_speaker_on)),
@@ -73,7 +76,7 @@ class NotificationViewModel(
             Notification(currentNames[i], flow.value)
         }
         viewModelScope.launch {
-            repository.oneMonth().collect {
+            oneMonthDayUseCase().collect {
                 _state.value = NotificationState.Success(list, it)
             }
         }
@@ -81,10 +84,9 @@ class NotificationViewModel(
 
     @SuppressLint("ScheduleExactAlarm")
     fun setAlarm() {
-        Log.d(TAG, "setAlarm: tushdi notificationga")
         viewModelScope.launch {
             try{
-                repository.oneMonth().collect {list->
+                oneMonthDayUseCase().collect {list->
                     val alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                     for (item in list){
                     val intent = Intent(application, AlarmBroadCast::class.java)
@@ -126,8 +128,7 @@ class NotificationViewModel(
                 }
             }
             }catch (_:Exception){
-                delay(500)
-                setAlarm()
+                print("Axx")
             }
         }
     }

@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.db.model;
+package uz.coder.muslimcalendar.data.db.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Entity(
         tableName = "audioPath",
-        indices = {@Index(value = {"sura"}, unique = true)}  // bu yerda sura unique qilindi
+        indices = {@Index(value = {"sura"}, unique = true)}
 )
 public class AudioPathDbModel {
     @PrimaryKey(autoGenerate = true)

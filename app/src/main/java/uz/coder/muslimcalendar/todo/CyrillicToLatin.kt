@@ -3,7 +3,7 @@ package uz.coder.muslimcalendar.todo
 import kotlin.concurrent.thread
 
 
-private val cyrillicToLatinMap = mapOf<Char, String>(
+private val cyrillicToLatinMap = mapOf(
     'А' to "A",
     'Б' to "B",
     'В' to "V",
