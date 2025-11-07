@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -28,25 +27,25 @@ class QuranViewModel @Inject constructor(
         loadQuran()
     }
     fun loadQuran() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _state.emit(QuranState.Loading)
-                getSurahUseCase().collect {
-                    if (it.isEmpty()){
-                        if (application.isConnected()){
-                            loadQuranArabUseCase()
-                            loadQuran()
-                        }else{
+        viewModelScope.launch {
+            _state.value = QuranState.Loading
+
+            getSurahUseCase().collect { suraList ->
+                if (suraList.isEmpty()) {
+                    if (application.isConnected()) {
+                        loadQuranArabUseCase()
+                    } else {
                         _state.value = QuranState.Error(application.getString(R.string.no_internet))
-                        }
-                    }else{
-                        _state.value = QuranState.Success(it)
                     }
+                } else {
+                    _state.value = QuranState.Success(suraList)
                 }
+            }
         }
     }
-
     fun searchSura(text: String, suraList: List<Sura>) = suraList.filter {
         it.englishName.lowercase().contains(text.lowercase().trim()) ||
         it.englishNameTranslation.lowercase().contains(text.lowercase().trim())
     }
 }
+

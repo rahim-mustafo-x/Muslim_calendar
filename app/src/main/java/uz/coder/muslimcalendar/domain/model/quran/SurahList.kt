@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.models.model.quran
+package uz.coder.muslimcalendar.domain.model.quran
 
 data class SurahList(
     val id: String,

@@ -1,6 +1,10 @@
 package uz.coder.muslimcalendar.presentation.screen
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.LocationManager
 import android.os.Build
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,7 +34,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,12 +44,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -54,9 +60,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.domain.model.Date
 import uz.coder.muslimcalendar.domain.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.About
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.AllahName
@@ -67,8 +71,7 @@ import uz.coder.muslimcalendar.domain.model.sealed.Screen.Notification
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Quran
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Tasbeh
-import uz.coder.muslimcalendar.todo.MONTH
-import uz.coder.muslimcalendar.todo.toItems
+import uz.coder.muslimcalendar.models.model.MenuSetting
 import uz.coder.muslimcalendar.presentation.ui.theme.Blue
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
@@ -76,7 +79,9 @@ import uz.coder.muslimcalendar.presentation.ui.view.MainButton
 import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 import uz.coder.muslimcalendar.presentation.viewModel.NotificationViewModel
 import uz.coder.muslimcalendar.presentation.viewModel.state.HomeState
+import uz.coder.muslimcalendar.todo.toItems
 
+@SuppressLint("MissingPermission")
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -85,6 +90,13 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
     val notificationViewModel = hiltViewModel<NotificationViewModel>()
     notificationViewModel.setAlarm()
     val permissionState = rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
+    val context = LocalContext.current
+    val location = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val isGpsEnabled = location.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    val provider = when{
+        isGpsEnabled-> LocationManager.GPS_PROVIDER
+        else -> LocationManager.NETWORK_PROVIDER
+    }
 
     // Permission dialog ko'rsatiladi (faqat bir marta)
     LaunchedEffect(Unit) {
@@ -97,6 +109,14 @@ fun HomeScreen(modifier: Modifier = Modifier, controller: NavHostController) {
             notificationViewModel.setAlarm()
         }
     }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME, onEvent = {
+        @Suppress("DEPRECATION")
+        location.requestSingleUpdate(provider,
+            {
+                viewModel.loadInformationFromInternet(it.latitude, it.longitude)
+            }, Looper.getMainLooper())
+
+    })
 
     val menuList = listOf(
         Menu(
@@ -144,8 +164,7 @@ fun Home(
             Screen(
                 paddingValues = paddingValues,
                 muslimCalendar = muslimCalendar,
-                controller = controller,
-                viewModel = viewModel
+                controller = controller
             )
         }
     }
@@ -203,8 +222,7 @@ private fun Screen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     muslimCalendar: MuslimCalendar,
-    controller: NavHostController,
-    viewModel: HomeViewModel
+    controller: NavHostController
 ) {
     val pagerState = rememberPagerState {
         muslimCalendar.item.size
@@ -259,32 +277,21 @@ private fun Screen(
                 }, selectedContentColor = Blue, unselectedContentColor = Light_Blue)
             }
         }
-        Bottom(modifier, controller, viewModel)
+        Bottom(modifier, controller)
     }
 }
 
 @Composable
 fun Bottom(
     modifier: Modifier,
-    controller: NavHostController,
-    viewModel: HomeViewModel
+    controller: NavHostController
 ) {
-    val date by viewModel.day().collectAsState(initial = Date())
     Column(modifier = modifier
         .fillMaxSize()
         .background(White)) {
         Column(modifier
             .fillMaxWidth()
-            .weight(2.5f)) {
-            if (date!= Date()){
-                Text("${date.weekDay}, ${date.day} - ${MONTH[date.month]}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
-                Text("${date.hijriDay} ${date.hijriMonth}", color = Light_Blue, modifier = modifier.fillMaxWidth(), textAlign = TextAlign.End)
-            }
-        }
-        Column(modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .weight(9.5f)) {
+            .verticalScroll(rememberScrollState())) {
             Row(modifier = modifier
                 .fillMaxWidth()
                 .wrapContentWidth(Alignment.CenterHorizontally)) {
@@ -318,6 +325,5 @@ fun Bottom(
             }
         }
     }
-
 }
 private const val TAG = "HomeScreen"

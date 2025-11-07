@@ -2,6 +2,7 @@ package uz.coder.muslimcalendar.data.network
 
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
@@ -20,11 +21,16 @@ object ApiClient {
     @JvmStatic
     private external fun getQuranArabUrl():String
 
+    val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
     fun getPrayerTime(): Retrofit{
         val client = OkHttpClient.Builder().apply {
             writeTimeout(2L, TimeUnit.MINUTES)
             connectTimeout(2L, TimeUnit.MINUTES)
             readTimeout(2L, TimeUnit.MINUTES)
+            addInterceptor(logging)
         }.build()
         return Retrofit.Builder()
             .baseUrl(getPrayerTimeUrl())
@@ -37,6 +43,7 @@ object ApiClient {
             writeTimeout(2L, TimeUnit.MINUTES)
             connectTimeout(2L, TimeUnit.MINUTES)
             readTimeout(2L, TimeUnit.MINUTES)
+            addInterceptor(logging)
         }.build()
         return Retrofit.Builder()
             .baseUrl(getQuranArabUrl())
@@ -49,6 +56,7 @@ object ApiClient {
             writeTimeout(2L, TimeUnit.MINUTES)
             connectTimeout(2L, TimeUnit.MINUTES)
             readTimeout(2L, TimeUnit.MINUTES)
+            addInterceptor(logging)
         }.build()
         return Retrofit.Builder()
             .baseUrl(getQuranUzbekUrl())

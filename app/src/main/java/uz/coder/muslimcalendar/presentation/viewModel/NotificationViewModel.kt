@@ -6,11 +6,9 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -103,11 +101,9 @@ class NotificationViewModel @Inject constructor(
                         Pair(item.hufton, sharedPref.getInt(KEY_XUFTON, -1))
                     )
                     listOfTime.forEach{
-                        Log.d(TAG, "setAlarm: ${it.first}")
                         val split = it.first.split(":")
                         val hour = split[0].toInt()
                         val minute = split[1].toInt()
-                        Log.d(TAG, "setAlarm: hour: $hour minute: $minute")
                         val calendar = Calendar.getInstance().apply {
                         set(Calendar.MONTH, item.month)
                             set(Calendar.DAY_OF_MONTH, item.day)

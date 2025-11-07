@@ -62,8 +62,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.logging.interceptor)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
@@ -80,7 +80,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)
-    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.logging.interceptor)
     implementation(libs.ui)
     implementation(libs.androidx.material)

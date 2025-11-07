@@ -36,6 +36,10 @@
         </activity>
         <service android:name=".data.service.PrayerTimeJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <service android:name=".data.service.QuranJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <service android:name=".data.service.DownloadJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
         <receiver android:name=".data.receiver.AlarmBroadCast"
             android:exported="false">
             <intent-filter>

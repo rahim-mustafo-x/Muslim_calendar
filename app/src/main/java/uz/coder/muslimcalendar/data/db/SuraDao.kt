@@ -18,6 +18,8 @@ interface SuraDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(suraDbModels: List<SuraDbModel>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(suraDbModels: SuraDbModel)
 
     @Query("DELETE FROM sura")
     suspend fun deleteAll()

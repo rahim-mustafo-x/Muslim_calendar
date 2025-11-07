@@ -1,5 +1,6 @@
 package uz.coder.muslimcalendar.presentation.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -66,14 +67,18 @@ fun QuranScreen(
             }
         } else {
             Column(
-                modifier = modifier.padding(padding).fillMaxSize()
+                modifier = modifier
+                    .padding(padding)
+                    .fillMaxSize()
             ){
                 OutlinedTextField(searchText, onValueChange = { searchText = it }, placeholder = {
                     Text(
                         text = stringResource(R.string.searchSura),
                         color = Light_Blue
                     )
-                }, modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp), colors = TextFieldDefaults.colors(focusedTextColor = Light_Blue, unfocusedTextColor = Light_Blue, disabledTextColor = Light_Blue, focusedIndicatorColor = Light_Blue, unfocusedIndicatorColor = Light_Blue, focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent),
+                }, modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 5.dp), colors = TextFieldDefaults.colors(focusedTextColor = Light_Blue, unfocusedTextColor = Light_Blue, disabledTextColor = Light_Blue, focusedIndicatorColor = Light_Blue, unfocusedIndicatorColor = Light_Blue, focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent),
                     leadingIcon = {
                         Icon(Icons.Default.Search, contentDescription = null, tint = Light_Blue)
                     })

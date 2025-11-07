@@ -1,6 +1,7 @@
 package uz.coder.muslimcalendar.di
 
 import android.content.Context
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,9 +40,5 @@ object AppProvidesModule {
         return ApiClient.getQuranUzbek().create(ApiServiceQuranUzbek::class.java)
     }
     @Provides
-    @Singleton
-    fun okHttp() = OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
+    fun provideGson() = Gson()
 }

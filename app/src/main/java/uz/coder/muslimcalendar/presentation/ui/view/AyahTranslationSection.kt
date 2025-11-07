@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import uz.coder.muslimcalendar.models.model.quran.SurahList
+import uz.coder.muslimcalendar.domain.model.quran.SurahList
 
 @Composable
 fun AyahTranslationSection(ayahList: List<SurahList>) {

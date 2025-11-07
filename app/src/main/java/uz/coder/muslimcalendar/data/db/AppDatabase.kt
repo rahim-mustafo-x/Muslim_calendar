@@ -9,7 +9,7 @@ import uz.coder.muslimcalendar.data.db.model.MuslimCalendarDbModel
 import uz.coder.muslimcalendar.data.db.model.SuraDbModel
 import uz.coder.muslimcalendar.data.db.model.SurahAyahDbModel
 
-@Database([MuslimCalendarDbModel::class, SuraDbModel::class, SurahAyahDbModel::class, AudioPathDbModel::class], version = 2, exportSchema = false)
+@Database([MuslimCalendarDbModel::class, SuraDbModel::class, SurahAyahDbModel::class, AudioPathDbModel::class], version = 3, exportSchema = false)
 abstract class AppDatabase:RoomDatabase() {
     abstract fun calendarDao(): MuslimCalendarDao
     abstract fun suraDao(): SuraDao

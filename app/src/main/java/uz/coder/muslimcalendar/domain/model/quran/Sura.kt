@@ -5,5 +5,6 @@ data class Sura(
     val englishNameTranslation: String,
     val name: String,
     val number: Int,
-    val revelationType: String
+    val revelationType: String,
+    val numberOfAyahs:Int
 )

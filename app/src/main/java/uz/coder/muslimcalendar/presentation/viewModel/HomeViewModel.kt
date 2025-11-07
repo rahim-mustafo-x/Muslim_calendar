@@ -1,19 +1,15 @@
 package uz.coder.muslimcalendar.presentation.viewModel
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.domain.model.Date
 import uz.coder.muslimcalendar.domain.usecase.LoadingUseCase
 import uz.coder.muslimcalendar.domain.usecase.PresentDayUseCase
 import uz.coder.muslimcalendar.domain.usecase.RemoveUseCase
@@ -30,29 +26,8 @@ class HomeViewModel @Inject constructor(
 ):AndroidViewModel(application) {
     private val _state = MutableStateFlow<HomeState>(HomeState.Init)
     val state = _state.asStateFlow()
-    private var latitude = 0.0
-    private var longitude = 0.0
-    private val fusedLocationClient by lazy {
-        LocationServices.getFusedLocationProviderClient(application)
-    }
     init {
-        initLocation()
         remove()
-        loadInfo()
-    }
-
-    fun loadInfo() {
-        if (application.isConnected()){
-            loadInformationFromInternet(latitude, longitude)
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun initLocation() {
-        fusedLocationClient.lastLocation.addOnSuccessListener {
-            latitude = it.latitude
-            longitude = it.longitude
-        }
     }
 
     private fun remove(){
@@ -81,12 +56,4 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
-    fun day() = flow {
-        presentDayUseCase().collect{
-            emit(Date(it.day, it.month-1, it.weekday, it.hijriDay, it.hijriMonth))
-        }
-    }
-
-
 }

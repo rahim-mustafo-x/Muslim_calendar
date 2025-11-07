@@ -62,13 +62,19 @@ class PrayerTimeJobService : JobService() {
         val year = localDate.year
         val month = localDate.month.value
         Log.d(TAG, "loading: $latitude/$longitude for $year-$month")
-
         try {
             val result = apiService.oneMonth(year, month, latitude, longitude)
-            result.data?.let {
-                db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(it))
-                Log.d(TAG, "Namoz vaqtlari bazaga saqlandi")
-            } ?: Log.w(TAG, "API dan data bo'sh qaytdi")
+            Log.d(TAG, "loadPrayerTimes: $result")
+            if(result.isSuccessful){
+                Log.d(TAG, "loadPrayerTimes: ${result.body()}")
+                result.body()?.let {it->
+                    it.data?.let {
+                        Log.d(TAG, "loadPrayerTimes: $it")
+                        db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(it))
+                        Log.d(TAG, "Namoz vaqtlari bazaga saqlandi")
+                    }
+                } ?: Log.w(TAG, "API dan data bo'sh qaytdi")
+            }
         } catch (e: IOException) {
             Log.e(TAG, "Tarmoq xatoligi", e)
         } catch (e: Exception) {

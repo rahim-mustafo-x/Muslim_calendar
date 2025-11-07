@@ -42,6 +42,9 @@
     <string name="speaker_off">Eslatilmasin</string>
     <string name="bell">Faqat xabarnoma yuborilsin</string>
     <string name="prayingTimeCome">Namoz vaqti bo\'ldi</string>
+    <string name="proggressOfDownload">Sura audio fayllarini yuklash progressi</string>
+    <string name="suraIsDownloading">"Sura yuklanmoqda: "</string>
+    <string name="downloadCompleted">Yuklash tugadi</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

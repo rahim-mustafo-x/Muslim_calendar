@@ -15,11 +15,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Calendar
-import uz.coder.muslimcalendar.domain.model.Date
 import uz.coder.muslimcalendar.domain.usecase.LoadingUseCase
 import uz.coder.muslimcalendar.domain.usecase.OneMonthDayUseCase
 import uz.coder.muslimcalendar.domain.usecase.PresentDayUseCase
@@ -185,13 +183,6 @@ data class CalendarViewModel @Inject constructor(
                     add(Calendar(it.hufton, Black, White))
                 }
             })
-        }
-    }
-
-
-    fun day() = flow {
-        presentDayUseCase().collect{
-            emit(Date(it.day, it.month-1, it.weekday, it.hijriDay, it.hijriMonth))
         }
     }
 

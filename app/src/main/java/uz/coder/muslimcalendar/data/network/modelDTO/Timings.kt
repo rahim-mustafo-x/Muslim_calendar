@@ -1,18 +1,15 @@
 package uz.coder.muslimcalendar.data.network.modelDTO
 
-import kotlinx.serialization.SerialName
+import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Timings(
-    @SerialName("Fajr")
-    val fajr: String? = null,
-    @SerialName("Sunrise")
-    val sunrise: String? = null,
-    @SerialName("Dhuhr")
-    val dhuhr: String? = null,
-    @SerialName("Asr")
-    val asr: String? = null,
-    @SerialName("Maghrib")
-    val maghrib: String? = null,
-    @SerialName("Isha")
-    val isha: String? = null,
+    @SerializedName("Fajr") val fajr: String,
+    @SerializedName("Sunrise") val sunrise: String,
+    @SerializedName("Dhuhr") val dhuhr: String,
+    @SerializedName("Asr") val asr: String,
+    @SerializedName("Sunset") val sunset: String,
+    @SerializedName("Maghrib") val maghrib: String,
+    @SerializedName("Isha") val isha: String,
 )

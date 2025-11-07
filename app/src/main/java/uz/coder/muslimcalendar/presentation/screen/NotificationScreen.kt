@@ -146,7 +146,6 @@ fun CalendarTime(modifier: Modifier = Modifier, data: List<MuslimCalendar>, onCh
                 .weight(10f)
                 .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${date.weekday}, ${date.day} - ${MONTH[date.month-1]}", color = White, textAlign = TextAlign.End)
-                Text("${date.hijriDay} ${date.hijriMonth}", color = White, textAlign = TextAlign.End)
             }
             IconButton(onClick = {
                 if(today < data.size) today++

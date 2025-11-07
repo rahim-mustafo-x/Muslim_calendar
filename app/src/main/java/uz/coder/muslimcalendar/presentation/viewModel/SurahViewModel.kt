@@ -15,8 +15,7 @@ import uz.coder.muslimcalendar.domain.usecase.GetAudioPathUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetSuraUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetSurahByIdUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetSurahByNumberUseCase
-import uz.coder.muslimcalendar.domain.usecase.ObserveProgressUseCase
-import uz.coder.muslimcalendar.models.model.quran.SurahList
+import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.presentation.viewModel.state.SurahState
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.todo.toSuraAyah
@@ -29,15 +28,12 @@ class SurahViewModel @Inject constructor(
     private val getSuraUseCase: GetSuraUseCase,
     private val getSurahByNumberUseCase: GetSurahByNumberUseCase,
     private val audioPathUseCase: GetAudioPathUseCase,
-    private val downloadSurahUseCase: DownloadSurahUseCase,
-    private val observePregressUseCase: ObserveProgressUseCase
+    private val downloadSurahUseCase: DownloadSurahUseCase
 ): AndroidViewModel(application) {
     private val _state = MutableStateFlow<SurahState>(SurahState.Init)
     val state = _state.asStateFlow()
     private val _audioPath = MutableStateFlow("")
     val audioPath = _audioPath.asStateFlow()
-    private val _downloadProgress = MutableStateFlow(0)
-    val downloadProgress = _downloadProgress.asStateFlow()
     fun getSura(surahNumber: Int) {
         Log.d(TAG, "getSura: tushdi")
         viewModelScope.launch {
@@ -76,12 +72,7 @@ class SurahViewModel @Inject constructor(
     }
     fun downloadSurah(suraAyahs: List<SurahList>, url: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            downloadSurahUseCase(suraAyahs, url).collect {
-                observePregressUseCase(it).collect { progress ->
-                    _downloadProgress.value = progress
-                }
-            }
-
+            downloadSurahUseCase(suraAyahs, url)
         }
     }
 

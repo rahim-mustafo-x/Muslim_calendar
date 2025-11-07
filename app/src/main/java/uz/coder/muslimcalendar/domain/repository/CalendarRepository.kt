@@ -6,8 +6,7 @@ import uz.coder.muslimcalendar.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.domain.model.quran.Sura
 import uz.coder.muslimcalendar.models.model.quran.Surah
-import uz.coder.muslimcalendar.models.model.quran.SurahList
-import java.util.UUID
+import uz.coder.muslimcalendar.domain.model.quran.SurahList
 
 interface CalendarRepository {
     suspend fun loading(longitude: Double, latitude: Double)
@@ -17,10 +16,9 @@ interface CalendarRepository {
     fun oneMonth():Flow<List<MuslimCalendar>>
     suspend fun loadQuranArab()
     fun getSurah(): Flow<List<Sura>>
-    fun downloadSurah(suraAyahs: List<SurahList>, url: String): Flow<UUID>
+    fun downloadSurah(suraAyahs: List<SurahList>, url: String)
     fun getSuraByNumber(number: Int): Flow<Sura>
     fun getSurahById(sura:String):Flow<List<SuraAyah>>
     fun getSura(number:Int):Flow<Surah>
     fun getAudioPath(sura:String):Flow<AudioPath>
-    fun observeProgress(id: UUID): Flow<Int>
 }

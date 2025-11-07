@@ -7,8 +7,9 @@ import androidx.room.PrimaryKey
 data class SuraDbModel(
     @PrimaryKey
     val number: Int,
+    val name: String,
     val englishName: String,
     val englishNameTranslation: String,
-    val name: String,
+    val numberOfAyahs: Int,
     val revelationType: String
 )
