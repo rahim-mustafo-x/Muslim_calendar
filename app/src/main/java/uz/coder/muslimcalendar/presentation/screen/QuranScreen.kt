@@ -1,6 +1,5 @@
 package uz.coder.muslimcalendar.presentation.screen
 
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box

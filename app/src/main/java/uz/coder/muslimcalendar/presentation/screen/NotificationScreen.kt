@@ -38,16 +38,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.Notification
-import uz.coder.muslimcalendar.todo.MONTH
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.viewModel.NotificationViewModel
 import uz.coder.muslimcalendar.presentation.viewModel.state.NotificationState
+import uz.coder.muslimcalendar.todo.MONTH
 
 /* ---------- SCREEN ---------- */
 

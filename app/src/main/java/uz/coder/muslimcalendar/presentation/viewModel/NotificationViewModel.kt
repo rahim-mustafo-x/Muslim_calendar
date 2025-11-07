@@ -138,6 +138,5 @@ class NotificationViewModel @Inject constructor(
         private const val KEY_ASR = "asr"
         private const val KEY_SHOM = "shom"
         private const val KEY_XUFTON = "xufton"
-        private const val TAG = "NotificationViewModel"
     }
 }

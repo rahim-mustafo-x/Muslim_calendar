@@ -7,13 +7,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.network.ApiClient
-import uz.coder.muslimcalendar.data.network.ApiServiceQuranArab
 import uz.coder.muslimcalendar.data.network.ApiServicePrayerTime
+import uz.coder.muslimcalendar.data.network.ApiServiceQuranArab
 import uz.coder.muslimcalendar.data.network.ApiServiceQuranUzbek
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
