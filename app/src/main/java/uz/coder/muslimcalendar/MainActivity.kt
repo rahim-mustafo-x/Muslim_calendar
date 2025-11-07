@@ -1,63 +1,132 @@
 package uz.coder.muslimcalendar
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import uz.coder.muslimcalendar.navigation.CalendarNavigation
-import uz.coder.muslimcalendar.screen.allTasbeh
-import uz.coder.muslimcalendar.screen.asr
-import uz.coder.muslimcalendar.screen.bomdod
-import uz.coder.muslimcalendar.screen.peshin
-import uz.coder.muslimcalendar.screen.shom
-import uz.coder.muslimcalendar.screen.tasbeh
-import uz.coder.muslimcalendar.screen.vitr
-import uz.coder.muslimcalendar.screen.xufton
-import uz.coder.muslimcalendar.todo.ALL_TASBEH
-import uz.coder.muslimcalendar.todo.ASR
-import uz.coder.muslimcalendar.todo.BOMDOD
-import uz.coder.muslimcalendar.todo.PESHIN
-import uz.coder.muslimcalendar.todo.SHOM
-import uz.coder.muslimcalendar.todo.TASBEH
-import uz.coder.muslimcalendar.todo.VITR
-import uz.coder.muslimcalendar.todo.XUFTON
-import uz.coder.muslimcalendar.ui.theme.MuslimCalendarTheme
-import uz.coder.muslimcalendar.viewModel.CalendarViewModel
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
+import uz.coder.muslimcalendar.presentation.navigation.CalendarNavigation
+import uz.coder.muslimcalendar.presentation.ui.theme.LightBlueStatusBar
+import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
+import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: CalendarViewModel by viewModels()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MuslimCalendarTheme(darkTheme = false)  {
-                    Greeting()
-                }
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val viewModel: HomeViewModel by viewModels()
+
+    // Activity result launcher for permissions
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (fineGranted || coarseGranted) {
+            getLocation()
+        } else {
+            showSettingsDialog()
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel.saveInt(BOMDOD, bomdod)
-        viewModel.saveInt(PESHIN, peshin)
-        viewModel.saveInt(ASR, asr)
-        viewModel.saveInt(SHOM, shom)
-        viewModel.saveInt(XUFTON, xufton)
-        viewModel.saveInt(VITR, vitr)
-        viewModel.saveInt(TASBEH, tasbeh)
-        viewModel.saveInt(ALL_TASBEH, allTasbeh)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        enableEdgeToEdge(SystemBarStyle.dark(LightBlueStatusBar))
+
+        checkLocationPermission()
+
+        setContent {
+            MuslimCalendarTheme(darkTheme = false) {
+                Greeting()
+            }
+        }
+    }
+
+    private fun checkLocationPermission() {
+        val fineLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (fineLocation != PackageManager.PERMISSION_GRANTED || coarseLocation != PackageManager.PERMISSION_GRANTED) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                showRationaleDialog()
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        } else {
+            getLocation()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getLocation() {
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                Log.d(TAG, "Location: ${location.latitude}, ${location.longitude}")
+                viewModel.loadInformationFromInternet(location.latitude, location.longitude)
+            } else {
+                Log.d(TAG, "Location is null. Trying again...")
+                // Optional: you can request single update if needed
+            }
+        }
+    }
+
+    private fun showRationaleDialog() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(getString(R.string.permission_title))
+            .setMessage(getString(R.string.permission_location_message))
+            .setPositiveButton(getString(R.string.acess)) { _, _ ->
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+        dialog.show()
+    }
+
+    private fun showSettingsDialog() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", packageName, null)
+        intent.data = uri
+        startActivity(intent)
     }
 }
 
 @Composable
 fun Greeting(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize()){
+    Box(modifier = modifier.fillMaxSize()) {
         CalendarNavigation()
     }
 }
+
+private const val TAG = "MainActivity"
