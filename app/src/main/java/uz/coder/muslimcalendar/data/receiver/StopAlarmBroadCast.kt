@@ -4,10 +4,12 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class StopAlarmBroadCast : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        // MediPlayer obyektini global qilish kerak yoki boshqa usulda to'xtatish kerak
+        // Stop MediaPlayer
         AlarmBroadCast.mediaPlayer?.let {
             if (it.isPlaying) {
                 it.stop()
@@ -16,9 +18,10 @@ class StopAlarmBroadCast : BroadcastReceiver() {
         }
         AlarmBroadCast.mediaPlayer = null
 
-        // Notificationni o'chirish
-        val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(101) // AlarmBroadCast ichida notificationId = 101 edi
+        // Cancel Notification
+        val notificationManager =
+            context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(101)
     }
 
     companion object {

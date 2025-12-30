@@ -45,6 +45,7 @@
     <string name="proggressOfDownload">Sura audio fayllarini yuklash progressi</string>
     <string name="suraIsDownloading">"Sura yuklanmoqda: "</string>
     <string name="downloadCompleted">Yuklash tugadi</string>
+    <string name="access">Ruxsat berish</string>
     <string-array name="months">
         <item>Yanvar</item>
         <item>Fevral</item>

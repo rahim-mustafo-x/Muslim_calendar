@@ -1,18 +1,20 @@
 package uz.coder.muslimcalendar
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 @HiltAndroidApp
-class App : Application(){
+class App : Application(), Configuration.Provider {
 
-    override fun onCreate() {
-        super.onCreate()
-        application = this
-    }
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
-    companion object {
-        lateinit var application: Application
-            private set
-    }
+    override val workManagerConfiguration: Configuration
+        get() =
+        Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }

@@ -22,7 +22,8 @@ class QuranJobService: JobService() {
     private val jobScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onStartJob(params: JobParameters?): Boolean {
-        Log.d(TAG, "onStartJob: #kirdi")
+        if (params == null) return false
+
         jobScope.launch {
             try {
                 getSuraList()
@@ -41,10 +42,25 @@ class QuranJobService: JobService() {
     }
 
     private suspend fun getSuraList() {
-        val response = apiService.getQuranArab()
-        if (response.isSuccessful) {
-            val data = response.body()?.data?.map { map.toSuraDbModel(it) } ?: emptyList()
-            db.suraDao().insertAll(data)
+        Log.d(TAG, "getSuraList: start")
+
+        try {
+            val response = apiService.getQuranArab()
+            Log.d(TAG, "code = ${response.code()}")
+            Log.d(TAG, "isSuccessful = ${response.isSuccessful}")
+            Log.d(TAG, "errorBody = ${response.errorBody()?.string()}")
+            Log.d(TAG, "body = ${response.body()}")
+
+            if (response.isSuccessful && response.body() != null) {
+                val data = response.body()!!.data
+                val dbModels = data?.map { map.toSuraDbModel(it) }?:emptyList()
+                db.suraDao().insertAll(dbModels)
+                Log.d(TAG, "getSuraList: DB ga saqlandi (${dbModels.size})")
+            } else {
+                Log.e(TAG, "getSuraList: API xato bilan qaytdi")
+            }
+        }catch (e: Exception){
+            Log.e(TAG, "getSuraList: error in quran obtaining", e)
         }
     }
 

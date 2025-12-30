@@ -1,12 +1,15 @@
 package uz.coder.muslimcalendar.todo
 
-import uz.coder.muslimcalendar.App
-import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.AllahName
 import uz.coder.muslimcalendar.domain.model.Duo
 import uz.coder.muslimcalendar.domain.model.Namoz
 
-
+const val KEY_BOMDOD = "bomdod"
+const val KEY_QUYOSH = "quyoshChiqishi"
+const val KEY_PESHIN = "peshin"
+const val KEY_ASR = "asr"
+const val KEY_SHOM = "shom"
+const val KEY_XUFTON = "xufton"
 const val REGION = "region"
 const val ALLAH_NAME_INDEX = "allahNameIndex"
 const val DUO_INDEX = "duo_index"
@@ -20,7 +23,6 @@ const val VITR = "vitr_time"
 const val TASBEH = "tasbeh"
 const val ALL_TASBEH = "all_tasbeh"
 const val NUMBER = "number"
-val MONTH:Array<String> = App.application.resources.getStringArray(R.array.months)
 
 
 val namozList = listOf(

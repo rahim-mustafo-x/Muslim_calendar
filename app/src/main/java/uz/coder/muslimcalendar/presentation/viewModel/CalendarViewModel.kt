@@ -2,16 +2,18 @@ package uz.coder.muslimcalendar.presentation.viewModel
 
 import android.Manifest
 import android.app.Application
+import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -25,7 +27,6 @@ import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.todo.ALL_TASBEH
 import uz.coder.muslimcalendar.todo.ASR
 import uz.coder.muslimcalendar.todo.BOMDOD
-import uz.coder.muslimcalendar.todo.MONTH
 import uz.coder.muslimcalendar.todo.PESHIN
 import uz.coder.muslimcalendar.todo.SHOM
 import uz.coder.muslimcalendar.todo.TASBEH
@@ -36,17 +37,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 data class CalendarViewModel @Inject constructor(
-    private val application: Application,
+    @ApplicationContext private val context: Context,
     private val oneMonthDayUseCase: OneMonthDayUseCase,
     private val presentDayUseCase: PresentDayUseCase,
     private val loadingUseCase: LoadingUseCase
-    ):AndroidViewModel(application){
+    ): ViewModel(){
     private val fusedLocationClient by lazy {
-        LocationServices.getFusedLocationProviderClient(application)
+        LocationServices.getFusedLocationProviderClient(context)
     }
     private var latitude = 0.0
     private var longitude = 0.0
-    private val preferences by lazy { application.getSharedPreferences(application.getString(R.string.app_name), Application.MODE_PRIVATE) }
+    private val preferences by lazy { context.getSharedPreferences(context.getString(R.string.app_name), Application.MODE_PRIVATE) }
     private val _bomdod = MutableStateFlow(0)
     val bomdod = _bomdod.asStateFlow()
     private val _peshin = MutableStateFlow(0)
@@ -69,10 +70,10 @@ data class CalendarViewModel @Inject constructor(
     }
     private fun init() {
         if (ActivityCompat.checkSelfPermission(
-                application,
+                context,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                application,
+                context,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
@@ -147,7 +148,7 @@ data class CalendarViewModel @Inject constructor(
     private fun loadInformationFromInternet() {
         viewModelScope.launch {
             Log.d("TAG", "loadInformationFromInternet: ")
-            if (application.isConnected()){
+            if (context.isConnected()){
                 loadingUseCase(longitude, latitude)
             }
         }
@@ -172,9 +173,9 @@ data class CalendarViewModel @Inject constructor(
     }
     fun oneMonth() = channelFlow<List<Calendar>> {
         oneMonthDayUseCase().collect{ it ->
-            send(mutableListOf(Calendar(application.getString(R.string.dayMonth), White, Light_Blue), Calendar(application.getString(R.string.bomdod), White, Light_Blue), Calendar(application.getString(R.string.quyoshChiqishi), White, Light_Blue), Calendar(application.getString(R.string.peshin), White, Light_Blue), Calendar(application.getString(R.string.asr), White, Light_Blue), Calendar(application.getString(R.string.shom), White, Light_Blue), Calendar(application.getString(R.string.xufton), White, Light_Blue)).apply {
+            send(mutableListOf(Calendar(context.getString(R.string.dayMonth), White, Light_Blue), Calendar(context.getString(R.string.bomdod), White, Light_Blue), Calendar(context.getString(R.string.quyoshChiqishi), White, Light_Blue), Calendar(context.getString(R.string.peshin), White, Light_Blue), Calendar(context.getString(R.string.asr), White, Light_Blue), Calendar(context.getString(R.string.shom), White, Light_Blue), Calendar(context.getString(R.string.xufton), White, Light_Blue)).apply {
                 it.forEach {
-                    add(Calendar(it.day.toString().plus("-${MONTH[it.month-1]}"), White, Light_Blue))
+                    add(Calendar(it.day.toString().plus("-${context.resources.getStringArray(R.array.months)[it.month-1]}"), White, Light_Blue))
                     add(Calendar(it.tongSaharlik, Black, White))
                     add(Calendar(it.sunRise, Black, White))
                     add(Calendar(it.peshin, Black, White))

@@ -90,7 +90,7 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
             QuranAyahScreen(controller = controller, navBackStackEntry = it)
         }
         composable(Screen.Notification.route){
-            NotificationScreen(controller = controller)
+            NotificationScreen()
         }
     }
 }

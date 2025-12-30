@@ -15,7 +15,9 @@
 -keepclassmembers class * extends androidx.work.Worker {
     public <init>(android.content.Context, androidx.work.WorkerParameters);
 }
--keep class uz.coder.muslimcalendar.data.service.QuranWorkManager, uz.coder.muslimcalendar.data.service.DownloadWorker { *; }
+-keep class uz.coder.muslimcalendar.data.db.model.*, uz.coder.muslimcalendar.data.db.dao.*, uz.coder.muslimcalendar.data.network.modelDTO.*, uz.coder.muslimcalendar.data.service.* {
+    public *;
+}
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable

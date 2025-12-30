@@ -1,21 +1,22 @@
 package uz.coder.muslimcalendar.presentation.viewModel
 
-import android.app.Application
+import android.content.Context
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.domain.usecase.DownloadSurahUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetAudioPathUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetSuraUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetSurahByIdUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetSurahByNumberUseCase
-import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.presentation.viewModel.state.SurahState
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.todo.toSuraAyah
@@ -23,13 +24,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SurahViewModel @Inject constructor(
-    private val application: Application,
+    @ApplicationContext private val context: Context,
     private val getSurahByIdUseCase: GetSurahByIdUseCase,
     private val getSuraUseCase: GetSuraUseCase,
     private val getSurahByNumberUseCase: GetSurahByNumberUseCase,
     private val audioPathUseCase: GetAudioPathUseCase,
     private val downloadSurahUseCase: DownloadSurahUseCase
-): AndroidViewModel(application) {
+): ViewModel() {
     private val _state = MutableStateFlow<SurahState>(SurahState.Init)
     val state = _state.asStateFlow()
     private val _audioPath = MutableStateFlow("")
@@ -42,12 +43,12 @@ class SurahViewModel @Inject constructor(
                     getAudioPath(surahNumber.toString())
                     Log.d(TAG, "getSura: $it")
                     if (it.isEmpty()){
-                        if (application.isConnected()) {
+                        if (context.isConnected()) {
                             getSuraUseCase(surahNumber).collect {
                                 _state.emit(SurahState.Success(it.result.toSuraAyah()))
                             }
                         }else {
-                                _state.emit(SurahState.Error(application.getString(R.string.no_internet)))
+                                _state.emit(SurahState.Error(context.getString(R.string.no_internet)))
                         }
                     }else{
                         _state.emit(SurahState.Success(it))
@@ -63,7 +64,7 @@ class SurahViewModel @Inject constructor(
                     Log.d(TAG, "getAudioPath: ${it.path}")
                     _audioPath.emit(it.path)
                 }else{
-                    if (application.isConnected()){
+                    if (context.isConnected()){
                         _audioPath.emit(getQuranAudioUrl(sura.toInt()))
                     }
                 }
