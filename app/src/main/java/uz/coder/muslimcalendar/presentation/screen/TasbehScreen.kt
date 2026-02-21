@@ -33,7 +33,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuSetting
+import uz.coder.muslimcalendar.domain.model.MenuSetting
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.viewModel.CalendarViewModel
@@ -94,11 +94,11 @@ fun Screen(modifier: Modifier = Modifier, paddingValues: PaddingValues, controll
             .fillMaxWidth()
 
             .background(Light_Blue), contentAlignment = Alignment.BottomEnd){
-            Text(stringResource(R.string.all).plus(allTasbeh.toString()),
-                modifier
+            Text(text = stringResource(R.string.all).plus(allTasbeh.toString()),
+                modifier = modifier
                     .fillMaxSize()
                     .wrapContentSize(Alignment.BottomEnd)
-                    .padding(20.dp), White, 30.sp, textAlign = TextAlign.End)
+                    .padding(20.dp), White, fontSize = 30.sp, textAlign = TextAlign.End)
         }
         Box(modifier = modifier
             .fillMaxSize(), contentAlignment = Alignment.Center) {

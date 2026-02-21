@@ -44,7 +44,6 @@ import uz.coder.muslimcalendar.domain.model.Notification
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.viewModel.NotificationViewModel
-import uz.coder.muslimcalendar.presentation.viewModel.state.NotificationState
 
 /* ================= SCREEN ================= */
 
@@ -184,7 +183,7 @@ private fun NotificationItem(
         ) {
 
             Text(
-                text = item.name ?: "",
+                text = item.name,
                 fontSize = 18.sp,
                 modifier = Modifier.weight(1f)
             )

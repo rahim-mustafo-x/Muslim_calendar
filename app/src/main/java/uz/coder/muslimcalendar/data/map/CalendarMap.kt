@@ -21,22 +21,22 @@ import javax.inject.Singleton
 class CalendarMap @Inject constructor() {
 
     fun toMuslimCalendarDbModel(times: List<PrayerData?>?): List<MuslimCalendarDbModel> {
-        return times?.map { prayerData ->
+        return times?.filterNotNull()?.map { prayerData ->
             val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
-            val date = LocalDate.parse(prayerData?.date?.gregorian?.date, formatter)
+            val date = LocalDate.parse(prayerData.date?.gregorian?.date, formatter)
 
             val day = date.dayOfMonth
             val month = date.monthValue
             MuslimCalendarDbModel(
                 day = day,
                 month = month,
-                weekday = prayerData?.date?.gregorian?.weekday?.en?.toWeakDays() ?: "",
-                asr = prayerData?.timings?.asr?.replace(" (+05)", "")?:"",
-                hufton = prayerData?.timings?.isha?.replace(" (+05)", "")?:"",
-                peshin = prayerData?.timings?.dhuhr?.replace(" (+05)", "")?:"",
-                sunrise = prayerData?.timings?.sunrise?.replace(" (+05)", "")?:"",
-                shomIftor = prayerData?.timings?.maghrib?.replace(" (+05)", "")?:"",
-                tongSaharlik = prayerData?.timings?.fajr?.replace(" (+05)", "")?:""
+                weekday = prayerData.date?.gregorian?.weekday?.en?.toWeakDays() ?: "",
+                asr = prayerData.timings?.asr?.replace(" (+05)", "")?:"",
+                hufton = prayerData.timings?.isha?.replace(" (+05)", "")?:"",
+                peshin = prayerData.timings?.dhuhr?.replace(" (+05)", "")?:"",
+                sunrise = prayerData.timings?.sunrise?.replace(" (+05)", "")?:"",
+                shomIftor = prayerData.timings?.maghrib?.replace(" (+05)", "")?:"",
+                tongSaharlik = prayerData.timings?.fajr?.replace(" (+05)", "")?:""
             )
         }?:emptyList()
     }

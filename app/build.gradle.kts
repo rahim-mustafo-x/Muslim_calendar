@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -14,8 +16,8 @@ android {
         applicationId = "uz.coder.muslimcalendar"
         minSdk = 26
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.5"
+        versionCode = 7
+        versionName = "1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,6 +26,7 @@ android {
         ndk{
             abiFilters.addAll(listOf("armeabi-v7a","arm64-v8a","x86","x86_64"))
         }
+        ndkVersion = "29.0.14206865"
     }
     externalNativeBuild {
         cmake {
@@ -45,8 +48,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin{
+        jvmToolchain(JavaVersion.VERSION_17.majorVersion.toInt())
+        compilerOptions {
+            freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        }
     }
     buildFeatures {
         compose = true
@@ -62,6 +68,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     implementation(libs.kotlinx.coroutines.android)

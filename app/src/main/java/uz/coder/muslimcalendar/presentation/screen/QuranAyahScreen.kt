@@ -36,7 +36,7 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuSetting
+import uz.coder.muslimcalendar.domain.model.MenuSetting
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.presentation.ui.view.AyahArabicSection
 import uz.coder.muslimcalendar.presentation.ui.view.AyahTranslationSection

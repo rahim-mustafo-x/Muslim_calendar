@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package uz.coder.muslimcalendar.presentation.screen
 
 import android.annotation.SuppressLint
@@ -13,9 +15,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -31,7 +35,7 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
 import uz.coder.muslimcalendar.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.*
-import uz.coder.muslimcalendar.models.model.MenuSetting
+import uz.coder.muslimcalendar.domain.model.MenuSetting
 import uz.coder.muslimcalendar.presentation.ui.theme.Blue
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
@@ -49,8 +53,7 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val homeState by homeViewModel.state.collectAsStateWithLifecycle()
-
-    // 📍 Location faqat 1 marta olinadi
+    homeViewModel.loadWithSavedLocation()
     LaunchedEffect(Unit) {
         val locationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -61,13 +64,15 @@ fun HomeScreen(
             else
                 LocationManager.NETWORK_PROVIDER
 
-        @Suppress("DEPRECATION")
-        locationManager.requestSingleUpdate(provider, {
-            homeViewModel.loadInformationFromInternet(it.latitude, it.longitude)
+        locationManager.requestSingleUpdate(provider, { location ->
+            location.let {
+                homeViewModel.loadInformationFromInternet(it.latitude, it.longitude)
+            }
         }, Looper.getMainLooper())
     }
 
     val menuList = listOf(
+        Menu(R.drawable.refresh, stringResource(R.string.refresh), MenuSetting.Refresh),
         Menu(R.drawable.ic_bell, stringResource(R.string.notification), MenuSetting.Notification),
         Menu(R.drawable.about, stringResource(R.string.about), MenuSetting.About)
     )
@@ -83,6 +88,7 @@ fun HomeScreen(
                 when (menu) {
                     MenuSetting.Notification -> controller.navigate(Notification.route)
                     MenuSetting.About -> controller.navigate(About.route)
+                    MenuSetting.Refresh -> homeViewModel.loadWithSavedLocation()
                     else -> {}
                 }
             }
@@ -103,7 +109,6 @@ fun HomeScreen(
     }
 }
 
-
 @Composable
 fun LoadingScreen(padding: PaddingValues) = Box(
     modifier = Modifier
@@ -123,7 +128,7 @@ fun ErrorScreen(message: String, onRetry: () -> Unit) = Column(
     verticalArrangement = Arrangement.Center
 ) {
     Image(
-        painterResource(R.drawable.no_internet),
+        painter = painterResource(R.drawable.no_internet),
         contentDescription = null,
         modifier = Modifier.size(200.dp),
         contentScale = ContentScale.Crop
@@ -178,21 +183,29 @@ fun Screen(
             }
         }
 
-        ScrollableTabRow(
+        SecondaryScrollableTabRow(
             selectedTabIndex = pagerState.currentPage,
-            containerColor = MaterialTheme.colorScheme.background,
-            indicator = { Box {} }
-        ) {
-            times.forEachIndexed { index, item ->
-                Tab(
-                    selected = index == pagerState.currentPage,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                    text = { Text(item) },
-                    selectedContentColor = Blue,
-                    unselectedContentColor = Light_Blue
-                )
-            }
-        }
+            modifier = Modifier.fillMaxWidth(),
+            scrollState = rememberScrollState(),
+            contentColor = TabRowDefaults.primaryContentColor,
+            containerColor = Color.Transparent,
+            edgePadding = 0.dp,
+            divider = {
+                HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+            },
+            tabs = {
+                times.forEachIndexed { index, item ->
+                    Tab(
+                        selected = index == pagerState.currentPage,
+                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                        text = { Text(item) },
+                        selectedContentColor = Blue,
+                        unselectedContentColor = Light_Blue
+                    )
+                }
+            },
+            minTabWidth = TabRowDefaults.ScrollableTabRowMinTabWidth
+        )
 
         Bottom(modifier, controller)
     }
@@ -206,17 +219,17 @@ fun Bottom(modifier: Modifier, controller: NavHostController) {
             .verticalScroll(rememberScrollState())
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            MainButton(modifier = modifier,R.drawable.book, stringResource(R.string.blessing)) { controller.navigate(Duo.route) }
-            MainButton(modifier = modifier,R.drawable.calendar, stringResource(R.string.calendar)) { controller.navigate(Calendar.route) }
-            MainButton(modifier = modifier,R.drawable.nine_nine, stringResource(R.string.allah)) { controller.navigate(AllahName.route) }
+            MainButton(modifier = modifier, R.drawable.book, stringResource(R.string.blessing)) { controller.navigate(Duo.route) }
+            MainButton(modifier = modifier, R.drawable.calendar, stringResource(R.string.calendar)) { controller.navigate(Calendar.route) }
+            MainButton(modifier = modifier, R.drawable.nine_nine, stringResource(R.string.allah)) { controller.navigate(AllahName.route) }
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            MainButton(modifier = modifier,R.drawable.rosary, stringResource(R.string.rosary)) { controller.navigate(Tasbeh.route) }
-            MainButton(modifier = modifier,R.drawable.muslim_man, stringResource(R.string.orderOfPrayer)) { controller.navigate(Namoz.route) }
-            MainButton(modifier = modifier,R.drawable.carpet, stringResource(R.string.qazo)) { controller.navigate(Qazo.route) }
+            MainButton(modifier = modifier, R.drawable.rosary, stringResource(R.string.rosary)) { controller.navigate(Tasbeh.route) }
+            MainButton(modifier = modifier, R.drawable.muslim_man, stringResource(R.string.orderOfPrayer)) { controller.navigate(Namoz.route) }
+            MainButton(modifier = modifier, R.drawable.carpet, stringResource(R.string.qazo)) { controller.navigate(Qazo.route) }
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            MainButton(modifier = modifier,R.drawable.quran, stringResource(R.string.quran)) { controller.navigate(Quran.route) }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            MainButton(modifier = modifier, R.drawable.quran, stringResource(R.string.quran)) { controller.navigate(Quran.route) }
         }
     }
 }

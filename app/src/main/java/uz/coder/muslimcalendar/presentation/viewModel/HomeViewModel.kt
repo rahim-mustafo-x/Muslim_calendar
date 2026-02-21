@@ -32,16 +32,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = HomeState.Loading
             presentDayUseCase().collect { calendar ->
-                _state.value = HomeState.Success(calendar)
+                _state.emit(HomeState.Success(calendar))
             }
         }
-    }
-
-    fun requestLocation() {
-        // Location olish logikasi
-        val lat = sharedPref.getFloat("saved_latitude", 41.2995f).toDouble()
-        val lon = sharedPref.getFloat("saved_longitude", 69.2401f).toDouble()
-        loadInformationFromInternet(lat, lon)
     }
 
     fun loadInformationFromInternet(latitude: Double, longitude: Double) {
@@ -61,7 +54,4 @@ class HomeViewModel @Inject constructor(
         val lon = sharedPref.getFloat("saved_longitude", 69.2401f).toDouble()
         loadInformationFromInternet(lat, lon)
     }
-
-    fun shouldShowLocationDialog(): Boolean = !sharedPref.getBoolean("location_requested", false)
-    fun markLocationGranted() = sharedPref.saveValue("location_granted", true)
 }
