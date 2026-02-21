@@ -5,6 +5,7 @@ import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import android.os.PersistableBundle
+import android.util.Log
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +20,10 @@ import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.SharedPref
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.map.CalendarMap
+import uz.coder.muslimcalendar.data.network.ApiServicePrayerTime
 import uz.coder.muslimcalendar.data.network.ApiServiceQuranUzbek
 import uz.coder.muslimcalendar.data.service.DownloadJobService
 import uz.coder.muslimcalendar.data.service.JobIds
-import uz.coder.muslimcalendar.data.service.PrayerTimeJobService
 import uz.coder.muslimcalendar.data.service.QuranJobService
 import uz.coder.muslimcalendar.domain.model.AudioPath
 import uz.coder.muslimcalendar.domain.model.MuslimCalendar
@@ -43,6 +44,7 @@ class CalendarRepositoryImpl @Inject constructor(
     private val map: CalendarMap,
     @ApplicationContext private val context: Context,
     private val apiService: ApiServiceQuranUzbek,
+    private val prayerTimeApiService:ApiServicePrayerTime,
     private val gson: Gson
 ) : CalendarRepository {
 
@@ -192,20 +194,18 @@ class CalendarRepositoryImpl @Inject constructor(
 
     override suspend fun loading(longitude: Double, latitude: Double) {
         if (longitude != 0.0 && latitude != 0.0) {
-            val extras = PersistableBundle().apply {
-                putDouble(PrayerTimeJobService.LATITUDE, latitude)
-                putDouble(PrayerTimeJobService.LONGITUDE, longitude)
+            val localDate = LocalDate.now()
+            val year = localDate.year
+            val month = localDate.month.value
+            val result = prayerTimeApiService.oneMonth(year, month, latitude, longitude)
+            Log.d("CalendarRepositoryImpl", "loading: $result")
+            if(result.isSuccessful){
+                result.body()?.let {it->
+                    it.data?.let {
+                        db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(it))
+                    }
+                }
             }
-            JobInfo.Builder(
-                JobIds.PRAYER_TIME,
-                ComponentName(context, PrayerTimeJobService::class.java)
-            )
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                .setMinimumLatency(0)
-                .setOverrideDeadline(0)
-                .setExtras(extras)
-                .build()
-                .also { context.getSystemService(JobScheduler::class.java)?.schedule(it) }
         }
     }
 

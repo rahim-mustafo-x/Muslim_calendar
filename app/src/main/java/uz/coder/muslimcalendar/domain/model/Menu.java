@@ -2,8 +2,6 @@ package uz.coder.muslimcalendar.domain.model;
 
 import androidx.annotation.NonNull;
 
-import uz.coder.muslimcalendar.models.model.MenuSetting;
-
 public class Menu {
     private int img;
     private String text;

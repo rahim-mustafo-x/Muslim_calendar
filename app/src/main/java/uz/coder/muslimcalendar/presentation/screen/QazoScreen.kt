@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
-import uz.coder.muslimcalendar.models.model.MenuSetting
+import uz.coder.muslimcalendar.domain.model.MenuSetting
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.ui.view.QazoCount

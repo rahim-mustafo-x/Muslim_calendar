@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun AboutScreen(modifier: Modifier = Modifier) {
@@ -24,13 +25,12 @@ fun AboutScreen(modifier: Modifier = Modifier) {
 @Composable
 fun About(modifier: Modifier = Modifier) {
     val state = rememberScrollState()
-    val context = LocalContext.current
     Scaffold(topBar = { CalendarTopBar(list = emptyList()) {} }){
         Box(modifier = modifier
             .fillMaxSize()
             .padding(it)){
             Text(
-                context.getString(R.string.about_text),
+                stringResource(R.string.about_text),
                 modifier.fillMaxSize().padding(horizontal = 5.dp).verticalScroll(state),
                 fontSize = 25.sp,
                 color = Black

@@ -51,10 +51,5 @@ fun List<SurahList>.toSuraAyah(): List<SuraAyah> {
     return this.map { SuraAyah(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, id =  it.id, sura =  it.sura, translation =  it.translation) }
 }
 fun Pair<List<String>, List<String>>.toItems(): List<Item> {
-    val list = mutableListOf<Item>()
-    list.clear()
-    repeat(this.first.size){
-        list.add(Item(this.first[it], this.second[it]))
-    }
-    return list
+    return this.first.zip(this.second) { name, time -> Item(name, time) }
 }
