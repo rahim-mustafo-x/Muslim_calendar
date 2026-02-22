@@ -1,4 +1,15 @@
 # Muslim calendar
+## Used technologies
+> Jetpack compose
+> 
+> Retrofit
+> 
+> ViewModel
+> 
+> Workmanager
+> 
+> Navigation-jetpack-compose
+> 
 ## This project is contains of 2 language
 
 
