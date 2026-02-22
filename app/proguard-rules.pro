@@ -9,13 +9,10 @@
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
--keepclassmembers class uz.coder.muslimcalendar.models.internet.* {
-   public *;
-}
 -keepclassmembers class * extends androidx.work.Worker {
     public <init>(android.content.Context, androidx.work.WorkerParameters);
 }
--keep class uz.coder.muslimcalendar.data.db.model.*, uz.coder.muslimcalendar.data.db.dao.*, uz.coder.muslimcalendar.data.network.modelDTO.*, uz.coder.muslimcalendar.data.service.* {
+-keep class uz.coder.muslimcalendar.data.db.model.*, uz.coder.muslimcalendar.data.db.dao.*, uz.coder.muslimcalendar.data.network.modelDTO.*, uz.coder.muslimcalendar.data.network.modelDTO.quran.*, uz.coder.muslimcalendar.data.service.* {
     public *;
 }
 # Uncomment this to preserve the line number information for
