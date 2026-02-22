@@ -2,21 +2,21 @@ package uz.coder.muslimcalendar.presentation.ui.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-//noinspection UsingMaterialAndMaterial3Libraries
-import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.delay
-import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.todo.formatTime
-import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 
 @Composable
 fun QuranPlayer(
@@ -32,7 +32,6 @@ fun QuranPlayer(
     var currentPosition by remember { mutableLongStateOf(0L) }
     var isCompleted by remember { mutableStateOf(false) }
 
-    // 🔄 Update position & completion status
     LaunchedEffect(exoPlayer) {
         while (true) {
             currentPosition = exoPlayer.currentPosition
@@ -44,7 +43,7 @@ fun QuranPlayer(
     }
 
     Surface(
-        color = Light_Blue,
+        color = MaterialTheme.colorScheme.primaryContainer,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         modifier = modifier.fillMaxWidth()
     ) {
@@ -52,7 +51,6 @@ fun QuranPlayer(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 🎚️ Slider
             Slider(
                 value = sliderPosition,
                 onValueChange = {
@@ -60,14 +58,13 @@ fun QuranPlayer(
                     exoPlayer.seekTo((duration * it).toLong())
                 },
                 colors = SliderDefaults.colors(
-                    thumbColor = Color.White,
-                    activeTrackColor = Color.White,
-                    inactiveTrackColor = Color.Gray
+                    thumbColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    activeTrackColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    inactiveTrackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f)
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // ⏱ Time display
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -76,13 +73,13 @@ fun QuranPlayer(
             ) {
                 Text(
                     text = currentPosition.formatTime(),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Start
                 )
                 Text(
                     text = duration.formatTime(),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 12.sp,
                     textAlign = TextAlign.End
                 )
@@ -90,7 +87,6 @@ fun QuranPlayer(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🎮 Controls
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround,
@@ -98,9 +94,9 @@ fun QuranPlayer(
             ) {
                 IconButton(onClick = { onPreviousClick() }) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_previous),
+                        imageVector = Icons.Default.FastRewind,
                         contentDescription = "Previous",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
 
@@ -114,21 +110,21 @@ fun QuranPlayer(
                     }
                 }) {
                     Icon(
-                        painter = if (isPlaying && !isCompleted)
-                            painterResource(R.drawable.ic_pause)
+                        imageVector = if (isPlaying && !isCompleted)
+                            Icons.Default.Pause
                         else
-                            painterResource(R.drawable.ic_play),
+                            Icons.Default.PlayArrow,
                         contentDescription = "Play/Pause",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(32.dp)
                     )
                 }
 
                 IconButton(onClick = { onNextClick() }) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_next),
+                        imageVector = Icons.Default.FastForward,
                         contentDescription = "Next",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }

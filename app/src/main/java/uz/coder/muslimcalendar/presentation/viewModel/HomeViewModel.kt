@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.SharedPref
+import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.domain.usecase.LoadingUseCase
 import uz.coder.muslimcalendar.domain.usecase.PresentDayUseCase
 import uz.coder.muslimcalendar.presentation.viewModel.state.HomeState
@@ -20,7 +21,8 @@ class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val presentDayUseCase: PresentDayUseCase,
     private val loadingUseCase: LoadingUseCase,
-    private val sharedPref: SharedPref
+    private val sharedPref: SharedPref,
+    private val notificationScheduler: NotificationScheduler
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeState>(HomeState.Init)
@@ -45,6 +47,8 @@ class HomeViewModel @Inject constructor(
                 sharedPref.saveValue("saved_longitude", longitude.toFloat())
                 loadingUseCase(longitude, latitude)
                 loadTodayData()
+                // Schedule azan alarms after loading prayer times
+                notificationScheduler.scheduleAllAlarms()
             } catch (_: Exception) { loadTodayData() }
         }
     }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
@@ -26,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -37,7 +37,6 @@ import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
 import uz.coder.muslimcalendar.domain.model.MenuSetting
-import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.ui.view.QazoCount
 import uz.coder.muslimcalendar.presentation.viewModel.CalendarViewModel
@@ -155,7 +154,13 @@ fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
 
     if (showDialog){
         Dialog(onDismissRequest = { showDialog = false }) {
-            OutlinedCard(modifier.padding(10.dp), colors = CardDefaults.cardColors(White), elevation = CardDefaults.cardElevation(10.dp)) {
+            OutlinedCard(
+                modifier.padding(10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(10.dp)
+            ) {
                 Column {
                     OutlinedTextField(value = numberOfQazo.toString(), onValueChange = { numberOfQazo = try {
                         it.toInt()
@@ -163,21 +168,42 @@ fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
                         .fillMaxWidth()
                         .padding(10.dp))
                     Row(modifier.fillMaxWidth()) {
-                        OutlinedButton(onClick = { showDialog =false; id = -1; numberOfQazo = 0 }, modifier = modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(10.dp), colors = ButtonDefaults.buttonColors(Light_Blue)) {
-                            Box(modifier = modifier.fillMaxWidth()){
-                                Text(stringResource(R.string.cancel), color = White)
-                            }
+                        OutlinedButton(
+                            onClick = { showDialog = false; id = -1; numberOfQazo = 0 },
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        ) {
+                            Text(
+                                stringResource(R.string.cancel),
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         }
-                        OutlinedButton(onClick = { try{ showDialog =false; buttonClicked(numberOfQazo, viewModel); id = -1; numberOfQazo = 0 }catch (_:Exception){  } }, modifier = modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(10.dp), colors = ButtonDefaults.buttonColors(Light_Blue)) {
-                            Box(modifier = modifier.fillMaxWidth()){
-                                Text(stringResource(R.string.save), color = White)
-                            }
+                        OutlinedButton(
+                            onClick = {
+                                try {
+                                    showDialog = false
+                                    buttonClicked(numberOfQazo, viewModel)
+                                    id = -1
+                                    numberOfQazo = 0
+                                } catch (_: Exception) { }
+                            },
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        ) {
+                            Text(
+                                stringResource(R.string.save),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         }
                     }
                 }

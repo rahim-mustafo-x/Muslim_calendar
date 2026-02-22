@@ -3,66 +3,51 @@ package uz.coder.muslimcalendar.presentation.screen
 import android.annotation.SuppressLint
 import android.icu.util.Calendar
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.Notification
-import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
-import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.viewModel.NotificationViewModel
+import uz.coder.muslimcalendar.R
 
-/* ================= SCREEN ================= */
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
     viewModel: NotificationViewModel = hiltViewModel()
 ) {
     val calendarData by viewModel.oneMonthDay().collectAsState(emptyList())
     val notifications by viewModel.notifications.collectAsState()
-
     var times by remember { mutableStateOf(List(6) { "--:--" }) }
 
     Scaffold(
-        topBar = { CalendarTopBar(list = emptyList()) {} }
+        topBar = {
+            TopAppBar(
+                title = { Text("Eslatmalar") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             CalendarTime(calendarData) { times = it }
             HorizontalDivider()
@@ -74,7 +59,6 @@ fun NotificationScreen(
         }
     }
 }
-/* ================= CALENDAR HEADER ================= */
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
@@ -82,61 +66,68 @@ fun CalendarTime(
     data: List<MuslimCalendar>,
     onChange: (List<String>) -> Unit
 ) {
-    val context = LocalContext.current
     val calendar = Calendar.getInstance()
     var today by remember { mutableIntStateOf(calendar.get(Calendar.DAY_OF_MONTH)) }
-
     val date = data.firstOrNull { it.day == today }
 
     LaunchedEffect(today, data) {
         if (date != null) {
             onChange(
                 listOf(
-                    date.tongSaharlik ?: "--:--",
-                    date.sunRise ?: "--:--",
-                    date.peshin ?: "--:--",
-                    date.asr ?: "--:--",
-                    date.shomIftor ?: "--:--",
-                    date.hufton ?: "--:--"
+                    date.tongSaharlik,
+                    date.sunRise,
+                    date.peshin,
+                    date.asr,
+                    date.shomIftor,
+                    date.hufton
                 )
             )
         }
     }
 
     if (date != null) {
-        Row(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
-                .background(Light_Blue),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            IconButton(
-                onClick = { if (today > 1) today-- },
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, tint = White)
-            }
-
-            Text(
-                text = "${date.weekday}, ${date.day} - ${context.resources.getStringArray(R.array.months)[date.month - 1]}",
-                color = White,
-                modifier = Modifier.weight(10f),
-                textAlign = TextAlign.Center
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
             )
-
-            IconButton(
-                onClick = { if (today < data.size) today++ },
-                modifier = Modifier.weight(1f)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = White)
+                IconButton(onClick = { if (today > 1) today-- }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+
+                Text(
+                    text = "${date.weekday}, ${date.day}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    textAlign = TextAlign.Center
+                )
+
+                IconButton(onClick = { if (today < data.size) today++ }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
     }
 }
-
-/* ================= ITEMS ================= */
 
 @Composable
 private fun NotificationItems(
@@ -144,7 +135,7 @@ private fun NotificationItems(
     listOfTimes: List<String>,
     onIconPick: (Int, Int) -> Unit
 ) {
-    Column {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         list.forEachIndexed { index, item ->
             NotificationItem(
                 index = index,
@@ -156,8 +147,6 @@ private fun NotificationItems(
     }
 }
 
-/* ================= SINGLE ITEM ================= */
-
 @Composable
 private fun NotificationItem(
     index: Int,
@@ -166,30 +155,40 @@ private fun NotificationItem(
     onIconPick: (Int, Int) -> Unit
 ) {
     val iconOptions = listOf(
-        R.drawable.ic_speaker_on to stringResource(R.string.speaker_on),
-        R.drawable.ic_speaker_cross to stringResource(R.string.speaker_off),
-        R.drawable.ic_bell to stringResource(R.string.bell)
+        Triple(R.drawable.ic_speaker_on, "Azon", Icons.AutoMirrored.Filled.VolumeUp),
+        Triple(R.drawable.ic_speaker_cross, "O'chirish", Icons.AutoMirrored.Filled.VolumeOff),
+        Triple(R.drawable.ic_bell, "Bildirishnoma", Icons.Default.Notifications)
     )
 
     var expanded by remember { mutableStateOf(false) }
 
-    Column {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .padding(horizontal = 16.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = item.name,
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
 
             Text(
                 text = time,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.End
             )
@@ -197,9 +196,13 @@ private fun NotificationItem(
             Box {
                 IconButton(onClick = { expanded = true }) {
                     Icon(
-                        painter = painterResource(item.icon),
+                        imageVector = when (item.icon) {
+                            R.drawable.ic_speaker_on -> Icons.AutoMirrored.Filled.VolumeUp
+                            R.drawable.ic_speaker_cross -> Icons.AutoMirrored.Filled.VolumeOff
+                            else -> Icons.Default.Notifications
+                        },
                         contentDescription = null,
-                        tint = Light_Blue
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -207,18 +210,18 @@ private fun NotificationItem(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    iconOptions.forEach { (icon, title) ->
+                    iconOptions.forEach { (icon, title, materialIcon) ->
                         DropdownMenuItem(
                             text = { Text(title) },
                             onClick = {
                                 expanded = false
                                 onIconPick(index, icon)
                             },
-                            trailingIcon = {
+                            leadingIcon = {
                                 Icon(
-                                    painter = painterResource(icon),
+                                    imageVector = materialIcon,
                                     contentDescription = null,
-                                    tint = Light_Blue
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         )
@@ -226,6 +229,5 @@ private fun NotificationItem(
                 }
             }
         }
-        HorizontalDivider()
     }
 }

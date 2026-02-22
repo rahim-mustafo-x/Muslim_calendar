@@ -4,22 +4,46 @@ import android.annotation.SuppressLint
 import android.app.job.JobParameters
 import android.app.job.JobService
 import android.util.Log
-import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.*
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.map.CalendarMap
-import uz.coder.muslimcalendar.data.network.ApiServiceQuranArab
-import javax.inject.Inject
+import uz.coder.muslimcalendar.data.network.KtorApiService
 
 @SuppressLint("SpecifyJobSchedulerIdRange")
-@AndroidEntryPoint
-class QuranJobService: JobService() {
+class QuranJobService : JobService() {
 
-    @Inject lateinit var apiService: ApiServiceQuranArab
-    @Inject lateinit var map: CalendarMap
-    @Inject lateinit var db: AppDatabase
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface QuranJobServiceEntryPoint {
+        fun getApiService(): KtorApiService
+        fun getCalendarMap(): CalendarMap
+        fun getDatabase(): AppDatabase
+    }
+
+    private lateinit var apiService: KtorApiService
+    private lateinit var map: CalendarMap
+    private lateinit var db: AppDatabase
 
     private val jobScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    companion object {
+        private const val TAG = "QuranJobService"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        val entryPoint = EntryPointAccessors.fromApplication(
+            applicationContext,
+            QuranJobServiceEntryPoint::class.java
+        )
+        apiService = entryPoint.getApiService()
+        map = entryPoint.getCalendarMap()
+        db = entryPoint.getDatabase()
+    }
 
     override fun onStartJob(params: JobParameters?): Boolean {
         if (params == null) return false
@@ -29,7 +53,7 @@ class QuranJobService: JobService() {
                 getSuraList()
                 jobFinished(params, false)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Error in QuranJobService", e)
                 jobFinished(params, true)
             }
         }
@@ -46,25 +70,25 @@ class QuranJobService: JobService() {
 
         try {
             val response = apiService.getQuranArab()
-            Log.d(TAG, "code = ${response.code()}")
-            Log.d(TAG, "isSuccessful = ${response.isSuccessful}")
-            Log.d(TAG, "errorBody = ${response.errorBody()?.string()}")
-            Log.d(TAG, "body = ${response.body()}")
+            Log.d(TAG, "Response code = ${response.code}")
+            Log.d(TAG, "Response status = ${response.status}")
+            Log.d(TAG, "Response data = ${response.data}")
 
-            if (response.isSuccessful && response.body() != null) {
-                val data = response.body()!!.data
-                val dbModels = data?.map { map.toSuraDbModel(it) }?:emptyList()
+            val data = response.data
+            if (data != null) {
+                val dbModels = data.map { map.toSuraDbModel(it) }
                 db.suraDao().insertAll(dbModels)
-                Log.d(TAG, "getSuraList: DB ga saqlandi (${dbModels.size})")
+                Log.d(TAG, "getSuraList: Saved to DB (${dbModels.size} items)")
             } else {
-                Log.e(TAG, "getSuraList: API xato bilan qaytdi")
+                Log.e(TAG, "getSuraList: API returned null data")
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.e(TAG, "getSuraList: error in quran obtaining", e)
         }
     }
 
-    companion object {
-        private const val TAG = "QuranJobService"
+    override fun onDestroy() {
+        super.onDestroy()
+        jobScope.cancel()
     }
 }

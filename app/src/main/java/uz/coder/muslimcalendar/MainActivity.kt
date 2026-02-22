@@ -15,6 +15,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -24,15 +25,28 @@ import androidx.core.net.toUri
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.presentation.navigation.CalendarNavigation
 import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
+import uz.coder.muslimcalendar.presentation.ui.theme.ThemeManager
+import uz.coder.muslimcalendar.presentation.ui.theme.isDarkTheme
 import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val viewModel: HomeViewModel by viewModels()
+    
+    @Inject
+    lateinit var notificationScheduler: NotificationScheduler
+    
+    @Inject
+    lateinit var themeManager: ThemeManager
 
     private var locationPermissionRequestCount = 0
 
@@ -147,7 +161,8 @@ class MainActivity : ComponentActivity() {
 
     private fun setContentUI() {
         setContent {
-            MuslimCalendarTheme(darkTheme = false) {
+            val isDark = themeManager.isDarkTheme(isSystemInDarkTheme())
+            MuslimCalendarTheme(darkTheme = isDark) {
                 Greeting()
             }
         }
@@ -245,8 +260,27 @@ class MainActivity : ComponentActivity() {
             if (location != null) {
                 Log.d(TAG, "Location: ${location.latitude}, ${location.longitude}")
                 viewModel.loadInformationFromInternet(location.latitude, location.longitude)
+                scheduleAzanAlarms()
             } else {
-                Log.d(TAG, "Location is null. Trying again...")
+                Log.d(TAG, "Location is null. Using saved or default location...")
+                viewModel.loadWithSavedLocation()
+                scheduleAzanAlarms()
+            }
+        }.addOnFailureListener { exception ->
+            Log.e(TAG, "Failed to get location: ${exception.message}")
+            viewModel.loadWithSavedLocation()
+            scheduleAzanAlarms()
+        }
+    }
+    
+    private fun scheduleAzanAlarms() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                Log.d(TAG, "Scheduling azan alarms for prayer times...")
+                notificationScheduler.scheduleAllAlarms()
+                Log.d(TAG, "Azan alarms scheduled successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to schedule azan alarms: ${e.message}")
             }
         }
     }

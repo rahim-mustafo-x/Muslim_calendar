@@ -49,8 +49,6 @@ class NotificationSchedulerImpl @Inject constructor(
             val today = Calendar.getInstance()
             val currentDay = today.get(Calendar.DAY_OF_MONTH)
             val currentMonth = today.get(Calendar.MONTH)
-
-            // Bugun va undan keyingi kunlarni olish
             db.calendarDao().fromTodayOnwards(currentDay, currentMonth).collect { monthList ->
                 monthList.forEach { scheduleDay(map.toMuslimCalendar(it), alarmManager) }
             }

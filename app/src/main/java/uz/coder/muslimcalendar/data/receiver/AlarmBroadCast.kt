@@ -86,14 +86,18 @@ class AlarmBroadCast : BroadcastReceiver() {
     }
     private fun ensureChannel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
-        if (manager.getNotificationChannel("alarm_channel_id") == null) {
-            manager.createNotificationChannel(
-                NotificationChannel(
-                    "alarm_channel_id",
-                    "Namoz alarmlari",
-                    NotificationManager.IMPORTANCE_HIGH
-                )
-            )
+        if (manager.getNotificationChannel("prayer_alarm_channel") == null) {
+            val channel = NotificationChannel(
+                "prayer_alarm_channel",
+                "Namoz vaqtlari",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Namoz vaqtlari uchun eslatmalar"
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 1000, 500, 1000)
+                setSound(null, null) // We'll play azan manually
+            }
+            manager.createNotificationChannel(channel)
         }
     }
 
