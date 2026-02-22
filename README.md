@@ -302,8 +302,8 @@ Contributions are welcome! Please follow these steps:
 
 **Developer**: Rahim Mustafo
 
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/rahim-mustafo-x)
+- Email: rahim.mustafo.x@gmail.com
 
 ---
 
