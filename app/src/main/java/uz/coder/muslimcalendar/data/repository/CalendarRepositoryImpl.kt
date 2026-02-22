@@ -6,7 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.PersistableBundle
 import android.util.Log
-import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -17,11 +16,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import uz.coder.muslimcalendar.SharedPref
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.map.CalendarMap
-import uz.coder.muslimcalendar.data.network.ApiServicePrayerTime
-import uz.coder.muslimcalendar.data.network.ApiServiceQuranUzbek
+import uz.coder.muslimcalendar.data.network.KtorApiService
 import uz.coder.muslimcalendar.data.service.DownloadJobService
 import uz.coder.muslimcalendar.data.service.JobIds
 import uz.coder.muslimcalendar.data.service.QuranJobService
@@ -43,15 +43,18 @@ class CalendarRepositoryImpl @Inject constructor(
     private val db: AppDatabase,
     private val map: CalendarMap,
     @ApplicationContext private val context: Context,
-    private val apiService: ApiServiceQuranUzbek,
-    private val prayerTimeApiService:ApiServicePrayerTime,
-    private val gson: Gson
+    private val ktorApiService: KtorApiService,
 ) : CalendarRepository {
-
+    private val json = Json { 
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
+    }
     private val calendarCache = mutableMapOf<String, MuslimCalendar?>()
     private val surahCache = mutableMapOf<Int, Sura?>()
     private var cacheTimestamp = 0L
-    companion object{
+    
+    companion object {
         private const val CACHE_DURATION_MS = 5 * 60 * 1000L
     }
 
@@ -82,8 +85,9 @@ class CalendarRepositoryImpl @Inject constructor(
                 cacheTimestamp = System.currentTimeMillis()
                 emit(it)
             }
-    }.catch { calendarCache["presentDay_${LocalDate.now()}"]?.let { emit(it) } }
-        .flowOn(Dispatchers.IO)
+    }.catch { 
+        calendarCache["presentDay_${LocalDate.now()}"]?.let { emit(it) }
+    }.flowOn(Dispatchers.IO)
 
     override fun oneMonth(): Flow<List<MuslimCalendar>> = flow {
         db.calendarDao().oneMonth()
@@ -103,7 +107,7 @@ class CalendarRepositoryImpl @Inject constructor(
                     .setOverrideDeadline(0)
                     .build()
                     .also { context.getSystemService(JobScheduler::class.java)?.schedule(it) }
-                job.hashCode() // yoki schedule() ning int natijasi
+                job.hashCode()
             }
         )
         return success
@@ -148,7 +152,8 @@ class CalendarRepositoryImpl @Inject constructor(
         var retry = 0
         while (true) {
             try {
-                val result = apiService.getSura(number).result ?: throw Exception("Empty response")
+                val result = ktorApiService.getSura(number).result 
+                    ?: throw Exception("Empty response")
                 emit(Surah(withContext(Dispatchers.IO) { map.toSurahList(result) }))
                 return@flow
             } catch (e: Exception) {
@@ -172,7 +177,7 @@ class CalendarRepositoryImpl @Inject constructor(
             runCatching {
                 val bundle = PersistableBundle().apply {
                     putString(DownloadJobService.KEY_FILE_URL, url)
-                    putString(DownloadJobService.KEY_SURA, gson.toJson(suraAyahs))
+                    putString(DownloadJobService.KEY_SURA, json.encodeToString(suraAyahs))
                 }
 
                 val job = JobInfo.Builder(
@@ -193,23 +198,31 @@ class CalendarRepositoryImpl @Inject constructor(
     }
 
     override suspend fun loading(longitude: Double, latitude: Double) {
-        if (longitude != 0.0 && latitude != 0.0) {
+        if (longitude == 0.0 || latitude == 0.0) {
+            Log.w("CalendarRepositoryImpl", "Invalid coordinates: lat=$latitude, lon=$longitude")
+            return
+        }
+        
+        try {
             val localDate = LocalDate.now()
             val year = localDate.year
             val month = localDate.month.value
-            val result = prayerTimeApiService.oneMonth(year, month, latitude, longitude)
+            
+            val result = ktorApiService.getOneMonthPrayerTimes(year, month, latitude, longitude)
             Log.d("CalendarRepositoryImpl", "loading: $result")
-            if(result.isSuccessful){
-                result.body()?.let {it->
-                    it.data?.let {
-                        db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(it))
-                    }
-                }
+            
+            result.data?.let { prayerDataList ->
+                db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(prayerDataList))
+                clearCache()
             }
+        } catch (e: Exception) {
+            Log.e("CalendarRepositoryImpl", "Error loading prayer times", e)
+            throw e
         }
     }
 
     private fun isCacheValid() = (System.currentTimeMillis() - cacheTimestamp) < CACHE_DURATION_MS
+    
     private fun clearCache() {
         calendarCache.clear()
         surahCache.clear()

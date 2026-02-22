@@ -19,18 +19,18 @@ string getQuranArabUrl() {
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_uz_coder_muslimcalendar_data_network_ApiClient_getPrayerTimeUrl(JNIEnv *env, jobject /* this */) {
-    return env->NewStringUTF(getPrayerTimeUrl().c_str());
-}
-
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_uz_coder_muslimcalendar_data_network_ApiClient_getQuranUzbekUrl(JNIEnv *env, jobject /* this */) {
+Java_uz_coder_muslimcalendar_data_network_KtorClient_getQuranUzbekUrl(JNIEnv *env, jobject /* this */) {
     return env->NewStringUTF(getQuranUzbekUrl().c_str());
 }
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_uz_coder_muslimcalendar_data_network_ApiClient_getQuranArabUrl(JNIEnv *env, jobject /* this */) {
+Java_uz_coder_muslimcalendar_data_network_KtorClient_getQuranArabUrl(JNIEnv *env, jobject /* this */) {
     return env->NewStringUTF(getQuranArabUrl().c_str());
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_uz_coder_muslimcalendar_data_network_KtorClient_getPrayerTimeUrl(JNIEnv *env, jclass clazz) {
+    return env->NewStringUTF(getPrayerTimeUrl().c_str());
 }

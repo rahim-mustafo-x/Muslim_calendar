@@ -77,9 +77,15 @@ data class CalendarViewModel @Inject constructor(
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            fusedLocationClient.lastLocation.addOnSuccessListener {
-                latitude = it.latitude
-                longitude = it.longitude
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    latitude = location.latitude
+                    longitude = location.longitude
+                } else {
+                    Log.d("CalendarViewModel", "Location is null, using default coordinates")
+                }
+            }.addOnFailureListener { exception ->
+                Log.e("CalendarViewModel", "Failed to get location: ${exception.message}")
             }
         }
     }

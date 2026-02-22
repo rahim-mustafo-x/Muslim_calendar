@@ -1,71 +1,56 @@
-package uz.coder.muslimcalendar;
+package uz.coder.muslimcalendar
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import dagger.hilt.android.qualifiers.ApplicationContext;
+import android.content.Context
+import android.content.SharedPreferences
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
-public class SharedPref {
+class SharedPref @Inject constructor(
+    @ApplicationContext context: Context
+) {
+    private val sharedPreferences: SharedPreferences = context.applicationContext
+        .getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)
 
-    private final SharedPreferences sharedPreferences;
-
-    @Inject
-    public SharedPref(@ApplicationContext Context context) {
-        sharedPreferences = context.getApplicationContext()
-                .getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE);
-    }
-
-    // ---- Universal save method ----
-    public <T> void saveValue(String key, T value) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        if (value instanceof String) {
-            editor.putString(key, (String) value);
-        } else if (value instanceof Integer) {
-            editor.putInt(key, (Integer) value);
-        } else if (value instanceof Boolean) {
-            editor.putBoolean(key, (Boolean) value);
-        } else if (value instanceof Float) {
-            editor.putFloat(key, (Float) value);
-        } else if (value instanceof Long) {
-            editor.putLong(key, (Long) value);
-        } else {
-            throw new IllegalArgumentException("Unsupported type: " + value.getClass().getSimpleName());
+    // Universal save method using reified generics
+    internal inline fun <reified T> saveValue(key: String, value: T) {
+        sharedPreferences.edit {
+            when (value) {
+                is String -> putString(key, value)
+                is Int -> putInt(key, value)
+                is Boolean -> putBoolean(key, value)
+                is Float -> putFloat(key, value)
+                is Long -> putLong(key, value)
+                else -> throw IllegalArgumentException("Unsupported type: ${value!!::class.simpleName}")
+            }
         }
-        editor.apply();
     }
 
-    // ---- Remove one key ----
-    public void removeValue(String key) {
-        sharedPreferences.edit().remove(key).apply();
+    // Remove one key
+    fun removeValue(key: String) {
+        sharedPreferences.edit { remove(key) }
     }
 
-    // ---- Clear all data ----
-    public void clear() {
-        sharedPreferences.edit().clear().apply();
+    // Clear all data
+    fun clear() {
+        sharedPreferences.edit { clear() }
     }
 
-    // ---- Getters ----
-    public String getString(String key, String defaultValue) {
-        return sharedPreferences.getString(key, defaultValue);
-    }
+    // Getters with default values
+    fun getString(key: String, defaultValue: String = ""): String =
+        sharedPreferences.getString(key, defaultValue) ?: defaultValue
 
-    public int getInt(String key, int defaultValue) {
-        return sharedPreferences.getInt(key, defaultValue);
-    }
+    fun getInt(key: String, defaultValue: Int = 0): Int =
+        sharedPreferences.getInt(key, defaultValue)
 
-    public boolean getBoolean(String key, boolean defaultValue) {
-        return sharedPreferences.getBoolean(key, defaultValue);
-    }
+    fun getBoolean(key: String, defaultValue: Boolean = false): Boolean =
+        sharedPreferences.getBoolean(key, defaultValue)
 
-    public float getFloat(String key, float defaultValue) {
-        return sharedPreferences.getFloat(key, defaultValue);
-    }
+    fun getFloat(key: String, defaultValue: Float = 0f): Float =
+        sharedPreferences.getFloat(key, defaultValue)
 
-    public long getLong(String key, long defaultValue) {
-        return sharedPreferences.getLong(key, defaultValue);
-    }
+    fun getLong(key: String, defaultValue: Long = 0L): Long =
+        sharedPreferences.getLong(key, defaultValue)
 }

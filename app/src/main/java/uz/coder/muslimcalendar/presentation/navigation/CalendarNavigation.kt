@@ -19,6 +19,7 @@ import uz.coder.muslimcalendar.domain.model.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Quran
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.QuranAyah
 import uz.coder.muslimcalendar.presentation.screen.AboutScreen
+import uz.coder.muslimcalendar.presentation.screen.AdvancedSettingsScreen
 import uz.coder.muslimcalendar.presentation.screen.AllahNameMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.AllahNameScreen
 import uz.coder.muslimcalendar.presentation.screen.CalendarScreen
@@ -28,9 +29,12 @@ import uz.coder.muslimcalendar.presentation.screen.HomeScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozScreen
 import uz.coder.muslimcalendar.presentation.screen.NotificationScreen
+import uz.coder.muslimcalendar.presentation.screen.PrayerStatisticsScreen
 import uz.coder.muslimcalendar.presentation.screen.QazoScreen
+import uz.coder.muslimcalendar.presentation.screen.QiblaCompassScreen
 import uz.coder.muslimcalendar.presentation.screen.QuranAyahScreen
 import uz.coder.muslimcalendar.presentation.screen.QuranScreen
+import uz.coder.muslimcalendar.presentation.screen.SettingsScreen
 import uz.coder.muslimcalendar.presentation.screen.TasbehScreen
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.DUO_INDEX
@@ -91,6 +95,18 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         }
         composable(Screen.Notification.route){
             NotificationScreen()
+        }
+        composable(Screen.Settings.route){
+            SettingsScreen(controller = controller)
+        }
+        composable(Screen.AdvancedSettings.route){
+            AdvancedSettingsScreen(controller = controller)
+        }
+        composable(Screen.QiblaCompass.route){
+            QiblaCompassScreen(controller = controller)
+        }
+        composable(Screen.PrayerStatistics.route){
+            PrayerStatisticsScreen(controller = controller)
         }
     }
 }

@@ -4,8 +4,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.dagger.hilt.android)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 android {
@@ -16,8 +17,8 @@ android {
         applicationId = "uz.coder.muslimcalendar"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.6"
+        versionCode = 8
+        versionName = "1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -26,14 +27,13 @@ android {
         ndk{
             abiFilters.addAll(listOf("armeabi-v7a","arm64-v8a","x86","x86_64"))
         }
-        ndkVersion = "29.0.14206865"
     }
-    externalNativeBuild {
-        cmake {
+    externalNativeBuild{
+        cmake{
             path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
         }
     }
+    ndkVersion = "29.0.14206865"
 
     buildTypes {
         release {
@@ -63,9 +63,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    buildFeatures {
-        compose = true
-    }
 }
 
 dependencies {
@@ -74,13 +71,15 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.logging.interceptor)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.androidx.hilt.compiler)
-    implementation (libs.retrofit)
-    implementation (libs.converter.gson)
-    implementation (libs.okhttp)
-    implementation (libs.hilt.android)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
@@ -92,7 +91,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)
-    implementation(libs.logging.interceptor)
     implementation(libs.ui)
     implementation(libs.androidx.material)
     implementation(libs.ui.tooling.preview)

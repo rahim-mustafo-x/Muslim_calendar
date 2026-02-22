@@ -1,20 +1,20 @@
 package uz.coder.muslimcalendar.data.network.modelDTO.quran
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SuraDTO(
-    @SerializedName("number")
+    @SerialName("number")
     val number: Int? = null,
-    @SerializedName("name")
+    @SerialName("name")
     val name: String? = null,
-    @SerializedName("englishName")
+    @SerialName("englishName")
     val englishName: String? = null,
-    @SerializedName("englishNameTranslation")
+    @SerialName("englishNameTranslation")
     val englishNameTranslation: String? = null,
-    @SerializedName("numberOfAyahs")
+    @SerialName("numberOfAyahs")
     val numberOfAyahs: Int? = null,
-    @SerializedName("revelationType")
+    @SerialName("revelationType")
     val revelationType: String? = null
 )

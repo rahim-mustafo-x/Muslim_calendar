@@ -19,14 +19,19 @@ class StopAlarmBroadCast : BroadcastReceiver() {
         AlarmBroadCast.mediaPlayer = null
 
         // Cancel Notification
+        val notificationId = intent?.getIntExtra(EXTRA_NOTIFICATION_ID, 101) ?: 101
         val notificationManager =
-            context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(101)
+            context?.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        notificationManager?.cancel(notificationId)
     }
 
     companion object {
-        fun getIntent(context: Context): Intent {
-            return Intent(context, StopAlarmBroadCast::class.java)
+        private const val EXTRA_NOTIFICATION_ID = "notification_id"
+        
+        fun getIntent(context: Context, notificationId: Int = 101): Intent {
+            return Intent(context, StopAlarmBroadCast::class.java).apply {
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+            }
         }
     }
 }
