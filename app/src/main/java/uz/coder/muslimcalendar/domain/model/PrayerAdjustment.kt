@@ -32,5 +32,15 @@ data class PrayerStatistics(
     val prayedOnTime: Int = 0,
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,
-    val lastPrayerDate: Long = 0L
+    val lastPrayerDate: Long = 0L,
+    val bomdodQazo: Int = 0,
+    val peshinQazo: Int = 0,
+    val asrQazo: Int = 0,
+    val shomQazo: Int = 0,
+    val xuftonQazo: Int = 0,
+    val bomdodToday: Boolean = false,
+    val peshinToday: Boolean = false,
+    val asrToday: Boolean = false,
+    val shomToday: Boolean = false,
+    val xuftonToday: Boolean = false
 )

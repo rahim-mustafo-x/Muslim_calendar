@@ -2,7 +2,6 @@
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.ksp)
@@ -11,14 +10,14 @@ plugins {
 
 android {
     namespace = "uz.coder.muslimcalendar"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "uz.coder.muslimcalendar"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 8
-        versionName = "1.7"
+        targetSdk = 37
+        versionCode = libs.versions.versionCode.get().toInt()
+        versionName = libs.versions.versionName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -30,14 +29,15 @@ android {
     }
     externalNativeBuild{
         cmake{
-            path = file("src/main/cpp/CMakeLists.txt")
+            path = project.file("src/main/cpp/CMakeLists.txt")
         }
     }
-    ndkVersion = "29.0.14206865"
+    ndkVersion = "30.0.14904198"
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -49,19 +49,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlin{
-        jvmToolchain(JavaVersion.VERSION_17.majorVersion.toInt())
-        compilerOptions {
-            freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
-        }
-    }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+kotlin{
+    jvmToolchain(JavaVersion.VERSION_17.majorVersion.toInt())
+    compilerOptions {
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 
@@ -103,6 +104,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

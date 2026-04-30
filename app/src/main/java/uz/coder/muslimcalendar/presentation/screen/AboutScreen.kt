@@ -11,12 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import uz.coder.muslimcalendar.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(modifier: Modifier = Modifier) {
+    val uriHandler = LocalUriHandler.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,7 +68,7 @@ fun AboutScreen(modifier: Modifier = Modifier) {
             )
             
             Text(
-                text = "Versiya 1.7",
+                text = "Versiya ${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -96,6 +99,38 @@ fun AboutScreen(modifier: Modifier = Modifier) {
                     FeatureItem(Icons.AutoMirrored.Filled.MenuBook, "Duolar")
                     FeatureItem(Icons.Default.Spa, "Tasbeh")
                     FeatureItem(Icons.Default.CalendarMonth, "Islomiy taqvim")
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                onClick = {
+                    uriHandler.openUri("https://t.me/rahim_mustafo_x")
+                }
+            ) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.SupportAgent, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Qo'llab-quvvatlash markazi",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "https://t.me/rahim_mustafo_x",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
             

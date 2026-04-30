@@ -8,12 +8,14 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
+import uz.coder.muslimcalendar.domain.repository.SettingsRepository
 
 @HiltWorker
 class PrayerAlarmWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val scheduler: NotificationScheduler
+    private val scheduler: NotificationScheduler,
+    private val settingsRepository: SettingsRepository
 ) : CoroutineWorker(context, params) {
 
     companion object {
@@ -22,7 +24,8 @@ class PrayerAlarmWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            Log.d(TAG, "Starting prayer alarm rescheduling")
+            Log.d(TAG, "Starting prayer alarm rescheduling and daily check")
+            settingsRepository.checkAndResetDailyPrayers()
             scheduler.rescheduleAll()
             Log.d(TAG, "Prayer alarm rescheduling completed successfully")
             Result.success()

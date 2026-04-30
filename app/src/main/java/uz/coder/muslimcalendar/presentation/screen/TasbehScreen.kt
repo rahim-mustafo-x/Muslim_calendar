@@ -17,20 +17,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import uz.coder.muslimcalendar.presentation.viewModel.CalendarViewModel
-import uz.coder.muslimcalendar.todo.ALL_TASBEH
-import uz.coder.muslimcalendar.todo.TASBEH
+import uz.coder.muslimcalendar.presentation.viewModel.TasbehViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbehScreen(modifier: Modifier = Modifier, controller: NavHostController) {
-    val viewModel = hiltViewModel<CalendarViewModel>()
-    viewModel.fromPreferencesTasbeh()
+    val viewModel: TasbehViewModel = hiltViewModel()
+    val allTasbeh by viewModel.allTasbeh.collectAsStateWithLifecycle()
+    val tasbeh by viewModel.tasbeh.collectAsStateWithLifecycle()
     
-    var allTasbeh by remember { mutableIntStateOf(0) }
-    var tasbeh by remember { mutableIntStateOf(0) }
     var scale by remember { mutableFloatStateOf(1f) }
     
     val scaleAnimation by animateFloatAsState(
@@ -42,11 +39,6 @@ fun TasbehScreen(modifier: Modifier = Modifier, controller: NavHostController) {
         label = "scale"
     )
     
-    LaunchedEffect(Unit) {
-        allTasbeh = viewModel.allTasbeh.value
-        tasbeh = viewModel.tasbeh.value
-    }
-    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,11 +49,7 @@ fun TasbehScreen(modifier: Modifier = Modifier, controller: NavHostController) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        viewModel.refreshTasbehAndAllTasbeh()
-                        allTasbeh = 0
-                        tasbeh = 0
-                    }) {
+                    IconButton(onClick = { viewModel.reset() }) {
                         Icon(Icons.Default.Refresh, "Tiklash")
                     }
                 },
@@ -124,15 +112,9 @@ fun TasbehScreen(modifier: Modifier = Modifier, controller: NavHostController) {
                 Card(
                     onClick = {
                         scale = 0.9f
-                        if (tasbeh == 33) {
-                            tasbeh = 0
-                            viewModel.saveTasbeh(0)
-                        } else {
-                            tasbeh++
-                            viewModel.saveTasbeh(tasbeh)
-                        }
-                        allTasbeh++
-                        viewModel.saveAllTasbeh(allTasbeh)
+                        val newTasbeh = if (tasbeh == 33) 1 else tasbeh + 1
+                        viewModel.saveTasbeh(newTasbeh)
+                        viewModel.saveAllTasbeh(allTasbeh + 1)
                         scale = 1f
                     },
                     modifier = Modifier
@@ -185,16 +167,7 @@ fun TasbehScreen(modifier: Modifier = Modifier, controller: NavHostController) {
         }
     }
     
-    LifecycleResumeEffect(Unit) {
-        onPauseOrDispose {
-            viewModel.saveInt(TASBEH, tasbeh)
-            viewModel.saveInt(ALL_TASBEH, allTasbeh)
-        }
-    }
-    
     BackHandler {
-        viewModel.saveInt(TASBEH, tasbeh)
-        viewModel.saveInt(ALL_TASBEH, allTasbeh)
         controller.popBackStack()
     }
 }

@@ -66,19 +66,20 @@ class CalendarRepositoryImpl @Inject constructor(
     override suspend fun remove() {
         val today = LocalDate.now()
         runCatching {
-            db.calendarDao().deleteOldData(today.dayOfMonth, today.monthValue)
+            db.calendarDao().deleteOldData(today.dayOfMonth, today.monthValue, today.year)
         }.onFailure {
             runCatching { db.calendarDao().deleteExceptLast30Days() }
         }
     }
 
     override fun presentDay(): Flow<MuslimCalendar> = flow {
-        val key = "presentDay_${LocalDate.now()}"
+        val today = LocalDate.now()
+        val key = "presentDay_$today"
         if (isCacheValid() && calendarCache.containsKey(key)) {
             calendarCache[key]?.let { emit(it); return@flow }
         }
 
-        db.calendarDao().presentDay(LocalDate.now().dayOfMonth, LocalDate.now().monthValue)
+        db.calendarDao().presentDay(today.dayOfMonth, today.monthValue, today.year)
             .mapNotNull(map::toMuslimCalendar)
             .collect {
                 calendarCache[key] = it
@@ -205,19 +206,37 @@ class CalendarRepositoryImpl @Inject constructor(
         
         try {
             val localDate = LocalDate.now()
-            val year = localDate.year
-            val month = localDate.month.value
             
-            val result = ktorApiService.getOneMonthPrayerTimes(year, month, latitude, longitude)
-            Log.d("CalendarRepositoryImpl", "loading: $result")
+            // Check if we have data for current month
+            val latest = db.calendarDao().getLatest()
             
-            result.data?.let { prayerDataList ->
-                db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(prayerDataList))
-                clearCache()
+            if (latest == null) {
+                // DB is empty, download current month
+                downloadAndSaveMonth(localDate.year, localDate.monthValue, latitude, longitude)
+            } else {
+                // Rule: if today is the last element, remove everything except today and download next month
+                if (latest.day == localDate.dayOfMonth && latest.month == localDate.monthValue && latest.year == localDate.year) {
+                    db.calendarDao().deleteOldData(localDate.dayOfMonth, localDate.monthValue, localDate.year)
+                    val nextDate = localDate.plusMonths(1)
+                    downloadAndSaveMonth(nextDate.year, nextDate.monthValue, latitude, longitude)
+                } else if (latest.year < localDate.year || (latest.year == localDate.year && latest.month < localDate.monthValue)) {
+                    // Data is outdated (from previous month), refresh to current month
+                    db.calendarDao().deleteCalendar()
+                    downloadAndSaveMonth(localDate.year, localDate.monthValue, latitude, longitude)
+                }
             }
+            
+            clearCache()
         } catch (e: Exception) {
             Log.e("CalendarRepositoryImpl", "Error loading prayer times", e)
             throw e
+        }
+    }
+
+    private suspend fun downloadAndSaveMonth(year: Int, month: Int, latitude: Double, longitude: Double) {
+        val result = ktorApiService.getOneMonthPrayerTimes(year, month, latitude, longitude)
+        result.data?.let { prayerDataList ->
+            db.calendarDao().insertMuslimCalendar(map.toMuslimCalendarDbModel(prayerDataList))
         }
     }
 

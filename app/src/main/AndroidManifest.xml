@@ -47,10 +47,21 @@
 
         <receiver android:name=".data.receiver.AlarmBroadCast" android:exported="false"/>
         <receiver android:name=".data.receiver.StopAlarmBroadCast" android:exported="false"/>
+        <receiver android:name=".data.receiver.PrayerActionReceiver" android:exported="false"/>
         <receiver android:name=".data.receiver.BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
+        </receiver>
+
+        <receiver android:name=".presentation.widget.IslamicCalendarWidgetReceiver" android:exported="false"
+            android:label="Islamic Calendar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/islamic_calendar_widget_info" />
         </receiver>
     </application>
 

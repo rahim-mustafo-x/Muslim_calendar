@@ -14,7 +14,20 @@ interface SettingsRepository {
     fun getPrayerStatistics(): Flow<PrayerStatistics>
     suspend fun updatePrayerStatistics(stats: PrayerStatistics)
     suspend fun markPrayerCompleted(prayerName: String, onTime: Boolean)
+    suspend fun checkAndResetDailyPrayers()
     suspend fun exportSettings(): String
     suspend fun importSettings(json: String): Boolean
     suspend fun resetAllSettings()
+    
+    // Daily Notification Settings
+    fun isDailyNotificationEnabled(): Flow<Boolean>
+    suspend fun setDailyNotificationEnabled(enabled: Boolean)
+    fun getDailyNotificationTime(): Flow<String>
+    suspend fun setDailyNotificationTime(time: String)
+    fun isFollowUpReminderEnabled(): Flow<Boolean>
+    suspend fun setFollowUpReminderEnabled(enabled: Boolean)
+    fun getFollowUpReminderDelay(): Flow<Int>
+    suspend fun setFollowUpReminderDelay(minutes: Int)
+    
+    fun getNextNotificationTime(): Flow<String>
 }
