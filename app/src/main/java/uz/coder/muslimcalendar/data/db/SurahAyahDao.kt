@@ -16,4 +16,6 @@ interface SurahAyahDao{
     @Query("DELETE FROM surahAyah")
     suspend fun deleteAll()
 
+    @Query("SELECT * FROM surahAyah ORDER BY RANDOM() LIMIT 1")
+    suspend fun getRandomAyah(): SurahAyahDbModel?
 }

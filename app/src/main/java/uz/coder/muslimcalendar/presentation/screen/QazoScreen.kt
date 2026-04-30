@@ -1,30 +1,10 @@
 package uz.coder.muslimcalendar.presentation.screen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,227 +12,132 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
 import uz.coder.muslimcalendar.domain.model.MenuSetting
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.ui.view.QazoCount
-import uz.coder.muslimcalendar.presentation.viewModel.CalendarViewModel
-import uz.coder.muslimcalendar.todo.ASR
-import uz.coder.muslimcalendar.todo.BOMDOD
-import uz.coder.muslimcalendar.todo.PESHIN
-import uz.coder.muslimcalendar.todo.SHOM
-import uz.coder.muslimcalendar.todo.VITR
-import uz.coder.muslimcalendar.todo.XUFTON
+import uz.coder.muslimcalendar.presentation.viewModel.QazoViewModel
 
 @Composable
 fun QazoScreen(modifier: Modifier = Modifier, controller: NavHostController) {
-    val viewModel = hiltViewModel<CalendarViewModel>()
-    viewModel.fromPreferencesQazo()
-    Scaffold(topBar = { CalendarTopBar(
-        list = listOf(
-            Menu(
-                R.drawable.settings,
-                MenuSetting.QazoSetting
-            )
-        )
-    ) {
-        when(it){
-            MenuSetting.QazoSetting->{
+    val viewModel: QazoViewModel = hiltViewModel()
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableIntStateOf(-1) }
+
+    Scaffold(topBar = {
+        CalendarTopBar(
+            list = listOf(Menu(R.drawable.ic_settings, "Sozlamalar", MenuSetting.QazoSetting))
+        ) {
+            if (it == MenuSetting.QazoSetting) showDialog = true
+        }
+    }) { padding ->
+        QazoContent(
+            modifier = modifier,
+            paddingValues = padding,
+            viewModel = viewModel,
+            onShowDialog = { id ->
+                selectedId = id
                 showDialog = true
             }
-            else->{}
-        }
-    } }) {
-        Qazo(modifier = modifier, controller = controller, paddingValues = it, viewModel = viewModel)
+        )
     }
-    LifecycleResumeEffect(Unit){
-        onPauseOrDispose {
-            viewModel.saveInt(BOMDOD, bomdod)
-            viewModel.saveInt(PESHIN, peshin)
-            viewModel.saveInt(ASR, asr)
-            viewModel.saveInt(SHOM, shom)
-            viewModel.saveInt(XUFTON, xufton)
-            viewModel.saveInt(VITR, vitr)
-        }
+
+    if (showDialog) {
+        QazoDialog(
+            id = selectedId,
+            viewModel = viewModel,
+            onDismiss = {
+                showDialog = false
+                selectedId = -1
+            }
+        )
     }
-}
-var bomdod by
-    mutableIntStateOf(0)
-var peshin by
-    mutableIntStateOf(0)
-var asr by
-    mutableIntStateOf(0)
-var shom by
-    mutableIntStateOf(0)
-var xufton by
-    mutableIntStateOf(0)
-var vitr by
-    mutableIntStateOf(0)
-var id by mutableIntStateOf(-1)
-@Composable
-fun Qazo(modifier: Modifier = Modifier, controller: NavHostController, paddingValues: PaddingValues, viewModel: CalendarViewModel) {
-    LaunchedEffect(true) {
-        bomdod = viewModel.bomdod.value
-        peshin = viewModel.peshin.value
-        asr = viewModel.asr.value
-        shom = viewModel.shom.value
-        xufton = viewModel.xufton.value
-        vitr = viewModel.vitr.value
-    }
-    Column(modifier = modifier
-        .fillMaxSize()
-        .padding(paddingValues), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        QazoCount(text = stringResource(R.string.bomdod), count = bomdod, minus = { viewModel.setBomdod(if (bomdod <=0){ 0 } else --bomdod) }, plus = { viewModel.setBomdod(++bomdod) }) {
-            showDialog = true
-            id = 1
-        }
-        QazoCount(text = stringResource(R.string.peshin), count = peshin, minus = { viewModel.setPeshin(if (peshin <=0){ 0 } else --peshin) }, plus = { viewModel.setPeshin(++peshin) }) {
-            showDialog = true
-            id = 2
-        }
-        QazoCount(text = stringResource(R.string.asr), count = asr, minus = { viewModel.setAsr(if (asr <=0){ 0 } else --asr) }, plus = { viewModel.setAsr(++asr) }) {
-            showDialog = true
-            id = 3
-        }
-        QazoCount(text = stringResource(R.string.shom), count = shom, minus = { viewModel.setShom(if (shom <=0){ 0 } else --shom) }, plus = { viewModel.setShom(++shom) }) {
-            showDialog = true
-            id = 4
-        }
-        QazoCount(text = stringResource(R.string.xufton), count = xufton, minus = { viewModel.setXufton(if (xufton <=0){ 0 } else --xufton) }, plus = { viewModel.setXufton(++xufton) }) {
-            showDialog = true
-            id = 5
-        }
-        QazoCount(text = stringResource(R.string.vitr), count = vitr, minus = { viewModel.setVitr(if (vitr <=0){ 0 } else --vitr) }, plus = { viewModel.setVitr(++vitr) }) {
-            showDialog = true
-            id = 6
-        }
-    }
-    QazoDialog(viewModel = viewModel)
+
     BackHandler {
-        viewModel.saveInt(BOMDOD, bomdod)
-        viewModel.saveInt(PESHIN, peshin)
-        viewModel.saveInt(ASR, asr)
-        viewModel.saveInt(SHOM, shom)
-        viewModel.saveInt(XUFTON, xufton)
-        viewModel.saveInt(VITR, vitr)
         controller.popBackStack()
     }
 }
 
-private var showDialog by
-    mutableStateOf(false)
-
-
 @Composable
-fun QazoDialog(modifier: Modifier = Modifier, viewModel: CalendarViewModel) {
-    var numberOfQazo by remember {
-        mutableIntStateOf(0)
-    }
+fun QazoContent(
+    modifier: Modifier,
+    paddingValues: PaddingValues,
+    viewModel: QazoViewModel,
+    onShowDialog: (Int) -> Unit
+) {
+    val bomdod by viewModel.bomdod.collectAsStateWithLifecycle()
+    val peshin by viewModel.peshin.collectAsStateWithLifecycle()
+    val asr by viewModel.asr.collectAsStateWithLifecycle()
+    val shom by viewModel.shom.collectAsStateWithLifecycle()
+    val xufton by viewModel.xufton.collectAsStateWithLifecycle()
+    val vitr by viewModel.vitr.collectAsStateWithLifecycle()
 
-    if (showDialog){
-        Dialog(onDismissRequest = { showDialog = false }) {
-            OutlinedCard(
-                modifier.padding(10.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(10.dp)
-            ) {
-                Column {
-                    OutlinedTextField(value = numberOfQazo.toString(), onValueChange = { numberOfQazo = try {
-                        it.toInt()
-                    }catch (_:Exception){ 0 } }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = modifier
-                        .fillMaxWidth()
-                        .padding(10.dp))
-                    Row(modifier.fillMaxWidth()) {
-                        OutlinedButton(
-                            onClick = { showDialog = false; id = -1; numberOfQazo = 0 },
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            )
-                        ) {
-                            Text(
-                                stringResource(R.string.cancel),
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-                        OutlinedButton(
-                            onClick = {
-                                try {
-                                    showDialog = false
-                                    buttonClicked(numberOfQazo, viewModel)
-                                    id = -1
-                                    numberOfQazo = 0
-                                } catch (_: Exception) { }
-                            },
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(10.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        ) {
-                            Text(
-                                stringResource(R.string.save),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        QazoCount(text = stringResource(R.string.bomdod), count = bomdod, minus = { viewModel.setBomdod((bomdod - 1).coerceAtLeast(0)) }, plus = { viewModel.setBomdod(bomdod + 1) }) { onShowDialog(1) }
+        QazoCount(text = stringResource(R.string.peshin), count = peshin, minus = { viewModel.setPeshin((peshin - 1).coerceAtLeast(0)) }, plus = { viewModel.setPeshin(peshin + 1) }) { onShowDialog(2) }
+        QazoCount(text = stringResource(R.string.asr), count = asr, minus = { viewModel.setAsr((asr - 1).coerceAtLeast(0)) }, plus = { viewModel.setAsr(asr + 1) }) { onShowDialog(3) }
+        QazoCount(text = stringResource(R.string.shom), count = shom, minus = { viewModel.setShom((shom - 1).coerceAtLeast(0)) }, plus = { viewModel.setShom(shom + 1) }) { onShowDialog(4) }
+        QazoCount(text = stringResource(R.string.xufton), count = xufton, minus = { viewModel.setXufton((xufton - 1).coerceAtLeast(0)) }, plus = { viewModel.setXufton(xufton + 1) }) { onShowDialog(5) }
+        QazoCount(text = stringResource(R.string.vitr), count = vitr, minus = { viewModel.setVitr((vitr - 1).coerceAtLeast(0)) }, plus = { viewModel.setVitr(vitr + 1) }) { onShowDialog(6) }
     }
 }
 
-fun buttonClicked(numberOfQazo: Int, viewModel: CalendarViewModel) {
-    if (id !=-1){
-        when(id){
-            1->{
-                bomdod = numberOfQazo
-                viewModel.setBomdod(numberOfQazo)
-            }
-            2->{
-                peshin = numberOfQazo
-                viewModel.setPeshin(numberOfQazo)
-            }
-            3->{
-                asr = numberOfQazo
-                viewModel.setAsr(numberOfQazo)
-            }
-            4->{
-                shom = numberOfQazo
-                viewModel.setShom(numberOfQazo)
-            }
-            5->{
-                xufton = numberOfQazo
-                viewModel.setXufton(numberOfQazo)
-            }
-            6->{
-                vitr = numberOfQazo
-                viewModel.setVitr(numberOfQazo)
+@Composable
+fun QazoDialog(id: Int, viewModel: QazoViewModel, onDismiss: () -> Unit) {
+    var value by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        OutlinedCard(
+            modifier = Modifier.padding(16.dp),
+            shape = MaterialTheme.shapes.large
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Qazo sonini kiriting",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) value = it },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Miqdor") }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+                    Button(onClick = {
+                        val num = value.toIntOrNull() ?: 0
+                        when (id) {
+                            1 -> viewModel.setBomdod(num)
+                            2 -> viewModel.setPeshin(num)
+                            3 -> viewModel.setAsr(num)
+                            4 -> viewModel.setShom(num)
+                            5 -> viewModel.setXufton(num)
+                            6 -> viewModel.setVitr(num)
+                            else -> {
+                                viewModel.setBomdod(num)
+                                viewModel.setPeshin(num)
+                                viewModel.setAsr(num)
+                                viewModel.setShom(num)
+                                viewModel.setXufton(num)
+                                viewModel.setVitr(num)
+                            }
+                        }
+                        onDismiss()
+                    }) { Text(stringResource(R.string.save)) }
+                }
             }
         }
-    }
-    else{
-        bomdod = numberOfQazo
-        viewModel.setBomdod(numberOfQazo)
-        peshin = numberOfQazo
-        viewModel.setPeshin(numberOfQazo)
-        asr = numberOfQazo
-        viewModel.setAsr(numberOfQazo)
-        shom = numberOfQazo
-        viewModel.setShom(numberOfQazo)
-        xufton = numberOfQazo
-        viewModel.setXufton(numberOfQazo)
-        vitr = numberOfQazo
-        viewModel.setVitr(numberOfQazo)
     }
 }

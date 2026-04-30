@@ -1,6 +1,7 @@
 package uz.coder.muslimcalendar.domain.model.sealed
 
 sealed class Screen(val route:String) {
+    data object Splash: Screen(SPLASH)
     data object Home: Screen(HOME)
     data object Tasbeh: Screen(TASBEH)
     data object Duo: Screen(DUO)
@@ -21,6 +22,7 @@ sealed class Screen(val route:String) {
     data object PrayerStatistics: Screen(PRAYER_STATISTICS)
 
     companion object{
+        private const val SPLASH = "splash"
         private const val HOME = "home"
         private const val TASBEH = "tasbeh"
         private const val DUO = "duo"

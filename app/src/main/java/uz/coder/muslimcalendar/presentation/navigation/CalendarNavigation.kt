@@ -15,6 +15,7 @@ import uz.coder.muslimcalendar.domain.model.sealed.Screen.About
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.AllahName
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.AllahNameMeaning
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Home
+import uz.coder.muslimcalendar.domain.model.sealed.Screen.Splash
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Quran
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.QuranAyah
@@ -26,6 +27,7 @@ import uz.coder.muslimcalendar.presentation.screen.CalendarScreen
 import uz.coder.muslimcalendar.presentation.screen.DuoMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.DuoScreen
 import uz.coder.muslimcalendar.presentation.screen.HomeScreen
+import uz.coder.muslimcalendar.presentation.screen.SplashScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozScreen
 import uz.coder.muslimcalendar.presentation.screen.NotificationScreen
@@ -44,7 +46,10 @@ import uz.coder.muslimcalendar.todo.NUMBER
 @Composable
 fun CalendarNavigation(modifier: Modifier = Modifier) {
     val controller = rememberNavController()
-    NavHost(navController = controller, startDestination = Home.route, modifier = modifier.fillMaxSize()) {
+    NavHost(navController = controller, startDestination = Splash.route, modifier = modifier.fillMaxSize()) {
+        composable(Splash.route) {
+            SplashScreen(controller = controller)
+        }
         composable(Home.route){
             HomeScreen(controller = controller)
         }

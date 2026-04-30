@@ -34,6 +34,7 @@ import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
 import uz.coder.muslimcalendar.presentation.ui.theme.ThemeManager
 import uz.coder.muslimcalendar.presentation.ui.theme.isDarkTheme
 import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
+import uz.coder.muslimcalendar.presentation.viewModel.state.HomeIntent
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -259,7 +260,7 @@ class MainActivity : ComponentActivity() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 Log.d(TAG, "Location: ${location.latitude}, ${location.longitude}")
-                viewModel.loadInformationFromInternet(location.latitude, location.longitude)
+                viewModel.handleIntent(HomeIntent.UpdateLocation(location.latitude, location.longitude))
                 scheduleAzanAlarms()
             } else {
                 Log.d(TAG, "Location is null. Using saved or default location...")
@@ -319,6 +320,19 @@ class MainActivity : ComponentActivity() {
             }
             .setCancelable(false)
             .show()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent?): Boolean {
+        if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP || keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN) {
+            stopAlarm()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    private fun stopAlarm() {
+        val intent = uz.coder.muslimcalendar.data.receiver.StopAlarmBroadCast.getIntent(this)
+        sendBroadcast(intent)
     }
 
     @Composable

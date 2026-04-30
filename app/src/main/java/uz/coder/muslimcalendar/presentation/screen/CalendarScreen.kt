@@ -18,7 +18,12 @@ fun CalendarScreen(modifier: Modifier = Modifier, controller: NavHostController)
 @Composable
 fun Calendar(modifier: Modifier, controller: NavHostController) {
     val viewModel = hiltViewModel<CalendarViewModel>()
-    Scaffold(topBar = { CalendarTopBar(list = emptyList()) {} }) {
+    Scaffold(topBar = { 
+        CalendarTopBar(
+            text = "Taqvim",
+            list = emptyList()
+        ) {} 
+    }) {
         CalendarView(modifier = modifier, viewModel = viewModel, paddingValues = it)
     }
     BackHandler {

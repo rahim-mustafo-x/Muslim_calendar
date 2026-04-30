@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Info
+import uz.coder.muslimcalendar.BuildConfig
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
@@ -169,7 +170,7 @@ fun SettingsScreen(
                     SettingsItem(
                         icon = Icons.Default.Info,
                         title = "Versiya",
-                        subtitle = "1.7",
+                        subtitle = BuildConfig.VERSION_NAME,
                         onClick = {}
                     )
                 }

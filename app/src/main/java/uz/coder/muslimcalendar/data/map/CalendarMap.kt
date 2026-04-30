@@ -30,6 +30,7 @@ class CalendarMap @Inject constructor() {
             MuslimCalendarDbModel(
                 day = day,
                 month = month,
+                year = date.year,
                 weekday = prayerData.date?.gregorian?.weekday?.en?.toWeakDays() ?: "",
                 asr = prayerData.timings?.asr?.replace(" (+05)", "")?:"",
                 hufton = prayerData.timings?.isha?.replace(" (+05)", "")?:"",

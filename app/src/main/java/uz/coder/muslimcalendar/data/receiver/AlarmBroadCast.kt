@@ -16,6 +16,9 @@ import uz.coder.muslimcalendar.R
 @AndroidEntryPoint
 class AlarmBroadCast : BroadcastReceiver() {
 
+    @javax.inject.Inject
+    lateinit var sharedPref: uz.coder.muslimcalendar.SharedPref
+
     companion object {
         var mediaPlayer: MediaPlayer? = null
 
@@ -37,6 +40,19 @@ class AlarmBroadCast : BroadcastReceiver() {
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context == null || intent == null) return
+        
+        when (intent.action) {
+            "ACTION_REFRESH_ALARMS" -> {
+                val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.PrayerAlarmWorker>().build()
+                androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+                return
+            }
+            "ACTION_DAILY_NOTIFICATION" -> {
+                handleDailyNotification(context)
+                return
+            }
+        }
+
         ensureChannel(context)
 
         val hour = intent.getIntExtra(EXTRA_HOUR, 0)
@@ -76,6 +92,15 @@ class AlarmBroadCast : BroadcastReceiver() {
             .addAction(R.drawable.ic_close, "O‘chirish", stopPendingIntent)
 
         notificationManager.notify(notificationId, notificationBuilder.build())
+        
+        // Schedule "Did you pray?" reminder after 15 minutes
+        scheduleQazoReminder(context, title)
+
+        // Reschedule alarms if it's Tong or Xufton
+        if (title.contains("Bomdod") || title.contains("Xufton")) {
+            val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.PrayerAlarmWorker>().build()
+            androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+        }
 
         // Play Music
         if (musicResId != -1) {
@@ -84,6 +109,55 @@ class AlarmBroadCast : BroadcastReceiver() {
             mediaPlayer?.start()
         }
     }
+    private fun handleDailyNotification(context: Context) {
+        val hijriDate = java.time.chrono.HijrahDate.now()
+        val formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMMM", java.util.Locale.getDefault())
+        val hijriStr = hijriDate.format(formatter)
+
+        val channelId = "daily_notification_channel"
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        val channel = NotificationChannel(
+            channelId,
+            "Daily Notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_alarm)
+            .setContentTitle("New Islamic Day")
+            .setContentText("Today is $hijriStr. Stay mindful.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(202, notification)
+
+        // Schedule next day's notification and update widget
+        val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.PrayerAlarmWorker>().build()
+        androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+        
+        // Schedule follow-up reminder
+        val followUpEnabled = sharedPref.getBoolean("follow_up_enabled", true)
+        if (followUpEnabled) {
+            val delay = sharedPref.getInt("follow_up_delay", 15)
+            val followUpWork = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.QazoReminderWorker>()
+                .setInitialDelay(delay.toLong(), java.util.concurrent.TimeUnit.MINUTES)
+                .setInputData(androidx.work.workDataOf("is_daily_follow_up" to true))
+                .build()
+            androidx.work.WorkManager.getInstance(context).enqueue(followUpWork)
+        }
+    }
+
+    private fun scheduleQazoReminder(context: Context, prayerName: String) {
+        val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.QazoReminderWorker>()
+            .setInitialDelay(15, java.util.concurrent.TimeUnit.MINUTES)
+            .setInputData(androidx.work.workDataOf("prayer_name" to prayerName))
+            .build()
+        androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+    }
+
     private fun ensureChannel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
         if (manager.getNotificationChannel("prayer_alarm_channel") == null) {
