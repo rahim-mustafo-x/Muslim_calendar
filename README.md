@@ -286,13 +286,6 @@ Contributions are welcome! Please follow these steps:
 - ✅ Modern Material 3 design
 - ✅ Performance optimizations
 
-See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -309,8 +302,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Developer**: Rahim Mustafo
 
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/rahim-mustafo-x)
+- Email: rahim.mustafo.x@gmail.com
 
 ---
 
