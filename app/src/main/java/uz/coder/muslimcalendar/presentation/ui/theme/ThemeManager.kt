@@ -4,12 +4,9 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 enum class ThemeMode {
     LIGHT,
@@ -17,9 +14,8 @@ enum class ThemeMode {
     SYSTEM
 }
 
-@Singleton
-class ThemeManager @Inject constructor(
-    @ApplicationContext private val context: Context
+class ThemeManager(
+    private val context: Context
 ) {
     private val prefs = context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
     

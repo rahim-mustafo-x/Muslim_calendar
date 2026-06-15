@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.presentation.viewModel.PrayerStatisticsViewModel
 
@@ -25,7 +25,7 @@ import uz.coder.muslimcalendar.presentation.viewModel.PrayerStatisticsViewModel
 @Composable
 fun PrayerStatisticsScreen(
     controller: NavHostController,
-    viewModel: PrayerStatisticsViewModel = hiltViewModel()
+    viewModel: PrayerStatisticsViewModel = koinViewModel()
 ) {
     val statistics by viewModel.statistics.collectAsState()
     

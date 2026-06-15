@@ -1,7 +1,6 @@
 package uz.coder.muslimcalendar.data.repository
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,9 +14,6 @@ import uz.coder.muslimcalendar.domain.model.PrayerAdjustment
 import uz.coder.muslimcalendar.domain.model.PrayerStatistics
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.domain.repository.SettingsRepository
-import javax.inject.Inject
-import javax.inject.Provider
-import javax.inject.Singleton
 
 @Serializable
 data class SettingsExport(
@@ -27,12 +23,12 @@ data class SettingsExport(
     val azanSounds: Map<String, Int>
 )
 
-@Singleton
-class SettingsRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+
+class SettingsRepositoryImpl (
+     private val context: Context,
     private val sharedPref: SharedPref,
     private val json: Json,
-    private val scheduler: Provider<NotificationScheduler>
+    private val scheduler: NotificationScheduler
 ): SettingsRepository {
     private val _prayerAdjustments = MutableStateFlow(loadPrayerAdjustments())
     private val _prayerStatistics = MutableStateFlow(loadPrayerStatistics())
@@ -47,7 +43,7 @@ class SettingsRepositoryImpl @Inject constructor(
         sharedPref.saveValue("adj_shom", adjustment.shom)
         sharedPref.saveValue("adj_xufton", adjustment.xufton)
         _prayerAdjustments.value = adjustment
-        scheduler.get().rescheduleAll()
+        scheduler.rescheduleAll()
     }
 
     override fun getAzanSound(prayerName: String): Flow<AzanSound> {
@@ -190,7 +186,7 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setDailyNotificationEnabled(enabled: Boolean) {
         sharedPref.saveValue("daily_notif_enabled", enabled)
         _prayerStatistics.value = _prayerStatistics.value // Trigger flow update
-        scheduler.get().rescheduleAll()
+        scheduler.rescheduleAll()
     }
 
     override fun getDailyNotificationTime(): Flow<String> = 
@@ -199,7 +195,7 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setDailyNotificationTime(time: String) {
         sharedPref.saveValue("daily_notif_time", time)
         _prayerStatistics.value = _prayerStatistics.value // Trigger flow update
-        scheduler.get().rescheduleAll()
+        scheduler.rescheduleAll()
     }
 
     override fun isFollowUpReminderEnabled(): Flow<Boolean> = 
@@ -208,7 +204,7 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setFollowUpReminderEnabled(enabled: Boolean) {
         sharedPref.saveValue("follow_up_enabled", enabled)
         _prayerStatistics.value = _prayerStatistics.value // Trigger flow update
-        scheduler.get().rescheduleAll()
+        scheduler.rescheduleAll()
     }
 
     override fun getFollowUpReminderDelay(): Flow<Int> = 
@@ -217,7 +213,7 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setFollowUpReminderDelay(minutes: Int) {
         sharedPref.saveValue("follow_up_delay", minutes)
         _prayerStatistics.value = _prayerStatistics.value // Trigger flow update
-        scheduler.get().rescheduleAll()
+        scheduler.rescheduleAll()
     }
 
     override fun getNextNotificationTime(): Flow<String> = _prayerStatistics.map {

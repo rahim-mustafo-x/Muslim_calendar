@@ -6,7 +6,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.PersistableBundle
 import android.util.Log
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -34,15 +33,12 @@ import uz.coder.muslimcalendar.domain.repository.CalendarRepository
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.todo.REGION
 import java.time.LocalDate
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class CalendarRepositoryImpl @Inject constructor(
+class CalendarRepositoryImpl(
     private val preferences: SharedPref,
     private val db: AppDatabase,
     private val map: CalendarMap,
-    @ApplicationContext private val context: Context,
+    private val context: Context,
     private val ktorApiService: KtorApiService,
 ) : CalendarRepository {
     private val json = Json { 

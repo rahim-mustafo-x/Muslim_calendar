@@ -14,7 +14,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,30 +23,29 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.presentation.navigation.CalendarNavigation
 import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
 import uz.coder.muslimcalendar.presentation.ui.theme.ThemeManager
 import uz.coder.muslimcalendar.presentation.ui.theme.isDarkTheme
-import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
-import uz.coder.muslimcalendar.presentation.viewModel.state.HomeIntent
-import javax.inject.Inject
+import uz.coder.muslimcalendar.presentation.viewmodel.SafaHomeViewModel
+import uz.coder.muslimcalendar.presentation.viewmodel.SafaHomeIntent
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private val viewModel: HomeViewModel by viewModels()
+    private val viewModel: SafaHomeViewModel by viewModel()
     
-    @Inject
-    lateinit var notificationScheduler: NotificationScheduler
+    private val notificationScheduler: NotificationScheduler by inject()
     
-    @Inject
-    lateinit var themeManager: ThemeManager
+    private val themeManager: ThemeManager by inject()
+
+    private val sharedPref: SharedPref by inject()
 
     private var locationPermissionRequestCount = 0
 
@@ -260,18 +258,24 @@ class MainActivity : ComponentActivity() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 Log.d(TAG, "Location: ${location.latitude}, ${location.longitude}")
-                viewModel.handleIntent(HomeIntent.UpdateLocation(location.latitude, location.longitude))
+                viewModel.handleIntent(SafaHomeIntent.UpdateLocation(location.latitude, location.longitude))
                 scheduleAzanAlarms()
             } else {
                 Log.d(TAG, "Location is null. Using saved or default location...")
-                viewModel.loadWithSavedLocation()
+                loadWithSavedLocation()
                 scheduleAzanAlarms()
             }
         }.addOnFailureListener { exception ->
             Log.e(TAG, "Failed to get location: ${exception.message}")
-            viewModel.loadWithSavedLocation()
+            loadWithSavedLocation()
             scheduleAzanAlarms()
         }
+    }
+
+    private fun loadWithSavedLocation() {
+        val lat = sharedPref.getFloat("saved_latitude", 41.2995f).toDouble()
+        val lon = sharedPref.getFloat("saved_longitude", 69.2401f).toDouble()
+        viewModel.handleIntent(SafaHomeIntent.UpdateLocation(lat, lon))
     }
     
     private fun scheduleAzanAlarms() {

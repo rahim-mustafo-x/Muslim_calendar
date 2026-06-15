@@ -10,14 +10,14 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.SharedPref
 
-@AndroidEntryPoint
-class AlarmBroadCast : BroadcastReceiver() {
+class AlarmBroadCast : BroadcastReceiver(), KoinComponent {
 
-    @javax.inject.Inject
-    lateinit var sharedPref: uz.coder.muslimcalendar.SharedPref
+    private val sharedPref: SharedPref by inject()
 
     companion object {
         var mediaPlayer: MediaPlayer? = null

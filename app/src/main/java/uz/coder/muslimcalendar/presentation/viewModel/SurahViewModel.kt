@@ -4,8 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,11 +18,9 @@ import uz.coder.muslimcalendar.domain.usecase.GetSurahByNumberUseCase
 import uz.coder.muslimcalendar.presentation.viewModel.state.SurahState
 import uz.coder.muslimcalendar.todo.isConnected
 import uz.coder.muslimcalendar.todo.toSuraAyah
-import javax.inject.Inject
 
-@HiltViewModel
-class SurahViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+class SurahViewModel (
+     private val context: Context,
     private val getSurahByIdUseCase: GetSurahByIdUseCase,
     private val getSuraUseCase: GetSuraUseCase,
     private val getSurahByNumberUseCase: GetSurahByNumberUseCase,

@@ -23,5 +23,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Muslim calendar"
+rootProject.name = "muslim_calendar"
 include(":app")
+include(":shared")

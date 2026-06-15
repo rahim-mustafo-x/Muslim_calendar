@@ -1,5 +1,6 @@
 package uz.coder.muslimcalendar.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -21,6 +22,7 @@ interface MuslimCalendarDao {
     fun presentDay(day:Int, month:Int, year:Int): Flow<MuslimCalendarDbModel?>
 
     @Query("select MAX(day) as day, month, year from muslimCalendar limit 1")
+    @ColumnInfo
     fun refreshDay():Flow<RefreshDay>
 
     @Query("select * from muslimCalendar ORDER BY year ASC, month ASC, day ASC")

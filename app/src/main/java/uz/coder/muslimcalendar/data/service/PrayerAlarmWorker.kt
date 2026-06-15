@@ -2,18 +2,14 @@ package uz.coder.muslimcalendar.data.service
 
 import android.content.Context
 import android.util.Log
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.domain.repository.SettingsRepository
 
-@HiltWorker
-class PrayerAlarmWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted params: WorkerParameters,
+class PrayerAlarmWorker(
+    context: Context,
+    params: WorkerParameters,
     private val scheduler: NotificationScheduler,
     private val settingsRepository: SettingsRepository
 ) : CoroutineWorker(context, params) {

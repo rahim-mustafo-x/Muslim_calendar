@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import uz.coder.muslimcalendar.R
@@ -32,12 +31,9 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class NotificationSchedulerImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+class NotificationSchedulerImpl(
+    private val context: Context,
     private val db: AppDatabase,
     private val sharedPref: SharedPref,
     private val map: CalendarMap

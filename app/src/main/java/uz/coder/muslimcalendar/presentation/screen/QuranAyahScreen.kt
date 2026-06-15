@@ -28,7 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavBackStackEntry
@@ -54,7 +54,7 @@ fun QuranAyahScreen(
     controller: NavHostController,
     navBackStackEntry: NavBackStackEntry,
 ) {
-    val viewModel = hiltViewModel<SurahViewModel>()
+    val viewModel = koinViewModel<SurahViewModel>()
     val context = LocalContext.current
     val number = navBackStackEntry.arguments?.getInt(NUMBER) ?: 1
     var showTranslation by remember { mutableStateOf(false) }

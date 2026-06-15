@@ -14,11 +14,8 @@ import uz.coder.muslimcalendar.todo.cyrillicToLatin
 import uz.coder.muslimcalendar.todo.toWeakDays
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class CalendarMap @Inject constructor() {
+class CalendarMap {
 
     fun toMuslimCalendarDbModel(times: List<PrayerData?>?): List<MuslimCalendarDbModel> {
         return times?.filterNotNull()?.map { prayerData ->
@@ -44,15 +41,16 @@ class CalendarMap @Inject constructor() {
 
 
     fun toMuslimCalendar(model: MuslimCalendarDbModel?) = MuslimCalendar(
-        model?.day?:0,
-        model?.month?:0,
-        model?.weekday?:"",
-        model?.asr?:"",
-        model?.hufton?:"",
-        model?.peshin?:"",
-        model?.shomIftor?:"",
-        model?.tongSaharlik?:"",
-        model?.sunrise?:""
+        day = model?.day?:0,
+        month = model?.month?:0,
+        year = model?.year?:0,
+        weekday = model?.weekday?:"",
+        asr = model?.asr?:"",
+        hufton = model?.hufton?:"",
+        peshin = model?.peshin?:"",
+        shomIftor = model?.shomIftor?:"",
+        tongSaharlik = model?.tongSaharlik?:"",
+        sunRise = model?.sunrise?:""
     )
 
     fun toMuslimCalendarList(models: List<MuslimCalendarDbModel>) = models.map { toMuslimCalendar(it) }

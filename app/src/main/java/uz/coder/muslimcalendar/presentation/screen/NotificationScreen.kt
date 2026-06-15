@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import uz.coder.muslimcalendar.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.Notification
 import uz.coder.muslimcalendar.presentation.viewModel.NotificationViewModel
@@ -26,7 +26,7 @@ import uz.coder.muslimcalendar.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationScreen(
-    viewModel: NotificationViewModel = hiltViewModel()
+    viewModel: NotificationViewModel = koinViewModel()
 ) {
     val calendarData by viewModel.oneMonthDay().collectAsState(emptyList())
     val notifications by viewModel.notifications.collectAsState()

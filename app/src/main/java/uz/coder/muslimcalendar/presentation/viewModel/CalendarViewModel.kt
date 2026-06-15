@@ -2,7 +2,6 @@ package uz.coder.muslimcalendar.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,16 +11,13 @@ import uz.coder.muslimcalendar.domain.model.Calendar
 import uz.coder.muslimcalendar.domain.usecase.OneMonthDayUseCase
 import uz.coder.muslimcalendar.presentation.viewModel.state.CalendarIntent
 import uz.coder.muslimcalendar.presentation.viewModel.state.CalendarState
-import javax.inject.Inject
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import uz.coder.muslimcalendar.R
 import androidx.compose.ui.graphics.Color
 import uz.coder.muslimcalendar.presentation.ui.theme.Light_Blue
 
-@HiltViewModel
-class CalendarViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+class CalendarViewModel (
+     private val context: Context,
     private val oneMonthDayUseCase: OneMonthDayUseCase
 ) : ViewModel() {
 

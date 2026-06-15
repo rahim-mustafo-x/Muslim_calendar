@@ -3,8 +3,6 @@ package uz.coder.muslimcalendar.presentation.viewModel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -14,11 +12,9 @@ import uz.coder.muslimcalendar.domain.usecase.GetSurahUseCase
 import uz.coder.muslimcalendar.domain.usecase.LoadQuranArabUseCase
 import uz.coder.muslimcalendar.presentation.viewModel.state.QuranState
 import uz.coder.muslimcalendar.todo.isConnected
-import javax.inject.Inject
 
-@HiltViewModel
-class QuranViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+class QuranViewModel (
+     private val context: Context,
     private val getSurahUseCase: GetSurahUseCase,
     private val loadQuranArabUseCase: LoadQuranArabUseCase
 ) : ViewModel() {

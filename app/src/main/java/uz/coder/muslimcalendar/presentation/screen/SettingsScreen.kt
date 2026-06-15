@@ -43,7 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.presentation.ui.theme.ThemeMode
 import uz.coder.muslimcalendar.presentation.viewModel.SettingsViewModel
@@ -52,7 +52,7 @@ import uz.coder.muslimcalendar.presentation.viewModel.SettingsViewModel
 @Composable
 fun SettingsScreen(
     controller: NavHostController,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = koinViewModel()
 ) {
     val themeMode by viewModel.themeMode.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }

@@ -17,20 +17,24 @@ string getQuranArabUrl() {
 
 // --- JNI Functions ---
 
+// Fix these two — change jobject to jclass
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_uz_coder_muslimcalendar_data_network_KtorClient_getQuranUzbekUrl(JNIEnv *env, jobject /* this */) {
+JNIEXPORT jstring
+jstring
+Java_uz_coder_muslimcalendar_data_network_KtorClient_getQuranUzbekUrl(JNIEnv *env, jclass clazz) {
     return env->NewStringUTF(getQuranUzbekUrl().c_str());
 }
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_uz_coder_muslimcalendar_data_network_KtorClient_getQuranArabUrl(JNIEnv *env, jobject /* this */) {
+JNIEXPORT jstring
+jstring
+Java_uz_coder_muslimcalendar_data_network_KtorClient_getQuranArabUrl(JNIEnv *env, jclass clazz) {
     return env->NewStringUTF(getQuranArabUrl().c_str());
 }
 
 extern "C"
-JNIEXPORT jstring JNICALL
+JNIEXPORT jstring
+jstring
 Java_uz_coder_muslimcalendar_data_network_KtorClient_getPrayerTimeUrl(JNIEnv *env, jclass clazz) {
     return env->NewStringUTF(getPrayerTimeUrl().c_str());
 }

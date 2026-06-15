@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import uz.coder.muslimcalendar.R
@@ -20,11 +18,9 @@ import uz.coder.muslimcalendar.todo.KEY_PESHIN
 import uz.coder.muslimcalendar.todo.KEY_QUYOSH
 import uz.coder.muslimcalendar.todo.KEY_SHOM
 import uz.coder.muslimcalendar.todo.KEY_XUFTON
-import javax.inject.Inject
 
-@HiltViewModel
-class NotificationViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+class NotificationViewModel (
+     private val context: Context,
     private val oneMonthDayUseCase: OneMonthDayUseCase,
     private val sharedPref: SharedPref
 ) : ViewModel() {

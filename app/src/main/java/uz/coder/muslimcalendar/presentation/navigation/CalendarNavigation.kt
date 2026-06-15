@@ -1,3 +1,5 @@
+@file:Suppress("TYPE_INTERSECTION_AS_REIFIED_WARNING")
+
 package uz.coder.muslimcalendar.presentation.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +28,6 @@ import uz.coder.muslimcalendar.presentation.screen.AllahNameScreen
 import uz.coder.muslimcalendar.presentation.screen.CalendarScreen
 import uz.coder.muslimcalendar.presentation.screen.DuoMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.DuoScreen
-import uz.coder.muslimcalendar.presentation.screen.HomeScreen
 import uz.coder.muslimcalendar.presentation.screen.SplashScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozScreen
@@ -38,6 +39,8 @@ import uz.coder.muslimcalendar.presentation.screen.QuranAyahScreen
 import uz.coder.muslimcalendar.presentation.screen.QuranScreen
 import uz.coder.muslimcalendar.presentation.screen.SettingsScreen
 import uz.coder.muslimcalendar.presentation.screen.TasbehScreen
+import uz.coder.muslimcalendar.presentation.viewmodel.SafaHomeViewModel
+import org.koin.androidx.compose.koinViewModel
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.DUO_INDEX
 import uz.coder.muslimcalendar.todo.NAMOZ_INDEX
@@ -51,7 +54,19 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
             SplashScreen(controller = controller)
         }
         composable(Home.route){
-            HomeScreen(controller = controller)
+            val viewModel: SafaHomeViewModel = koinViewModel()
+            uz.coder.muslimcalendar.presentation.screen.HomeScreen(viewModel = viewModel) { route ->
+                val targetRoute = when (route) {
+                    "duo" -> Screen.Duo.route
+                    "quran" -> Screen.Quran.route
+                    "tasbeh" -> Screen.Tasbeh.route
+                    "qibla" -> Screen.QiblaCompass.route
+                    "calendar" -> Screen.Calendar.route
+                    "settings" -> Screen.Settings.route
+                    else -> route
+                }
+                controller.navigate(targetRoute)
+            }
         }
         composable(Tasbeh.route){
             TasbehScreen(controller = controller)

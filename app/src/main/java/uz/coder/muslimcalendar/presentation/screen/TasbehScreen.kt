@@ -16,7 +16,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.presentation.viewModel.TasbehViewModel
@@ -24,7 +24,7 @@ import uz.coder.muslimcalendar.presentation.viewModel.TasbehViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbehScreen(modifier: Modifier = Modifier, controller: NavHostController) {
-    val viewModel: TasbehViewModel = hiltViewModel()
+    val viewModel: TasbehViewModel = koinViewModel()
     val allTasbeh by viewModel.allTasbeh.collectAsStateWithLifecycle()
     val tasbeh by viewModel.tasbeh.collectAsStateWithLifecycle()
     

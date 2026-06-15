@@ -7,10 +7,10 @@ import android.app.NotificationManager
 import android.app.job.JobParameters
 import android.app.job.JobService
 import android.util.Log
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
+import org.koin.android.ext.android.get
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.qualifier.named
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -33,25 +33,15 @@ import uz.coder.muslimcalendar.data.map.CalendarMap
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import java.io.File
 import java.io.FileOutputStream
-import javax.inject.Named
 import kotlin.coroutines.cancellation.CancellationException
 
 @Suppress("DEPRECATION")
 @SuppressLint("SpecifyJobSchedulerIdRange")
-class DownloadJobService : JobService() {
+class DownloadJobService : JobService(), KoinComponent {
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface DownloadJobServiceEntryPoint {
-        fun getDatabase(): AppDatabase
-        fun getCalendarMap(): CalendarMap
-        @Named("download")
-        fun getHttpClient(): HttpClient
-    }
-
-    private lateinit var db: AppDatabase
-    private lateinit var map: CalendarMap
-    private lateinit var httpClient: HttpClient
+    private val db: AppDatabase by inject()
+    private val map: CalendarMap by inject()
+    private val httpClient: HttpClient by inject()
 
     private val jobScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val json = Json { ignoreUnknownKeys = true }
@@ -66,13 +56,6 @@ class DownloadJobService : JobService() {
 
     override fun onCreate() {
         super.onCreate()
-        val entryPoint = EntryPointAccessors.fromApplication(
-            applicationContext,
-            DownloadJobServiceEntryPoint::class.java
-        )
-        db = entryPoint.getDatabase()
-        map = entryPoint.getCalendarMap()
-        httpClient = entryPoint.getHttpClient()
     }
 
     override fun onStartJob(params: JobParameters?): Boolean {

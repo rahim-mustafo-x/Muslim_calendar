@@ -2,17 +2,14 @@ package uz.coder.muslimcalendar.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.domain.model.AzanSound
 import uz.coder.muslimcalendar.domain.model.PrayerAdjustment
 import uz.coder.muslimcalendar.domain.repository.SettingsRepository
-import javax.inject.Inject
 
-@HiltViewModel
-class AdvancedSettingsViewModel @Inject constructor(
+class AdvancedSettingsViewModel (
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
     

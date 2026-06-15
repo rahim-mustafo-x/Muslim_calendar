@@ -3,30 +3,32 @@ package uz.coder.muslimcalendar
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import dagger.hilt.android.HiltAndroidApp
 import uz.coder.muslimcalendar.data.service.PrayerAlarmWorker
-import javax.inject.Inject
+import uz.coder.muslimcalendar.di.initKoin
+import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.koin.workManagerFactory
+import uz.coder.muslimcalendar.di.appModule
 
-@HiltAndroidApp
 class App : Application(), Configuration.Provider {
-
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
         super.onCreate()
+        initKoin {
+            androidContext(this@App)
+            modules(appModule)
+            workManagerFactory()
+        }
         createNotificationChannel()
         triggerPrayerAlarmWorker()
     }
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
+            .setWorkerFactory(org.koin.androidx.workmanager.factory.KoinWorkerFactory())
             .build()
 
     private fun createNotificationChannel() {

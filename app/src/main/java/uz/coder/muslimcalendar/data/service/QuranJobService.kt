@@ -4,29 +4,19 @@ import android.annotation.SuppressLint
 import android.app.job.JobParameters
 import android.app.job.JobService
 import android.util.Log
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlinx.coroutines.*
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.map.CalendarMap
 import uz.coder.muslimcalendar.data.network.KtorApiService
 
 @SuppressLint("SpecifyJobSchedulerIdRange")
-class QuranJobService : JobService() {
+class QuranJobService : JobService(), KoinComponent {
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface QuranJobServiceEntryPoint {
-        fun getApiService(): KtorApiService
-        fun getCalendarMap(): CalendarMap
-        fun getDatabase(): AppDatabase
-    }
-
-    private lateinit var apiService: KtorApiService
-    private lateinit var map: CalendarMap
-    private lateinit var db: AppDatabase
+    private val apiService: KtorApiService by inject()
+    private val map: CalendarMap by inject()
+    private val db: AppDatabase by inject()
 
     private val jobScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -36,13 +26,6 @@ class QuranJobService : JobService() {
 
     override fun onCreate() {
         super.onCreate()
-        val entryPoint = EntryPointAccessors.fromApplication(
-            applicationContext,
-            QuranJobServiceEntryPoint::class.java
-        )
-        apiService = entryPoint.getApiService()
-        map = entryPoint.getCalendarMap()
-        db = entryPoint.getDatabase()
     }
 
     override fun onStartJob(params: JobParameters?): Boolean {

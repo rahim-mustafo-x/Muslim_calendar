@@ -2,16 +2,13 @@ package uz.coder.muslimcalendar.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.domain.model.PrayerStatistics
 import uz.coder.muslimcalendar.domain.repository.SettingsRepository
-import javax.inject.Inject
 
-@HiltViewModel
-class PrayerStatisticsViewModel @Inject constructor(
+class PrayerStatisticsViewModel (
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
     

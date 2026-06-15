@@ -4,17 +4,13 @@ import android.app.Application
 import android.content.Context
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.todo.*
-import javax.inject.Inject
 
-@HiltViewModel
-class TasbehViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+class TasbehViewModel (
+     private val context: Context
 ) : ViewModel() {
     private val preferences by lazy { context.getSharedPreferences(context.getString(R.string.app_name), Application.MODE_PRIVATE) }
 

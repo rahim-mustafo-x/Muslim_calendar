@@ -2,14 +2,10 @@ package uz.coder.muslimcalendar
 
 import android.content.Context
 import android.content.SharedPreferences
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import androidx.core.content.edit
 
-@Singleton
-class SharedPref @Inject constructor(
-    @ApplicationContext context: Context
+class SharedPref(
+    context: Context
 ) {
     private val sharedPreferences: SharedPreferences = context.applicationContext
         .getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)

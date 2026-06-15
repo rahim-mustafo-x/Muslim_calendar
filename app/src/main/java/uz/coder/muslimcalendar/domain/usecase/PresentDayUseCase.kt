@@ -8,9 +8,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import uz.coder.muslimcalendar.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
-import javax.inject.Inject
 
-class PresentDayUseCase @Inject constructor(
+class PresentDayUseCase(
     private val repository: CalendarRepository
 ) {
 

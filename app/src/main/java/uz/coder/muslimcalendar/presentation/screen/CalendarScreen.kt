@@ -4,7 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarTopBar
 import uz.coder.muslimcalendar.presentation.ui.view.CalendarView
@@ -17,7 +17,7 @@ fun CalendarScreen(modifier: Modifier = Modifier, controller: NavHostController)
 
 @Composable
 fun Calendar(modifier: Modifier, controller: NavHostController) {
-    val viewModel = hiltViewModel<CalendarViewModel>()
+    val viewModel = koinViewModel<CalendarViewModel>()
     Scaffold(topBar = { 
         CalendarTopBar(
             text = "Taqvim",

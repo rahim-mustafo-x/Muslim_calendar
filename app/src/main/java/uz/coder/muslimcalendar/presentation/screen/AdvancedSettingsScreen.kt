@@ -50,7 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.domain.model.AzanSound
@@ -60,7 +60,7 @@ import uz.coder.muslimcalendar.presentation.viewModel.AdvancedSettingsViewModel
 @Composable
 fun AdvancedSettingsScreen(
     controller: NavHostController,
-    viewModel: AdvancedSettingsViewModel = hiltViewModel()
+    viewModel: AdvancedSettingsViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()

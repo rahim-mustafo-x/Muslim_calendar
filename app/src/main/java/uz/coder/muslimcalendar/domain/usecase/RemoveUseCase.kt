@@ -2,9 +2,8 @@ package uz.coder.muslimcalendar.domain.usecase
 
 import android.util.Log
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
-import javax.inject.Inject
 
-class RemoveUseCase @Inject constructor(
+class RemoveUseCase (
     private val repository: CalendarRepository
 ) {
 
