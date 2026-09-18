@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
-import uz.coder.muslimcalendar.domain.model.MuslimCalendar
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
 
 class PresentDayUseCase(

@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
-import uz.coder.muslimcalendar.domain.model.MuslimCalendar
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.Notification
 import uz.coder.muslimcalendar.presentation.viewModel.NotificationViewModel
 import uz.coder.muslimcalendar.R

@@ -21,7 +21,7 @@ import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.SharedPref
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.map.CalendarMap
-import uz.coder.muslimcalendar.domain.model.MuslimCalendar
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.todo.hijriMonthTranslations
 import java.time.LocalDate
 import java.time.LocalTime
@@ -236,8 +236,8 @@ class IslamicCalendarWidget : GlanceAppWidget() {
             }
             Spacer(modifier = GlanceModifier.width(12.dp))
             Image(
-                provider = ImageProvider(R.drawable.safa_icon),
-                contentDescription = "Safa Icon",
+                provider = ImageProvider(R.drawable.mosque),
+                contentDescription = "Icon",
                 modifier = GlanceModifier.size(48.dp)
             )
         }
@@ -269,8 +269,8 @@ class IslamicCalendarWidget : GlanceAppWidget() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    provider = ImageProvider(R.drawable.safa_icon),
-                    contentDescription = "Safa Icon",
+                    provider = ImageProvider(R.drawable.mosque),
+                    contentDescription = "Icon",
                     modifier = GlanceModifier.size(24.dp)
                 )
                 Spacer(modifier = GlanceModifier.width(8.dp))
@@ -364,7 +364,7 @@ class IslamicCalendarWidget : GlanceAppWidget() {
             
             // Bottom branding
             Text(
-                text = "Safa",
+                text = "Muslim Calendar",
                 style = TextStyle(
                     color = ColorProvider(Color(0x80BEC9C6)), // 50% alpha
                     fontSize = 10.sp,

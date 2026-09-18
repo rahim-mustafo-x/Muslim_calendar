@@ -1,7 +1,5 @@
 package uz.coder.muslimcalendar.di
 
-import android.content.Context
-import androidx.work.WorkerParameters
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.androidx.workmanager.dsl.worker
@@ -20,7 +18,7 @@ import uz.coder.muslimcalendar.domain.repository.SettingsRepository
 import uz.coder.muslimcalendar.domain.usecase.*
 import uz.coder.muslimcalendar.presentation.ui.theme.ThemeManager
 import uz.coder.muslimcalendar.presentation.viewModel.*
-import uz.coder.muslimcalendar.presentation.viewmodel.SafaHomeViewModel
+import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 import uz.coder.muslimcalendar.data.service.*
 import kotlinx.serialization.json.Json
 
@@ -68,9 +66,9 @@ val appModule = module {
     viewModel { AdvancedSettingsViewModel(get()) }
     viewModel { CalendarViewModel(androidContext(), get()) }
     viewModel { NotificationViewModel(androidContext(), get(), get()) }
-    viewModel { SafaHomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get()) }
+    viewModel { LocationSettingsViewModel(get(), get(), get()) }
     viewModel { PrayerStatisticsViewModel(get()) }
-    viewModel { QazoViewModel(get()) }
     viewModel { QuranViewModel(get(), get(), get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { SurahViewModel(get(), get(), get(), get(), get(), get()) }
@@ -78,9 +76,9 @@ val appModule = module {
 
     // Workers
     worker { params ->
-        PrayerAlarmWorker(get(), params.get(), get(), get())
+        PrayerAlarmWorker(get(), params.get(), get(), get(), get(), get())
     }
     worker { params ->
-        QazoReminderWorker(get(), params.get())
+        QazoReminderWorker(get(), params.get(), get())
     }
 }

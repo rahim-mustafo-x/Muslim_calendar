@@ -14,6 +14,9 @@ interface SettingsRepository {
     fun getPrayerStatistics(): Flow<PrayerStatistics>
     suspend fun updatePrayerStatistics(stats: PrayerStatistics)
     suspend fun markPrayerCompleted(prayerName: String, onTime: Boolean)
+    suspend fun markPrayerMissed(prayerName: String)
+    /** Records one response per scheduled prayer event, so retries cannot double-count it. */
+    suspend fun recordPrayerResponse(prayerName: String, prayed: Boolean, eventId: String)
     suspend fun checkAndResetDailyPrayers()
     suspend fun exportSettings(): String
     suspend fun importSettings(json: String): Boolean

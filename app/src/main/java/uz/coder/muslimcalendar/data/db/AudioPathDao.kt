@@ -11,7 +11,7 @@ import uz.coder.muslimcalendar.data.db.model.AudioPathDbModel
 interface AudioPathDao {
 
     @Query("SELECT * FROM audioPath WHERE sura = :sura")
-    fun getAudioPathBySura(sura: String): Flow<AudioPathDbModel>
+    fun getAudioPathBySura(sura: String): Flow<AudioPathDbModel?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAudioPath(audioPathDbModel: AudioPathDbModel)

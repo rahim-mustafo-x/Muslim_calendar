@@ -10,6 +10,7 @@ import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
@@ -58,6 +59,8 @@ object KtorClient {
 
             defaultRequest {
                 url(baseUrl)
+                header("User-Agent", "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
+                header("Accept", "application/json")
             }
         }
     }
@@ -80,6 +83,9 @@ object KtorClient {
                 requestTimeoutMillis = 300_000
                 connectTimeoutMillis = 120_000
                 socketTimeoutMillis = 300_000
+            }
+            defaultRequest {
+                header("User-Agent", "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
             }
         }
     }

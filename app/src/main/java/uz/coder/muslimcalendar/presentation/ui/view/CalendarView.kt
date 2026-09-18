@@ -63,20 +63,26 @@ private fun CalendarItem(
     color: Color,
     backgroundColor: Color
 ) {
-    val isHeader = backgroundColor != Color.White && backgroundColor != Color.Transparent
+    val isHeader = backgroundColor != Color.White && backgroundColor != Color.Transparent && backgroundColor != Color.Unspecified
     
+    val itemBackground = if (isHeader) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    
+    val itemTextColor = if (isHeader) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
     Box(
         modifier = modifier
             .padding(1.dp)
             .aspectRatio(1f)
             .clip(RoundedCornerShape(4.dp))
-            .background(
-                if (backgroundColor == Color.Transparent || backgroundColor == Color.Unspecified) {
-                    MaterialTheme.colorScheme.surface
-                } else {
-                    backgroundColor
-                }
-            )
+            .background(itemBackground)
             .border(
                 width = 0.5.dp,
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
@@ -86,13 +92,7 @@ private fun CalendarItem(
     ) {
         Text(
             text = text,
-            color = if (color == Color.Unspecified) {
-                MaterialTheme.colorScheme.onSurface
-            } else if (color == Color.White && !isHeader) {
-                MaterialTheme.colorScheme.onSurface
-            } else {
-                color
-            },
+            color = itemTextColor,
             style = MaterialTheme.typography.bodySmall,
             fontSize = if (isHeader) 10.sp else 12.sp,
             fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal,

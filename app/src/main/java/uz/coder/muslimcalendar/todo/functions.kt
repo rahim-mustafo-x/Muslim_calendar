@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import uz.coder.muslimcalendar.domain.model.Item
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
@@ -16,6 +17,14 @@ fun Context.isConnected():Boolean{
     return info != null && info.isConnectedOrConnecting
 }
 fun Context.getConnectivityManager() = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+fun Context.hasInternetConnection(): Boolean {
+    val manager = getConnectivityManager()
+    val network = manager.activeNetwork ?: return false
+    val capabilities = manager.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+        capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+}
 
 fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this

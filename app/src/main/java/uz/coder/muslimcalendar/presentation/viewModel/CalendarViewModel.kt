@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.domain.model.Calendar
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.usecase.OneMonthDayUseCase
 import uz.coder.muslimcalendar.presentation.viewModel.state.CalendarIntent
 import uz.coder.muslimcalendar.presentation.viewModel.state.CalendarState

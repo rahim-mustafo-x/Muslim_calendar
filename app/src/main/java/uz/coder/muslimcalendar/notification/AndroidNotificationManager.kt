@@ -4,8 +4,8 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import uz.coder.muslimcalendar.data.receiver.AlarmBroadCast
-import uz.coder.muslimcalendar.domain.model.MuslimCalendar
-import uz.coder.muslimcalendar.domain.notification.NotificationManager
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
+import uz.coder.muslimcalendar.shared.domain.notification.NotificationManager
 import java.util.*
 
 class AndroidNotificationManager(private val context: Context) : NotificationManager {
@@ -15,7 +15,6 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
         
         val prayerTimes = listOf(
             calendar.tongSaharlik to "Bomdod",
-            calendar.sunRise to "Quyosh",
             calendar.peshin to "Peshin",
             calendar.asr to "Asr",
             calendar.shomIftor to "Shom",
@@ -39,7 +38,8 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             }
 
             if (calendarInstance.timeInMillis > System.currentTimeMillis()) {
-                val intent = AlarmBroadCast.getIntent(context, h, m, "$name namozi", -1)
+                val eventId = "${calendar.year}${calendar.month.toString().padStart(2, '0')}${calendar.day.toString().padStart(2, '0')}_${name.lowercase()}"
+                val intent = AlarmBroadCast.getIntent(context, h, m, "$name namozi", -1, eventId)
                 val pendingIntent = PendingIntent.getBroadcast(
                     context, 
                     generateRequestId(calendar.month, calendar.day, index), 

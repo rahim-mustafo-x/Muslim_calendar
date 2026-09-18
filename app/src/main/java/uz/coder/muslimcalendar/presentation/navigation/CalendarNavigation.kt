@@ -17,8 +17,6 @@ import uz.coder.muslimcalendar.domain.model.sealed.Screen.About
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.AllahName
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.AllahNameMeaning
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Home
-import uz.coder.muslimcalendar.domain.model.sealed.Screen.Splash
-import uz.coder.muslimcalendar.domain.model.sealed.Screen.Qazo
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.Quran
 import uz.coder.muslimcalendar.domain.model.sealed.Screen.QuranAyah
 import uz.coder.muslimcalendar.presentation.screen.AboutScreen
@@ -28,18 +26,18 @@ import uz.coder.muslimcalendar.presentation.screen.AllahNameScreen
 import uz.coder.muslimcalendar.presentation.screen.CalendarScreen
 import uz.coder.muslimcalendar.presentation.screen.DuoMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.DuoScreen
-import uz.coder.muslimcalendar.presentation.screen.SplashScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozMeaningScreen
 import uz.coder.muslimcalendar.presentation.screen.NamozScreen
 import uz.coder.muslimcalendar.presentation.screen.NotificationScreen
 import uz.coder.muslimcalendar.presentation.screen.PrayerStatisticsScreen
-import uz.coder.muslimcalendar.presentation.screen.QazoScreen
 import uz.coder.muslimcalendar.presentation.screen.QiblaCompassScreen
 import uz.coder.muslimcalendar.presentation.screen.QuranAyahScreen
 import uz.coder.muslimcalendar.presentation.screen.QuranScreen
 import uz.coder.muslimcalendar.presentation.screen.SettingsScreen
 import uz.coder.muslimcalendar.presentation.screen.TasbehScreen
-import uz.coder.muslimcalendar.presentation.viewmodel.SafaHomeViewModel
+import uz.coder.muslimcalendar.presentation.screen.HomeScreen
+import uz.coder.muslimcalendar.presentation.screen.LocationSettingsScreen
+import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 import uz.coder.muslimcalendar.todo.ALLAH_NAME_INDEX
 import uz.coder.muslimcalendar.todo.DUO_INDEX
@@ -49,13 +47,10 @@ import uz.coder.muslimcalendar.todo.NUMBER
 @Composable
 fun CalendarNavigation(modifier: Modifier = Modifier) {
     val controller = rememberNavController()
-    NavHost(navController = controller, startDestination = Splash.route, modifier = modifier.fillMaxSize()) {
-        composable(Splash.route) {
-            SplashScreen(controller = controller)
-        }
+    NavHost(navController = controller, startDestination = Home.route, modifier = modifier.fillMaxSize()) {
         composable(Home.route){
-            val viewModel: SafaHomeViewModel = koinViewModel()
-            uz.coder.muslimcalendar.presentation.screen.HomeScreen(viewModel = viewModel) { route ->
+            val viewModel: HomeViewModel = koinViewModel()
+            HomeScreen(viewModel = viewModel) { route ->
                 val targetRoute = when (route) {
                     "duo" -> Screen.Duo.route
                     "quran" -> Screen.Quran.route
@@ -63,6 +58,8 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
                     "qibla" -> Screen.QiblaCompass.route
                     "calendar" -> Screen.Calendar.route
                     "settings" -> Screen.Settings.route
+                    "location_settings" -> Screen.LocationSettings.route
+                    "allah_names" -> Screen.AllahName.route
                     else -> route
                 }
                 controller.navigate(targetRoute)
@@ -88,9 +85,6 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
             NAMOZ_INDEX
             ){ type = NavType.IntType })){
             NamozMeaningScreen(modifier, controller = controller, navBackStackEntry = it)
-        }
-        composable(Qazo.route){
-            QazoScreen(controller = controller)
         }
         composable(Calendar.route){
             CalendarScreen(controller = controller)
@@ -118,6 +112,9 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
         }
         composable(Screen.Settings.route){
             SettingsScreen(controller = controller)
+        }
+        composable(Screen.LocationSettings.route) {
+            LocationSettingsScreen(controller = controller)
         }
         composable(Screen.AdvancedSettings.route){
             AdvancedSettingsScreen(controller = controller)

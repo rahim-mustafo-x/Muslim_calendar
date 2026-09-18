@@ -102,6 +102,16 @@ fun PrayerStatisticsScreen(
                     subtitle = "kun"
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            StatCard(
+                modifier = Modifier.fillMaxWidth(),
+                icon = Icons.Default.Cancel,
+                title = "O'tkazib yuborilgan namozlar",
+                value = "${statistics.bomdodQazo + statistics.peshinQazo + statistics.asrQazo + statistics.shomQazo + statistics.xuftonQazo}",
+                subtitle = "javob berilmagan yoki yo'q deb belgilangan"
+            )
             
             Spacer(modifier = Modifier.height(16.dp))
             

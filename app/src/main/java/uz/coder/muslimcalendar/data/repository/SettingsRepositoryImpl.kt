@@ -14,6 +14,7 @@ import uz.coder.muslimcalendar.domain.model.PrayerAdjustment
 import uz.coder.muslimcalendar.domain.model.PrayerStatistics
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.domain.repository.SettingsRepository
+import java.util.Calendar
 
 @Serializable
 data class SettingsExport(
@@ -53,6 +54,7 @@ class SettingsRepositoryImpl (
 
     override suspend fun setAzanSound(prayerName: String, sound: AzanSound) {
         sharedPref.saveValue("azan_sound_$prayerName", sound.resourceId)
+        scheduler.rescheduleAll()
     }
 
     override fun getPrayerStatistics(): Flow<PrayerStatistics> = _prayerStatistics.asStateFlow()
@@ -68,11 +70,13 @@ class SettingsRepositoryImpl (
         sharedPref.saveValue("stats_qazo_asr", stats.asrQazo)
         sharedPref.saveValue("stats_qazo_shom", stats.shomQazo)
         sharedPref.saveValue("stats_qazo_xufton", stats.xuftonQazo)
+        sharedPref.saveValue("stats_qazo_vitr", stats.vitrQazo)
         sharedPref.saveValue("stats_today_bomdod", stats.bomdodToday)
         sharedPref.saveValue("stats_today_peshin", stats.peshinToday)
         sharedPref.saveValue("stats_today_asr", stats.asrToday)
         sharedPref.saveValue("stats_today_shom", stats.shomToday)
         sharedPref.saveValue("stats_today_xufton", stats.xuftonToday)
+        sharedPref.saveValue("stats_today_vitr", stats.vitrToday)
         _prayerStatistics.value = stats
     }
 
@@ -80,59 +84,108 @@ class SettingsRepositoryImpl (
         val current = _prayerStatistics.value
         val now = System.currentTimeMillis()
         
-        val newStats = when (prayerName.lowercase()) {
-            "bomdod" -> current.copy(bomdodToday = true)
-            "peshin" -> current.copy(peshinToday = true)
-            "asr" -> current.copy(asrToday = true)
-            "shom" -> current.copy(shomToday = true)
-            "xufton" -> current.copy(xuftonToday = true)
+        // Calculate new streak
+        val lastDate = Calendar.getInstance().apply { timeInMillis = current.lastPrayerDate }
+        val today = Calendar.getInstance()
+        val isSameDay = lastDate.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) &&
+                       lastDate.get(Calendar.YEAR) == today.get(Calendar.YEAR)
+        
+        val newStreak = if (isSameDay) current.currentStreak else current.currentStreak + 1
+        val newLongestStreak = if (newStreak > current.longestStreak) newStreak else current.longestStreak
+
+        val newStats = when (prayerName.lowercase().trim()) {
+            "bomdod", "bomdod namozi" -> current.copy(bomdodToday = true)
+            "peshin", "peshin namozi" -> current.copy(peshinToday = true)
+            "asr", "asr namozi" -> current.copy(asrToday = true)
+            "shom", "shom namozi" -> current.copy(shomToday = true)
+            "xufton", "xufton namozi" -> current.copy(xuftonToday = true)
+            "vitr", "vitr namozi" -> current.copy(vitrToday = true)
             else -> current
         }.let {
             it.copy(
                 totalPrayers = it.totalPrayers + 1,
                 prayedOnTime = if (onTime) it.prayedOnTime + 1 else it.prayedOnTime,
-                lastPrayerDate = now
+                lastPrayerDate = now,
+                currentStreak = newStreak,
+                longestStreak = newLongestStreak
             )
         }
         
         updatePrayerStatistics(newStats)
     }
 
+    override suspend fun markPrayerMissed(prayerName: String) {
+        val current = _prayerStatistics.value
+        val now = System.currentTimeMillis()
+        
+        val newStats = when (prayerName.lowercase().trim()) {
+            "bomdod", "bomdod namozi" -> current.copy(bomdodQazo = current.bomdodQazo + 1)
+            "peshin", "peshin namozi" -> current.copy(peshinQazo = current.peshinQazo + 1)
+            "asr", "asr namozi" -> current.copy(asrQazo = current.asrQazo + 1)
+            "shom", "shom namozi" -> current.copy(shomQazo = current.shomQazo + 1)
+            "xufton", "xufton namozi" -> current.copy(xuftonQazo = current.xuftonQazo + 1)
+            "vitr", "vitr namozi" -> current.copy(vitrQazo = current.vitrQazo + 1)
+            else -> current
+        }.copy(
+            lastPrayerDate = now,
+            currentStreak = 0 // Reset streak on miss
+        )
+        
+        updatePrayerStatistics(newStats)
+    }
+
+    override suspend fun recordPrayerResponse(prayerName: String, prayed: Boolean, eventId: String) {
+        val key = "prayer_outcome_$eventId"
+        val previous = sharedPref.getString(key)
+        if (previous == "yes" || (!prayed && previous == "missed")) return
+
+        if (prayed) {
+            // A late positive answer corrects an automatic missed result.
+            if (previous == "missed") {
+                val current = _prayerStatistics.value
+                val corrected = when (prayerName.lowercase().trim()) {
+                    "bomdod", "bomdod namozi" -> current.copy(bomdodQazo = (current.bomdodQazo - 1).coerceAtLeast(0))
+                    "peshin", "peshin namozi" -> current.copy(peshinQazo = (current.peshinQazo - 1).coerceAtLeast(0))
+                    "asr", "asr namozi" -> current.copy(asrQazo = (current.asrQazo - 1).coerceAtLeast(0))
+                    "shom", "shom namozi" -> current.copy(shomQazo = (current.shomQazo - 1).coerceAtLeast(0))
+                    "xufton", "xufton namozi" -> current.copy(xuftonQazo = (current.xuftonQazo - 1).coerceAtLeast(0))
+                    else -> current
+                }
+                updatePrayerStatistics(corrected)
+            }
+            markPrayerCompleted(prayerName, onTime = true)
+            sharedPref.saveValue(key, "yes")
+        } else {
+            markPrayerMissed(prayerName)
+            sharedPref.saveValue(key, "missed")
+        }
+    }
+
     override suspend fun checkAndResetDailyPrayers() {
         val current = _prayerStatistics.value
         val now = System.currentTimeMillis()
         
-        // Check if it's a new day
-        val lastDate = java.util.Calendar.getInstance().apply { timeInMillis = current.lastPrayerDate }
-        val today = java.util.Calendar.getInstance()
+        val lastDate = Calendar.getInstance().apply { timeInMillis = current.lastPrayerDate }
+        val today = Calendar.getInstance()
         
-        if (lastDate.get(java.util.Calendar.DAY_OF_YEAR) != today.get(java.util.Calendar.DAY_OF_YEAR) ||
-            lastDate.get(java.util.Calendar.YEAR) != today.get(java.util.Calendar.YEAR)) {
+        // Check if more than 1 day has passed
+        val diff = now - current.lastPrayerDate
+        val daysDiff = diff / (1000 * 60 * 60 * 24)
+
+        if (lastDate.get(Calendar.DAY_OF_YEAR) != today.get(Calendar.DAY_OF_YEAR) ||
+            lastDate.get(Calendar.YEAR) != today.get(Calendar.YEAR)) {
             
-            // Increment Qazo if not prayed yesterday
-            var newBomdodQazo = current.bomdodQazo
-            var newPeshinQazo = current.peshinQazo
-            var newAsrQazo = current.asrQazo
-            var newShomQazo = current.shomQazo
-            var newXuftonQazo = current.xuftonQazo
+            val prayedAnyYesterday = current.bomdodToday || current.peshinToday || current.asrToday || current.shomToday || current.xuftonToday
             
-            if (!current.bomdodToday) newBomdodQazo++
-            if (!current.peshinToday) newPeshinQazo++
-            if (!current.asrToday) newAsrQazo++
-            if (!current.shomToday) newShomQazo++
-            if (!current.xuftonToday) newXuftonQazo++
-            
+            // Misses are recorded by each prayer's expiry worker. Do not add them again at midnight.
             val resetStats = current.copy(
                 bomdodToday = false,
                 peshinToday = false,
                 asrToday = false,
                 shomToday = false,
                 xuftonToday = false,
-                bomdodQazo = newBomdodQazo,
-                peshinQazo = newPeshinQazo,
-                asrQazo = newAsrQazo,
-                shomQazo = newShomQazo,
-                xuftonQazo = newXuftonQazo,
+                vitrToday = false,
+                currentStreak = if (prayedAnyYesterday && daysDiff <= 1) current.currentStreak else 0,
                 lastPrayerDate = now
             )
             updatePrayerStatistics(resetStats)
@@ -247,11 +300,13 @@ class SettingsRepositoryImpl (
             asrQazo = sharedPref.getInt("stats_qazo_asr", 0),
             shomQazo = sharedPref.getInt("stats_qazo_shom", 0),
             xuftonQazo = sharedPref.getInt("stats_qazo_xufton", 0),
+            vitrQazo = sharedPref.getInt("stats_qazo_vitr", 0),
             bomdodToday = sharedPref.getBoolean("stats_today_bomdod", false),
             peshinToday = sharedPref.getBoolean("stats_today_peshin", false),
             asrToday = sharedPref.getBoolean("stats_today_asr", false),
             shomToday = sharedPref.getBoolean("stats_today_shom", false),
-            xuftonToday = sharedPref.getBoolean("stats_today_xufton", false)
+            xuftonToday = sharedPref.getBoolean("stats_today_xufton", false),
+            vitrToday = sharedPref.getBoolean("stats_today_vitr", false)
         )
     }
 }

@@ -10,14 +10,10 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import uz.coder.muslimcalendar.R
-import uz.coder.muslimcalendar.SharedPref
+import java.util.concurrent.TimeUnit
 
-class AlarmBroadCast : BroadcastReceiver(), KoinComponent {
-
-    private val sharedPref: SharedPref by inject()
+class AlarmBroadCast : BroadcastReceiver() {
 
     companion object {
         var mediaPlayer: MediaPlayer? = null
@@ -26,13 +22,15 @@ class AlarmBroadCast : BroadcastReceiver(), KoinComponent {
         private const val EXTRA_HOUR = "extra_hour"
         private const val EXTRA_MINUTE = "extra_minute"
         private const val EXTRA_MUSIC = "extra_music"
+        private const val EXTRA_EVENT_ID = "extra_event_id"
 
-        fun getIntent(context: Context, hour: Int, minute: Int, text: String, musicResId: Int): Intent {
+        fun getIntent(context: Context, hour: Int, minute: Int, text: String, musicResId: Int, eventId: String): Intent {
             return Intent(context, AlarmBroadCast::class.java).apply {
                 putExtra(EXTRA_TEXT, text)
                 putExtra(EXTRA_HOUR, hour)
                 putExtra(EXTRA_MINUTE, minute)
                 putExtra(EXTRA_MUSIC, musicResId)
+                putExtra(EXTRA_EVENT_ID, eventId)
             }
         }
     }
@@ -59,19 +57,13 @@ class AlarmBroadCast : BroadcastReceiver(), KoinComponent {
         val minute = intent.getIntExtra(EXTRA_MINUTE, 0)
         val musicResId = intent.getIntExtra(EXTRA_MUSIC, -1)
         val title = intent.getStringExtra(EXTRA_TEXT) ?: "Eslatma"
+        val eventId = intent.getStringExtra(EXTRA_EVENT_ID) ?: return
 
         // Notification Channel
-        val channelId = "alarm_channel_id"
+        val channelId = "prayer_alarm_channel"
         val notificationId = 101
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val channel = NotificationChannel(
-            channelId,
-            "Alarm Channel",
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply { description = "Alarm notifications" }
-        notificationManager.createNotificationChannel(channel)
 
         // Stop Alarm Intent
         val stopIntent = StopAlarmBroadCast.getIntent(context)
@@ -93,8 +85,8 @@ class AlarmBroadCast : BroadcastReceiver(), KoinComponent {
 
         notificationManager.notify(notificationId, notificationBuilder.build())
         
-        // Schedule "Did you pray?" reminder after 15 minutes
-        scheduleQazoReminder(context, title)
+        // Ask after 30 minutes; unanswered prompts are automatically marked missed.
+        schedulePrayerCheck(context, title, eventId)
 
         // Reschedule alarms if it's Tong or Xufton
         if (title.contains("Bomdod") || title.contains("Xufton")) {
@@ -138,24 +130,18 @@ class AlarmBroadCast : BroadcastReceiver(), KoinComponent {
         val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.PrayerAlarmWorker>().build()
         androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
         
-        // Schedule follow-up reminder
-        val followUpEnabled = sharedPref.getBoolean("follow_up_enabled", true)
-        if (followUpEnabled) {
-            val delay = sharedPref.getInt("follow_up_delay", 15)
-            val followUpWork = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.QazoReminderWorker>()
-                .setInitialDelay(delay.toLong(), java.util.concurrent.TimeUnit.MINUTES)
-                .setInputData(androidx.work.workDataOf("is_daily_follow_up" to true))
-                .build()
-            androidx.work.WorkManager.getInstance(context).enqueue(followUpWork)
-        }
     }
 
-    private fun scheduleQazoReminder(context: Context, prayerName: String) {
+    private fun schedulePrayerCheck(context: Context, prayerName: String, eventId: String) {
         val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.QazoReminderWorker>()
-            .setInitialDelay(15, java.util.concurrent.TimeUnit.MINUTES)
-            .setInputData(androidx.work.workDataOf("prayer_name" to prayerName))
+            .setInitialDelay(30, TimeUnit.MINUTES)
+            .setInputData(androidx.work.workDataOf("prayer_name" to prayerName, "event_id" to eventId))
             .build()
-        androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+        androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+            "prayer-check-$eventId",
+            androidx.work.ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 
     private fun ensureChannel(context: Context) {

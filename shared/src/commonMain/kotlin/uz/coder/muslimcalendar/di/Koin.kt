@@ -8,10 +8,8 @@ import kotlinx.serialization.json.Json
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
-import uz.coder.muslimcalendar.shared.data.network.KtorApiService
 import uz.coder.muslimcalendar.shared.domain.PrayerEngine
-import uz.coder.muslimcalendar.shared.domain.repository.CalendarRepository
-import uz.coder.muslimcalendar.shared.data.repository.CalendarRepositoryImpl
+import uz.coder.muslimcalendar.shared.domain.repository.SharedCalendarRepository
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
     startKoin {
@@ -36,7 +34,5 @@ val sharedModule = module {
             }
         }
     }
-    single { KtorApiService(get()) }
     single { PrayerEngine() }
-    single<CalendarRepository> { CalendarRepositoryImpl(get()) }
 }

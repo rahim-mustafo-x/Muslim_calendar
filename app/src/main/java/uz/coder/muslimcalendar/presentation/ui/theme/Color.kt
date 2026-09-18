@@ -4,35 +4,35 @@ import androidx.annotation.ColorInt
 import androidx.compose.ui.graphics.Color
 
 // Light Theme Colors
-val LightPrimary = Color(0xFF00AA94)
+val LightPrimary = Color(0xFF087F5B)
 val LightOnPrimary = Color(0xFFFFFFFF)
-val LightPrimaryContainer = Color(0xFFB2F1E8)
-val LightOnPrimaryContainer = Color(0xFF002019)
+val LightPrimaryContainer = Color(0xFFD8F2E8)
+val LightOnPrimaryContainer = Color(0xFF002117)
 
-val LightSecondary = Color(0xFF4A6360)
+val LightSecondary = Color(0xFF52645E)
 val LightOnSecondary = Color(0xFFFFFFFF)
-val LightSecondaryContainer = Color(0xFFCCE8E3)
-val LightOnSecondaryContainer = Color(0xFF05201D)
+val LightSecondaryContainer = Color(0xFFE0E9E5)
+val LightOnSecondaryContainer = Color(0xFF101C18)
 
-val LightTertiary = Color(0xFF45607C)
+val LightTertiary = Color(0xFF496575)
 val LightOnTertiary = Color(0xFFFFFFFF)
-val LightTertiaryContainer = Color(0xFFCCE5FF)
-val LightOnTertiaryContainer = Color(0xFF001D35)
+val LightTertiaryContainer = Color(0xFFDCEBF2)
+val LightOnTertiaryContainer = Color(0xFF0B1D25)
 
-val LightError = Color(0xFFBA1A1A)
+val LightError = Color(0xFFB3261E)
 val LightOnError = Color(0xFFFFFFFF)
-val LightErrorContainer = Color(0xFFFFDAD6)
-val LightOnErrorContainer = Color(0xFF410002)
+val LightErrorContainer = Color(0xFFF9DEDC)
+val LightOnErrorContainer = Color(0xFF410E0B)
 
-val LightBackground = Color(0xFFFAFDFB)
-val LightOnBackground = Color(0xFF191C1C)
-val LightSurface = Color(0xFFFAFDFB)
-val LightOnSurface = Color(0xFF191C1C)
-val LightSurfaceVariant = Color(0xFFDAE5E2)
-val LightOnSurfaceVariant = Color(0xFF3F4947)
+val LightBackground = Color(0xFFF7F9F8)
+val LightOnBackground = Color(0xFF171C1A)
+val LightSurface = Color(0xFFF7F9F8)
+val LightOnSurface = Color(0xFF171C1A)
+val LightSurfaceVariant = Color(0xFFE3E9E6)
+val LightOnSurfaceVariant = Color(0xFF434C48)
 
-val LightOutline = Color(0xFF6F7977)
-val LightOutlineVariant = Color(0xFFBEC9C6)
+val LightOutline = Color(0xFF727B77)
+val LightOutlineVariant = Color(0xFFC4CCC8)
 
 // Dark Theme Colors
 val DarkPrimary = Color(0xFF54DBC8)
@@ -70,4 +70,4 @@ val Light_Blue = LightPrimary
 val Blue = Color(0xFF00008B)
 
 @ColorInt
-val LightBlueStatusBar = 0xFF00AA94.toInt()
+val LightBlueStatusBar = 0xFF087F5B.toInt()

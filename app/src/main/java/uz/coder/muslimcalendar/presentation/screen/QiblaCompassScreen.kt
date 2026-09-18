@@ -1,10 +1,19 @@
 package uz.coder.muslimcalendar.presentation.screen
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -27,7 +36,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
 import uz.coder.muslimcalendar.SharedPref
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -40,9 +61,54 @@ fun QiblaCompassScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
+    val lifecycleOwner = LocalLifecycleOwner.current
     var azimuth by remember { mutableFloatStateOf(0f) }
     var qiblaDirection by remember { mutableFloatStateOf(0f) }
     var isCalibrated by remember { mutableStateOf(false) }
+    var hasLocationPermission by remember { mutableStateOf(context.hasLocationPermission()) }
+    var showPermissionRationale by remember { mutableStateOf(false) }
+    var showSettingsExplanation by remember { mutableStateOf(false) }
+    var gpsResolutionVersion by remember { mutableIntStateOf(0) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (!hasLocationPermission) {
+            val canAskAgain = activity?.let {
+                ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_FINE_LOCATION) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_COARSE_LOCATION)
+            } == true
+            showPermissionRationale = canAskAgain
+            showSettingsExplanation = !canAskAgain
+        }
+    }
+    val gpsResolutionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        // Re-check only after the user enabled location; cancelling must not reopen the dialog.
+        if (result.resultCode == Activity.RESULT_OK) gpsResolutionVersion++
+    }
+
+    LaunchedEffect(Unit) {
+        if (!hasLocationPermission) {
+            permissionLauncher.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                hasLocationPermission = context.hasLocationPermission()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     
     val animatedAzimuth by animateFloatAsState(
         targetValue = azimuth,
@@ -104,6 +170,58 @@ fun QiblaCompassScreen(
         }
     }
 
+    /*
+     * Qibla needs a current position, but location updates are deliberately scoped to
+     * this composable. Disposing the screen always removes the callback, so this is
+     * never background location tracking.
+     */
+    DisposableEffect(hasLocationPermission, gpsResolutionVersion) {
+        if (!hasLocationPermission) {
+            onDispose { }
+        } else {
+            val locationClient = LocationServices.getFusedLocationProviderClient(context)
+            val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5_000L)
+                .setMinUpdateIntervalMillis(2_000L)
+                .setWaitForAccurateLocation(true)
+                .build()
+            val settingsRequest = LocationSettingsRequest.Builder()
+                .addLocationRequest(request)
+                .setAlwaysShow(true)
+                .build()
+            var isScreenActive = true
+            val callback = object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    val location = result.lastLocation ?: return
+                    if (!isScreenActive) return
+                    SharedPref(context).apply {
+                        saveValue("saved_latitude", location.latitude.toFloat())
+                        saveValue("saved_longitude", location.longitude.toFloat())
+                    }
+                    qiblaDirection = calculateQiblaDirection(location.latitude, location.longitude)
+                }
+            }
+
+            LocationServices.getSettingsClient(context).checkLocationSettings(settingsRequest)
+                .addOnSuccessListener {
+                    if (isScreenActive) {
+                        locationClient.requestLocationUpdates(request, callback, context.mainLooper)
+                    }
+                }
+                .addOnFailureListener { error ->
+                    if (isScreenActive && error is ResolvableApiException) {
+                        gpsResolutionLauncher.launch(
+                            IntentSenderRequest.Builder(error.resolution).build()
+                        )
+                    }
+                }
+
+            onDispose {
+                isScreenActive = false
+                locationClient.removeLocationUpdates(callback)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -128,6 +246,20 @@ fun QiblaCompassScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            if (!hasLocationPermission) {
+                Card(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text(
+                        text = "Aniq qibla yo'nalishi uchun joylashuv ruxsati kerak.",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             if (!isCalibrated) {
                 Icon(
                     imageVector = Icons.Default.Warning,
@@ -222,7 +354,47 @@ fun QiblaCompassScreen(
             }
         }
     }
+
+    if (showPermissionRationale) {
+        AlertDialog(
+            onDismissRequest = { showPermissionRationale = false },
+            title = { Text("Joylashuv ruxsati kerak") },
+            text = { Text("Joylashuv faqat Qibla yo'nalishi oynasi ochiq paytda olinadi va oynadan chiqqaningizda kuzatuv to'xtaydi.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionRationale = false
+                    permissionLauncher.launch(
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    )
+                }) { Text("Ruxsat berish") }
+            },
+            dismissButton = { TextButton(onClick = { showPermissionRationale = false }) { Text("Hozir emas") } }
+        )
+    }
+
+    if (showSettingsExplanation) {
+        AlertDialog(
+            onDismissRequest = { showSettingsExplanation = false },
+            title = { Text("Ruxsat sozlamalarda o'chirilgan") },
+            text = { Text("Qibla yo'nalishini aniqlash uchun ilova sozlamalaridan Joylashuv ruxsatini yoqing.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSettingsExplanation = false
+                    context.startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                    )
+                }) { Text("Sozlamalarni ochish") }
+            },
+            dismissButton = { TextButton(onClick = { showSettingsExplanation = false }) { Text("Bekor qilish") } }
+        )
+    }
 }
+
+private fun Context.hasLocationPermission(): Boolean =
+    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
 @Composable
 fun CompassView(azimuth: Float, qiblaDirection: Float) {

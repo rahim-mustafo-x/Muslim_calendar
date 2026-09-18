@@ -1,13 +1,16 @@
 package uz.coder.muslimcalendar.data.map
 
+import uz.coder.muslimcalendar.data.db.model.AudioPathDbModel
 import uz.coder.muslimcalendar.data.db.model.MuslimCalendarDbModel
 import uz.coder.muslimcalendar.data.db.model.SuraDbModel
 import uz.coder.muslimcalendar.data.db.model.SurahAyahDbModel
 import uz.coder.muslimcalendar.data.network.modelDTO.PrayerData
 import uz.coder.muslimcalendar.data.network.modelDTO.quran.SuraDTO
 import uz.coder.muslimcalendar.data.network.modelDTO.quran.SurahListDTO
-import uz.coder.muslimcalendar.domain.model.MuslimCalendar
+import uz.coder.muslimcalendar.domain.model.AudioPath
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.quran.Sura
+import uz.coder.muslimcalendar.domain.model.quran.Surah
 import uz.coder.muslimcalendar.models.model.SuraAyah
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.todo.cyrillicToLatin
@@ -29,12 +32,12 @@ class CalendarMap {
                 month = month,
                 year = date.year,
                 weekday = prayerData.date?.gregorian?.weekday?.en?.toWeakDays() ?: "",
-                asr = prayerData.timings?.asr?.replace(" (+05)", "")?:"",
-                hufton = prayerData.timings?.isha?.replace(" (+05)", "")?:"",
-                peshin = prayerData.timings?.dhuhr?.replace(" (+05)", "")?:"",
-                sunrise = prayerData.timings?.sunrise?.replace(" (+05)", "")?:"",
-                shomIftor = prayerData.timings?.maghrib?.replace(" (+05)", "")?:"",
-                tongSaharlik = prayerData.timings?.fajr?.replace(" (+05)", "")?:""
+                asr = prayerData.timings?.asr?.substringBefore(" ")?:"",
+                hufton = prayerData.timings?.isha?.substringBefore(" ")?:"",
+                peshin = prayerData.timings?.dhuhr?.substringBefore(" ")?:"",
+                sunrise = prayerData.timings?.sunrise?.substringBefore(" ")?:"",
+                shomIftor = prayerData.timings?.maghrib?.substringBefore(" ")?:"",
+                tongSaharlik = prayerData.timings?.fajr?.substringBefore(" ")?:""
             )
         }?:emptyList()
     }
@@ -52,8 +55,6 @@ class CalendarMap {
         tongSaharlik = model?.tongSaharlik?:"",
         sunRise = model?.sunrise?:""
     )
-
-    fun toMuslimCalendarList(models: List<MuslimCalendarDbModel>) = models.map { toMuslimCalendar(it) }
 
     fun toSurahList(dTOS: List<SurahListDTO?>?) = dTOS?.map {
         toSurah(it)
@@ -83,10 +84,6 @@ class CalendarMap {
             }
         )
 
-    fun toSuraList(models: List<SuraDbModel>) = models.map {
-        toSura(it)
-    }
-
     fun toSura(model:SuraDbModel) = Sura(
         number = model.number,
         englishName = model.englishName,
@@ -97,6 +94,29 @@ class CalendarMap {
     )
 
     fun toSuraAyah(model: SurahAyahDbModel) = SuraAyah(arabicText = model.arabicText, aya =  model.aya, footnotes =  model.footnotes, sura =  model.sura, translation =  model.translation.cyrillicToLatin(), id =  model.id)
-    fun toSuraAyahList(list: List<SurahAyahDbModel>) = list.map { toSuraAyah(it) }
     fun toSuraAyahDbModels(model: List<SurahList>) = model.map { SurahAyahDbModel(arabicText = it.arabicText, aya =  it.aya, footnotes =  it.footnotes, sura =  it.sura, translation =  it.translation, id = it.id) }
+    fun toSurah(
+        entities: List<SurahAyahDbModel>
+    ): Surah {
+        return Surah(
+            result = entities.map { entity ->
+                SurahList(
+                    id = entity.id,
+                    sura = entity.sura,
+                    aya = entity.aya,
+                    arabicText = entity.arabicText,
+                    translation = entity.translation,
+                    footnotes = entity.footnotes
+                )
+            }
+        )
+    }
+    fun toAudioPath(
+        entity: AudioPathDbModel
+    ): AudioPath {
+        return AudioPath(
+            sura = entity.sura,
+            path = entity.audioPath
+        )
+    }
 }

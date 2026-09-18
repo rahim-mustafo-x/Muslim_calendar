@@ -1,6 +1,6 @@
 package uz.coder.muslimcalendar.presentation.viewModel.state
 
-import uz.coder.muslimcalendar.domain.model.MuslimCalendar
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.Notification
 
 sealed class NotificationState {

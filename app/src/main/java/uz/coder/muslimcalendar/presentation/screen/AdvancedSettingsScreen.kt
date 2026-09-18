@@ -237,7 +237,6 @@ fun PrayerAdjustmentDialog(
     onSave: (uz.coder.muslimcalendar.domain.model.PrayerAdjustment) -> Unit
 ) {
     var bomdod by remember { mutableIntStateOf(adjustments.bomdod) }
-    var quyosh by remember { mutableIntStateOf(adjustments.quyosh) }
     var peshin by remember { mutableIntStateOf(adjustments.peshin) }
     var asr by remember { mutableIntStateOf(adjustments.asr) }
     var shom by remember { mutableIntStateOf(adjustments.shom) }
@@ -253,7 +252,6 @@ fun PrayerAdjustmentDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 AdjustmentSlider("Bomdod", bomdod) { bomdod = it }
-                AdjustmentSlider("Quyosh", quyosh) { quyosh = it }
                 AdjustmentSlider("Peshin", peshin) { peshin = it }
                 AdjustmentSlider("Asr", asr) { asr = it }
                 AdjustmentSlider("Shom", shom) { shom = it }
@@ -263,7 +261,11 @@ fun PrayerAdjustmentDialog(
         confirmButton = {
             TextButton(onClick = {
                 onSave(uz.coder.muslimcalendar.domain.model.PrayerAdjustment(
-                    bomdod, quyosh, peshin, asr, shom, xufton
+                    bomdod = bomdod,
+                    peshin = peshin,
+                    asr = asr,
+                    shom = shom,
+                    xufton = xufton
                 ))
             }) {
                 Text("Saqlash")

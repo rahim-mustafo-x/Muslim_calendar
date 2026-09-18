@@ -38,9 +38,11 @@ data class PrayerStatistics(
     val asrQazo: Int = 0,
     val shomQazo: Int = 0,
     val xuftonQazo: Int = 0,
+    val vitrQazo: Int = 0,
     val bomdodToday: Boolean = false,
     val peshinToday: Boolean = false,
     val asrToday: Boolean = false,
     val shomToday: Boolean = false,
-    val xuftonToday: Boolean = false
+    val xuftonToday: Boolean = false,
+    val vitrToday: Boolean = false
 )

@@ -19,11 +19,16 @@ class PrayerActionReceiver : BroadcastReceiver(), KoinComponent {
         if (context == null || intent == null) return
         
         val prayerName = intent.getStringExtra("prayer_name") ?: return
+        val eventId = intent.getStringExtra("event_id") ?: return
         val notificationId = intent.getIntExtra("notification_id", -1)
         
         if (intent.action == "ACTION_PRAYER_YES") {
             CoroutineScope(Dispatchers.IO).launch {
-                settingsRepository.markPrayerCompleted(prayerName, true)
+                settingsRepository.recordPrayerResponse(prayerName, prayed = true, eventId = eventId)
+            }
+        } else if (intent.action == "ACTION_PRAYER_NO") {
+            CoroutineScope(Dispatchers.IO).launch {
+                settingsRepository.recordPrayerResponse(prayerName, prayed = false, eventId = eventId)
             }
         }
         

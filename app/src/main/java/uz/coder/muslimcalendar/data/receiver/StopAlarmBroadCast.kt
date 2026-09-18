@@ -4,6 +4,9 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import uz.coder.muslimcalendar.data.service.PrayerAlarmWorker
 
 class StopAlarmBroadCast : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -21,6 +24,15 @@ class StopAlarmBroadCast : BroadcastReceiver() {
         val notificationManager =
             context?.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
         notificationManager?.cancel(notificationId)
+
+        // A user action is a good safe moment to refresh current/next month when
+        // they have previously allowed calendar downloads. The worker checks consent
+        // and validated internet before making any request.
+        context?.let {
+            WorkManager.getInstance(it).enqueue(
+                OneTimeWorkRequestBuilder<PrayerAlarmWorker>().build()
+            )
+        }
     }
 
     companion object {

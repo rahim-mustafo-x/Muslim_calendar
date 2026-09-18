@@ -32,25 +32,35 @@ class SurahViewModel (
     private val _audioPath = MutableStateFlow("")
     val audioPath = _audioPath.asStateFlow()
     fun getSura(surahNumber: Int) {
-        Log.d(TAG, "getSura: tushdi")
+        Log.d(TAG, "getSura: $surahNumber")
         viewModelScope.launch {
             _state.emit(SurahState.Loading)
-                getSurahByIdUseCase(surahNumber.toString()).collect { it ->
-                    getAudioPath(surahNumber.toString())
-                    Log.d(TAG, "getSura: $it")
-                    if (it.isEmpty()){
-                        if (context.isConnected()) {
-                            getSuraUseCase(surahNumber).collect {
-                                _state.emit(SurahState.Success(it.result.toSuraAyah()))
+            getSurahByIdUseCase(surahNumber.toString()).collect { localAyahs ->
+                getAudioPath(surahNumber.toString())
+                Log.d(TAG, "getSura local DB count: ${localAyahs.size}")
+                if (localAyahs.isEmpty()) {
+                    if (context.isConnected()) {
+                        try {
+                            getSuraUseCase(surahNumber).collect { surah ->
+                                val ayahs = surah.result.toSuraAyah()
+                                if (ayahs.isNotEmpty()) {
+                                    _state.emit(SurahState.Success(ayahs))
+                                } else {
+                                    _state.emit(SurahState.Error("Ma'lumot topilmadi"))
+                                }
                             }
-                        }else {
-                                _state.emit(SurahState.Error(context.getString(R.string.no_internet)))
+                        } catch (e: Exception) {
+                            Log.e(TAG, "getSura error", e)
+                            _state.emit(SurahState.Error(e.localizedMessage ?: "Ma'lumot yuklab bo'lmadi"))
                         }
-                    }else{
-                        _state.emit(SurahState.Success(it))
+                    } else {
+                        _state.emit(SurahState.Error(context.getString(R.string.no_internet)))
                     }
+                } else {
+                    _state.emit(SurahState.Success(localAyahs))
                 }
             }
+        }
     }
     fun getNameOfSura(surahNumber: Int) = getSurahByNumberUseCase(surahNumber)
     fun getAudioPath(sura:String) {

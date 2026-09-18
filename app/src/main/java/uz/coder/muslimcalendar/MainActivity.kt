@@ -6,11 +6,13 @@ import android.app.AlarmManager
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import java.util.Locale
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,6 +25,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,13 +40,16 @@ import uz.coder.muslimcalendar.presentation.navigation.CalendarNavigation
 import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
 import uz.coder.muslimcalendar.presentation.ui.theme.ThemeManager
 import uz.coder.muslimcalendar.presentation.ui.theme.isDarkTheme
-import uz.coder.muslimcalendar.presentation.viewmodel.SafaHomeViewModel
-import uz.coder.muslimcalendar.presentation.viewmodel.SafaHomeIntent
+import uz.coder.muslimcalendar.presentation.viewModel.AdvancedSettingsViewModel
+import uz.coder.muslimcalendar.presentation.viewModel.HomeIntent
+import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
+import uz.coder.muslimcalendar.todo.REGION
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private val viewModel: SafaHomeViewModel by viewModel()
+    private lateinit var appUpdateManager: AppUpdateManager
+    private val viewModel: HomeViewModel by viewModel()
     
     private val notificationScheduler: NotificationScheduler by inject()
     
@@ -77,7 +87,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        checkAndShowPermissionIntro()
+        // Location is intentionally requested only from the location setup screen.
+        // A saved choice is reused on every later launch.
+        setContentUI()
+        val notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        } else true
+        checkNotificationPermissionIfNeeded(notificationGranted)
+        checkForUpdates()
     }
 
     override fun onResume() {
@@ -87,6 +104,33 @@ class MainActivity : ComponentActivity() {
             if (!alarmManager.canScheduleExactAlarms()) {
                 Log.d(TAG, "Exact alarm permission still not granted")
             }
+        }
+        if (::appUpdateManager.isInitialized) {
+            appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+                if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                    appUpdateManager.completeUpdate()
+                }
+            }
+        }
+    }
+
+    private fun checkForUpdates() {
+        try {
+            appUpdateManager = AppUpdateManagerFactory.create(this)
+            appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+                ) {
+                    appUpdateManager.startUpdateFlowForResult(
+                        appUpdateInfo,
+                        AppUpdateType.FLEXIBLE,
+                        this,
+                        1001
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -131,7 +175,6 @@ class MainActivity : ComponentActivity() {
             showNotificationIntroDialog()
         } else {
             checkExactAlarmPermission()
-            setContentUI()
         }
     }
 
@@ -143,18 +186,15 @@ class MainActivity : ComponentActivity() {
                 .setPositiveButton("Ruxsat berish") { _, _ ->
                     checkNotificationPermission()
                     checkExactAlarmPermission()
-                    setContentUI()
                 }
                 .setNegativeButton("Keyinroq") { dialog, _ ->
                     dialog.dismiss()
                     checkExactAlarmPermission()
-                    setContentUI()
                 }
                 .setCancelable(false)
                 .show()
         } else {
             checkExactAlarmPermission()
-            setContentUI()
         }
     }
 
@@ -258,7 +298,18 @@ class MainActivity : ComponentActivity() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 Log.d(TAG, "Location: ${location.latitude}, ${location.longitude}")
-                viewModel.handleIntent(SafaHomeIntent.UpdateLocation(location.latitude, location.longitude))
+                sharedPref.saveValue("saved_latitude", location.latitude.toFloat())
+                sharedPref.saveValue("saved_longitude", location.longitude.toFloat())
+                
+                val cityName = try {
+                    val geocoder = Geocoder(this, Locale.forLanguageTag("uz"))
+                    val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                    addresses?.firstOrNull()?.locality ?: addresses?.firstOrNull()?.subAdminArea ?: "Noma'lum"
+                } catch (e: Exception) {
+                    null
+                }
+                
+                viewModel.handleIntent(HomeIntent.UpdateLocation(location.latitude, location.longitude, cityName))
                 scheduleAzanAlarms()
             } else {
                 Log.d(TAG, "Location is null. Using saved or default location...")
@@ -275,7 +326,8 @@ class MainActivity : ComponentActivity() {
     private fun loadWithSavedLocation() {
         val lat = sharedPref.getFloat("saved_latitude", 41.2995f).toDouble()
         val lon = sharedPref.getFloat("saved_longitude", 69.2401f).toDouble()
-        viewModel.handleIntent(SafaHomeIntent.UpdateLocation(lat, lon))
+        val cityName = sharedPref.getString(REGION, "Toshkent")
+        viewModel.handleIntent(HomeIntent.UpdateLocation(lat, lon, cityName))
     }
     
     private fun scheduleAzanAlarms() {

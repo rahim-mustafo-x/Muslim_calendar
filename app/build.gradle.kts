@@ -1,5 +1,8 @@
 @file:Suppress("DEPRECATION")
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -42,9 +45,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+            freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        }
     }
     buildFeatures {
         compose = true
@@ -59,10 +64,10 @@ android {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("io.insert-koin:koin-android:4.0.0")
-    implementation("io.insert-koin:koin-androidx-compose:4.0.0")
-    implementation("io.insert-koin:koin-androidx-workmanager:4.0.0")
-    implementation("io.insert-koin:koin-androidx-navigation:4.0.0")
+    implementation(libs.koin.android.v422)
+    implementation(libs.koin.androidx.compose.v422)
+    implementation(libs.koin.androidx.workmanager)
+    implementation(libs.koin.androidx.navigation)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.work.runtime.ktx)
@@ -82,6 +87,7 @@ dependencies {
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.play.services.location)
+    implementation(libs.play.app.update)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
