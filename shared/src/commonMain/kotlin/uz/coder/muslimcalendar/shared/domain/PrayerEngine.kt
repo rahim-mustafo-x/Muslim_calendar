@@ -1,6 +1,8 @@
 package uz.coder.muslimcalendar.shared.domain
 
 import kotlinx.datetime.*
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.number
 import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 
 class PrayerEngine {
@@ -26,7 +28,7 @@ class PrayerEngine {
                 if (parts.size < 2) return@mapIndexed null
                 val h = parts[0].toIntOrNull() ?: return@mapIndexed null
                 val m = parts[1].toIntOrNull() ?: return@mapIndexed null
-                names[index] to LocalDateTime(date.year, date.monthNumber, date.dayOfMonth, h, m)
+                names[index] to LocalDateTime(date.year, date.month.number, date.day, h, m)
             } catch (e: Exception) {
                 null
             }

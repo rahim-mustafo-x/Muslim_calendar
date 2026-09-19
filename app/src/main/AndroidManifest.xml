@@ -48,6 +48,11 @@
         <receiver android:name=".data.receiver.AlarmBroadCast" android:exported="false"/>
         <receiver android:name=".data.receiver.StopAlarmBroadCast" android:exported="false"/>
         <receiver android:name=".data.receiver.PrayerActionReceiver" android:exported="false"/>
+        <receiver android:name=".data.receiver.VolumeButtonReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.VOLUME_CHANGED_ACTION" />
+            </intent-filter>
+        </receiver>
         <receiver android:name=".data.receiver.BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

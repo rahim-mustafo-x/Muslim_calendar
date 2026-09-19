@@ -15,6 +15,7 @@ import uz.coder.muslimcalendar.data.repository.SettingsRepositoryImpl
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.domain.repository.SettingsRepository
+import uz.coder.muslimcalendar.domain.location.LocationSupervisor
 import uz.coder.muslimcalendar.domain.usecase.*
 import uz.coder.muslimcalendar.presentation.ui.theme.ThemeManager
 import uz.coder.muslimcalendar.presentation.viewModel.*
@@ -28,6 +29,7 @@ val appModule = module {
     single { SharedPref(androidContext()) }
     single { CalendarMap() }
     single { ThemeManager(androidContext()) }
+    single { LocationSupervisor(get()) }
     
     single { Json {
         ignoreUnknownKeys = true
@@ -66,8 +68,8 @@ val appModule = module {
     viewModel { AdvancedSettingsViewModel(get()) }
     viewModel { CalendarViewModel(androidContext(), get()) }
     viewModel { NotificationViewModel(androidContext(), get(), get()) }
-    viewModel { HomeViewModel(get(), get(), get(), get()) }
-    viewModel { LocationSettingsViewModel(get(), get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
+    viewModel { LocationSettingsViewModel(get(), get(), get(), get()) }
     viewModel { PrayerStatisticsViewModel(get()) }
     viewModel { QuranViewModel(get(), get(), get()) }
     viewModel { SettingsViewModel(get()) }

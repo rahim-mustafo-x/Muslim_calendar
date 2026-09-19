@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.SharedPref
+import uz.coder.muslimcalendar.domain.location.LocationSupervisor
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
 import uz.coder.muslimcalendar.domain.usecase.PresentDayUseCase
@@ -32,18 +33,34 @@ class HomeViewModel(
     private val repository: CalendarRepository,
     private val presentDayUseCase: PresentDayUseCase,
     private val sharedPref: SharedPref,
-    private val notificationScheduler: NotificationScheduler
+    private val notificationScheduler: NotificationScheduler,
+    private val locationSupervisor: LocationSupervisor
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState(
         locationName = sharedPref.getString(REGION),
-        isLocationConfigured = sharedPref.getBoolean(LOCATION_CONFIGURED)
+        isLocationConfigured = locationSupervisor.isLocationConfigured()
     ))
     val state: StateFlow<HomeState> = _state.asStateFlow()
 
     init {
         observePrayerTimes()
+        observeLocationStatus()
         checkCalendarAvailability()
+    }
+
+    private fun observeLocationStatus() {
+        viewModelScope.launch {
+            locationSupervisor.isLocationConfiguredFlow.collect { isConfigured ->
+                _state.update { 
+                    it.copy(
+                        isLocationConfigured = isConfigured,
+                        locationName = if (isConfigured) sharedPref.getString(REGION) else it.locationName
+                    ) 
+                }
+                if (isConfigured) checkCalendarAvailability()
+            }
+        }
     }
 
     private fun observePrayerTimes() {
@@ -69,7 +86,7 @@ class HomeViewModel(
         _state.update {
             it.copy(
                 locationName = sharedPref.getString(REGION),
-                isLocationConfigured = sharedPref.getBoolean(LOCATION_CONFIGURED)
+                isLocationConfigured = locationSupervisor.isLocationConfigured()
             )
         }
         checkCalendarAvailability()
@@ -91,7 +108,7 @@ class HomeViewModel(
     }
 
     private fun checkCalendarAvailability() {
-        if (!sharedPref.getBoolean(LOCATION_CONFIGURED)) return
+        if (!locationSupervisor.isLocationConfigured()) return
         viewModelScope.launch {
             val availability = repository.getCalendarAvailability()
             if (!availability.needsDownload) {
@@ -111,7 +128,7 @@ class HomeViewModel(
     }
 
     private fun syncCalendar() {
-        if (!sharedPref.getBoolean(LOCATION_CONFIGURED)) return
+        if (!locationSupervisor.isLocationConfigured()) return
         viewModelScope.launch {
             try {
                 _state.update { it.copy(isLoading = true) }

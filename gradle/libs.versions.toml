@@ -38,8 +38,8 @@ compose-multiplatform = "1.12.0"
 kotlinx-datetime = "0.8.0"
 koin = "4.2.2"
 playAppUpdate = "2.1.0"
-versionCode = "11"
-versionName = "2.0"
+versionCode = "12"
+versionName = "2.1"
 
 [libraries]
 koin-androidx-compose-v422 = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }

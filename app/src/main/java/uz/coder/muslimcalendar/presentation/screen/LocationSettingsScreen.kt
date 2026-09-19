@@ -57,30 +57,35 @@ fun LocationSettingsScreen(
     val context = LocalContext.current
     val state by viewModel.state.collectAsState()
     var city by remember { mutableStateOf("") }
-    var findingLocation by remember { mutableStateOf(false) }
     var lookupError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    fun useDeviceLocation() {
-        findingLocation = true
+    fun detectLocation() {
+        viewModel.setLocating(true)
         val client = LocationServices.getFusedLocationProviderClient(context)
-        client.lastLocation.addOnSuccessListener { location ->
-            if (location == null) {
-                findingLocation = false
-                lookupError = "Joylashuv topilmadi. Shahar nomini kiriting."
-                return@addOnSuccessListener
+        try {
+            client.lastLocation.addOnSuccessListener { location ->
+                if (location == null) {
+                    viewModel.setLocating(false)
+                    lookupError = "Joylashuv topilmadi. Shahar nomini kiriting."
+                    return@addOnSuccessListener
+                }
+                val name = try {
+                    val address = Geocoder(context, Locale.forLanguageTag("uz"))
+                        .getFromLocation(location.latitude, location.longitude, 1)
+                        ?.firstOrNull()
+                    address?.locality ?: address?.subAdminArea ?: "Tanlangan joylashuv"
+                } catch (_: Exception) {
+                    "Tanlangan joylashuv"
+                }
+                viewModel.updateDetectedLocation(name, location.latitude, location.longitude)
+            }.addOnFailureListener {
+                viewModel.setLocating(false)
+                lookupError = "Joylashuvni olib bo'lmadi. Shahar nomini kiriting."
             }
-            val name = try {
-                val address = Geocoder(context, Locale.forLanguageTag("uz"))
-                    .getFromLocation(location.latitude, location.longitude, 1)
-                    ?.firstOrNull()
-                address?.locality ?: address?.subAdminArea ?: "Tanlangan joylashuv"
-            } catch (_: Exception) { "Tanlangan joylashuv" }
-            findingLocation = false
-            viewModel.saveLocation(name, location.latitude, location.longitude)
-        }.addOnFailureListener {
-            findingLocation = false
-            lookupError = "Joylashuvni olib bo'lmadi. Shahar nomini kiriting."
+        } catch (e: SecurityException) {
+            viewModel.setLocating(false)
+            lookupError = "Joylashuv ruxsati yo'q."
         }
     }
 
@@ -89,7 +94,29 @@ fun LocationSettingsScreen(
     ) { permissions ->
         if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
             permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-        ) useDeviceLocation() else lookupError = "Ruxsat berilmadi. Shahar nomini qo'lda kiriting."
+        ) {
+            detectLocation()
+        } else {
+            lookupError = "Ruxsat berilmadi. Shahar nomini qo'lda kiriting."
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+        if (hasPermission) {
+            detectLocation()
+        } else {
+            permissionLauncher.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+        }
     }
 
     LaunchedEffect(state.isSaved) {
@@ -121,18 +148,30 @@ fun LocationSettingsScreen(
                 "Joylashuv faqat siz tanlaganingizda olinadi va keyingi tashriflarda saqlangan ma'lumot ishlatiladi.",
                 style = MaterialTheme.typography.bodyMedium
             )
+            
+            state.detectedCity?.let { cityName ->
+                Spacer(Modifier.height(24.dp))
+                Text("Aniqlangan joylashuv:", style = MaterialTheme.typography.labelLarge)
+                Text(cityName, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+            }
+
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = {
-                    val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    if (granted) useDeviceLocation() else permissionLauncher.launch(
-                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-                    )
+                    val lat = state.detectedLatitude
+                    val lon = state.detectedLongitude
+                    val name = state.detectedCity
+                    if (lat != null && lon != null && name != null) {
+                        viewModel.saveLocation(name, lat, lon)
+                    } else {
+                        detectLocation()
+                    }
                 },
-                enabled = !state.isSaving && !findingLocation,
+                enabled = !state.isSaving && !state.isLocating,
                 modifier = Modifier.fillMaxWidth()
-            ) { Text("Hozirgi joylashuvimdan foydalanish") }
+            ) {
+                Text(if (state.detectedCity != null) "Shu joylashuvni saqlash" else "Hozirgi joylashuvimdan foydalanish")
+            }
             Spacer(Modifier.height(20.dp))
             OutlinedTextField(
                 value = city,
@@ -144,27 +183,29 @@ fun LocationSettingsScreen(
             Spacer(Modifier.height(12.dp))
             Button(
                 onClick = {
-                    findingLocation = true
+                    viewModel.setLocating(true)
                     lookupError = null
-                    // Geocoding can use the device's configured geocoder service.
                     scope.launch {
                         val address = withContext(Dispatchers.IO) {
                             try { Geocoder(context, Locale.forLanguageTag("uz")).getFromLocationName(city, 1)?.firstOrNull() }
                             catch (_: Exception) { null }
                         }
-                        findingLocation = false
-                        if (address == null) lookupError = "Shahar topilmadi. Nomini aniqroq yozing."
-                        else viewModel.saveLocation(
-                            address.locality ?: city,
-                            address.latitude,
-                            address.longitude
-                        )
+                        viewModel.setLocating(false)
+                        if (address == null) {
+                            lookupError = "Shahar topilmadi. Nomini aniqroq yozing."
+                        } else {
+                            viewModel.saveLocation(
+                                address.locality ?: city,
+                                address.latitude,
+                                address.longitude
+                            )
+                        }
                     }
                 },
-                enabled = city.isNotBlank() && !state.isSaving && !findingLocation,
+                enabled = city.isNotBlank() && !state.isSaving && !state.isLocating,
                 modifier = Modifier.fillMaxWidth()
             ) { Text("Shaharni tanlash") }
-            if (findingLocation || state.isSaving) {
+            if (state.isLocating || state.isSaving) {
                 Spacer(Modifier.height(20.dp))
                 CircularProgressIndicator()
             }

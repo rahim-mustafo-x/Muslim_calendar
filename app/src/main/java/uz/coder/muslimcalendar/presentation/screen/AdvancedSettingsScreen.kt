@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
+import uz.coder.muslimcalendar.data.receiver.StopAlarmBroadCast
 import uz.coder.muslimcalendar.domain.model.AzanSound
 import uz.coder.muslimcalendar.presentation.viewModel.AdvancedSettingsViewModel
 
@@ -310,17 +311,22 @@ fun AzanSoundDialog(
     onDismiss: () -> Unit,
     onSelect: (AzanSound) -> Unit
 ) {
+    val ctx = LocalContext.current
     Log.d("TAG", "AzanSoundDialog: $prayerName")
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Azon ovozini tanlang") },
         text = {
             Column {
-                AzanSound.entries.forEach { sound ->
+                listOf(AzanSound.DEFAULT, AzanSound.NOTIFICATION).forEach { sound ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onSelect(sound) }
+                            .clickable { 
+                                onSelect(sound)
+                                val stopIntent = StopAlarmBroadCast.getIntent(ctx)
+                                ctx.sendBroadcast(stopIntent)
+                            }
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

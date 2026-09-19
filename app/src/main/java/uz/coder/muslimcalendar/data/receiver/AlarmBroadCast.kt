@@ -9,8 +9,19 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Build
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.data.service.PrayerAlarmWorker
+import uz.coder.muslimcalendar.data.service.QazoReminderWorker
+import java.time.chrono.HijrahDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class AlarmBroadCast : BroadcastReceiver() {
@@ -41,8 +52,8 @@ class AlarmBroadCast : BroadcastReceiver() {
         
         when (intent.action) {
             "ACTION_REFRESH_ALARMS" -> {
-                val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.PrayerAlarmWorker>().build()
-                androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+                val workRequest = OneTimeWorkRequestBuilder<PrayerAlarmWorker>().build()
+                WorkManager.getInstance(context).enqueue(workRequest)
                 return
             }
             "ACTION_DAILY_NOTIFICATION" -> {
@@ -59,13 +70,18 @@ class AlarmBroadCast : BroadcastReceiver() {
         val title = intent.getStringExtra(EXTRA_TEXT) ?: "Eslatma"
         val eventId = intent.getStringExtra(EXTRA_EVENT_ID) ?: return
 
-        // Notification Channel
-        val channelId = "prayer_alarm_channel"
-        val notificationId = 101
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channelId = "prayer_alarm_channel"
+        val notificationId = 101
 
-        // Stop Alarm Intent
+        // Custom XML Custom remote views layout implementation for Azan notification popup banner
+        val customLayout = RemoteViews(context.packageName, R.layout.notification_custom_azan).apply {
+            setTextViewText(R.id.notification_title, title)
+            setTextViewText(R.id.notification_text, "Soat $hour:$minute bo‘ldi. Namoz vaqti kirdi.")
+        }
+
+        // Stop Action Intent setup
         val stopIntent = StopAlarmBroadCast.getIntent(context)
         val stopPendingIntent = PendingIntent.getBroadcast(
             context,
@@ -73,38 +89,60 @@ class AlarmBroadCast : BroadcastReceiver() {
             stopIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        customLayout.setOnClickPendingIntent(R.id.btn_stop_azan, stopPendingIntent)
 
-        // Build Notification
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_alarm)
-            .setContentTitle(title)
-            .setContentText("Soat $hour:$minute bo‘ldi")
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(customLayout)
+            .setCustomBigContentView(customLayout)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .addAction(R.drawable.ic_close, "O‘chirish", stopPendingIntent)
 
         notificationManager.notify(notificationId, notificationBuilder.build())
         
-        // Ask after 30 minutes; unanswered prompts are automatically marked missed.
         schedulePrayerCheck(context, title, eventId)
 
-        // Reschedule alarms if it's Tong or Xufton
         if (title.contains("Bomdod") || title.contains("Xufton")) {
-            val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.PrayerAlarmWorker>().build()
-            androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
+            val workRequest = OneTimeWorkRequestBuilder<PrayerAlarmWorker>().build()
+            WorkManager.getInstance(context).enqueue(workRequest)
         }
 
-        // Play Music
+        // Play Azan Audio Audio handling with notification modes option filter override support
         if (musicResId != -1) {
             mediaPlayer?.release()
             mediaPlayer = MediaPlayer.create(context, musicResId)
             mediaPlayer?.start()
         }
     }
+
     private fun handleDailyNotification(context: Context) {
-        val hijriDate = java.time.chrono.HijrahDate.now()
-        val formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMMM", java.util.Locale.getDefault())
-        val hijriStr = hijriDate.format(formatter)
+        val hijriDate = HijrahDate.now()
+        val hijriStr = hijriDate.toString()
+        val parts = hijriStr.split(" ")
+        val datePart = parts.lastOrNull() ?: ""
+        val dateParts = datePart.split("-")
+        
+        val monthNumber = dateParts.getOrNull(1)?.toIntOrNull() ?: hijriDate.get(ChronoField.MONTH_OF_YEAR)
+        val hijriDay = dateParts.getOrNull(2)?.toIntOrNull() ?: hijriDate.get(ChronoField.DAY_OF_MONTH)
+
+        val hijriMonth = when (monthNumber) {
+            1 -> "Muharram"
+            2 -> "Safar"
+            3 -> "Rabiul avval"
+            4 -> "Rabius sani"
+            5 -> "Jumadil avval"
+            6 -> "Jumadis sani"
+            7 -> "Rajab"
+            8 -> "Sha’bon"
+            9 -> "Ramazon"
+            10 -> "Shawvol"
+            11 -> "Zulqa’da"
+            12 -> "Zulhijja"
+            else -> "Muharram"
+        }
+        val displayHijri = "$hijriDay $hijriMonth"
 
         val channelId = "daily_notification_channel"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -119,27 +157,25 @@ class AlarmBroadCast : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_alarm)
             .setContentTitle("New Islamic Day")
-            .setContentText("Today is $hijriStr. Stay mindful.")
+            .setContentText("Bugun: $displayHijri. Yoqimli kun tilaymiz.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()
 
         notificationManager.notify(202, notification)
 
-        // Schedule next day's notification and update widget
-        val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.PrayerAlarmWorker>().build()
-        androidx.work.WorkManager.getInstance(context).enqueue(workRequest)
-        
+        val workRequest = OneTimeWorkRequestBuilder<PrayerAlarmWorker>().build()
+        WorkManager.getInstance(context).enqueue(workRequest)
     }
 
     private fun schedulePrayerCheck(context: Context, prayerName: String, eventId: String) {
-        val workRequest = androidx.work.OneTimeWorkRequestBuilder<uz.coder.muslimcalendar.data.service.QazoReminderWorker>()
+        val workRequest = OneTimeWorkRequestBuilder<QazoReminderWorker>()
             .setInitialDelay(30, TimeUnit.MINUTES)
-            .setInputData(androidx.work.workDataOf("prayer_name" to prayerName, "event_id" to eventId))
+            .setInputData(workDataOf("prayer_name" to prayerName, "event_id" to eventId))
             .build()
-        androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+        WorkManager.getInstance(context).enqueueUniqueWork(
             "prayer-check-$eventId",
-            androidx.work.ExistingWorkPolicy.REPLACE,
+            ExistingWorkPolicy.REPLACE,
             workRequest
         )
     }
@@ -155,10 +191,9 @@ class AlarmBroadCast : BroadcastReceiver() {
                 description = "Namoz vaqtlari uchun eslatmalar"
                 enableVibration(true)
                 vibrationPattern = longArrayOf(0, 1000, 500, 1000)
-                setSound(null, null) // We'll play azan manually
+                setSound(null, null)
             }
             manager.createNotificationChannel(channel)
         }
     }
-
 }

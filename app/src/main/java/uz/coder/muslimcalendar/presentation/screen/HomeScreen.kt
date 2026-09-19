@@ -207,12 +207,34 @@ fun DateAndLocationSection(
     onLocationClick: () -> Unit
 ) {
     val today = LocalDate.now()
-    val hijriDate = HijrahDate.from(today)
+    val hijriDate = HijrahDate.now()
     val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("uz"))
     
-    val hijriMonth = hijriMonthTranslations.entries.find { it.key.contains(hijriDate.toString().split(" ")[1], ignoreCase = true) }?.value ?: "Rabiul avval"
-    val hijriDay = hijriDate.get(ChronoField.DAY_OF_MONTH)
-    val hijriYear = hijriDate.get(ChronoField.YEAR)
+    // Fallback translation strategy mapping HijrahDate variants robustly
+    val hijriStr = hijriDate.toString() // e.g. "Hijrah-umalqura AH 1447-09-05"
+    val parts = hijriStr.split(" ")
+    val datePart = parts.lastOrNull() ?: ""
+    val dateParts = datePart.split("-")
+    
+    val hijriYear = dateParts.getOrNull(0) ?: hijriDate.get(ChronoField.YEAR).toString()
+    val monthNumber = dateParts.getOrNull(1)?.toIntOrNull() ?: hijriDate.get(ChronoField.MONTH_OF_YEAR)
+    val hijriDay = dateParts.getOrNull(2)?.toIntOrNull() ?: hijriDate.get(ChronoField.DAY_OF_MONTH)
+
+    val hijriMonth = when (monthNumber) {
+        1 -> "Muharram"
+        2 -> "Safar"
+        3 -> "Rabiul avval"
+        4 -> "Rabius sani"
+        5 -> "Jumadil avval"
+        6 -> "Jumadis sani"
+        7 -> "Rajab"
+        8 -> "Sha’bon"
+        9 -> "Ramazon"
+        10 -> "Shawvol"
+        11 -> "Zulqa’da"
+        12 -> "Zulhijja"
+        else -> "Muharram"
+    }
 
     Column(
         modifier = Modifier
@@ -232,28 +254,44 @@ fun DateAndLocationSection(
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f), shape = RoundedCornerShape(16.dp))
                 .clickable(onClick = onLocationClick)
-                .padding(vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Default.LocationOn,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-                tint = contentColor
-            )
-            Text(
-                " ${locationName.ifBlank { "Joylashuvni tanlang" }}",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = contentColor
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Mintaqa / Joylashuv",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = contentColor.copy(alpha = 0.5f)
+                )
+                Text(
+                    text = locationName.ifBlank { "Joylashuvni tanlang" },
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = contentColor
+                )
+            }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Joylashuvni o'zgartirish",
-                modifier = Modifier.size(20.dp),
-                tint = contentColor.copy(alpha = 0.7f)
+                modifier = Modifier.size(24.dp),
+                tint = contentColor.copy(alpha = 0.6f)
             )
         }
     }
@@ -365,9 +403,7 @@ fun PrayerTimeRow(prayerTimes: MuslimCalendar, currentTime: LocalTime, primaryCo
 fun NavigationList(onNavigate: (String) -> Unit, contentColor: Color, primaryColor: Color) {
     val items = listOf(
         NavItem("Bugungi taqvim", "Sana, oy, hafta kuni", R.drawable.calendar, "calendar"),
-        NavItem("Qibla yo'nalishi", "Qiblani kompas orqali aniqlang", R.drawable.ic_kaaba, "qibla"),
         NavItem("Tasbeh", "Zikrlarni sanab boring", R.drawable.ic_prayer_beads, "tasbeh"),
-        NavItem("Qur'on", "Kunlik oyatlar", R.drawable.quran, "quran"),
         NavItem("Zikrlar", "Kunlik zikr va duolar", R.drawable.book, "duo"),
         NavItem("Allohning 99 ismi", "Go'zal ismlar va ma'nolari", R.drawable.muslim_man, "allah_names")
     )

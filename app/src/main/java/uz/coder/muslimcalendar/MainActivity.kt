@@ -40,11 +40,11 @@ import uz.coder.muslimcalendar.presentation.navigation.CalendarNavigation
 import uz.coder.muslimcalendar.presentation.ui.theme.MuslimCalendarTheme
 import uz.coder.muslimcalendar.presentation.ui.theme.ThemeManager
 import uz.coder.muslimcalendar.presentation.ui.theme.isDarkTheme
-import uz.coder.muslimcalendar.presentation.viewModel.AdvancedSettingsViewModel
 import uz.coder.muslimcalendar.presentation.viewModel.HomeIntent
 import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 import uz.coder.muslimcalendar.todo.REGION
 
+@Suppress("DEPRECATION")
 class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -90,10 +90,7 @@ class MainActivity : ComponentActivity() {
         // Location is intentionally requested only from the location setup screen.
         // A saved choice is reused on every later launch.
         setContentUI()
-        val notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        } else true
-        checkNotificationPermissionIfNeeded(notificationGranted)
+        checkAndShowPermissionIntro()
         checkForUpdates()
     }
 
@@ -305,7 +302,7 @@ class MainActivity : ComponentActivity() {
                     val geocoder = Geocoder(this, Locale.forLanguageTag("uz"))
                     val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
                     addresses?.firstOrNull()?.locality ?: addresses?.firstOrNull()?.subAdminArea ?: "Noma'lum"
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 }
                 

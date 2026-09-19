@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -48,13 +49,13 @@ class QazoReminderWorker(
         val notificationId = eventId.hashCode()
         
         // Yes Intent
-        val yesIntent = android.content.Intent(context, uz.coder.muslimcalendar.data.receiver.PrayerActionReceiver::class.java).apply {
+        val yesIntent = Intent(context, PrayerActionReceiver::class.java).apply {
             action = "ACTION_PRAYER_YES"
             putExtra("prayer_name", prayerName)
             putExtra("event_id", eventId)
             putExtra("notification_id", notificationId)
         }
-        val yesPendingIntent = android.app.PendingIntent.getBroadcast(
+        val yesPendingIntent = PendingIntent.getBroadcast(
             context,
             notificationId,
             yesIntent,
@@ -72,17 +73,23 @@ class QazoReminderWorker(
             context,
             notificationId + 1,
             noIntent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+
+        // Remote layout view logic implementation hook for custom prayer follow-up alert
+        val checkLayout = RemoteViews(context.packageName, R.layout.notification_prayer_check).apply {
+            setTextViewText(R.id.check_title, "$prayerName o'qidingizmi?")
+            setOnClickPendingIntent(R.id.btn_prayed_yes, yesPendingIntent)
+            setOnClickPendingIntent(R.id.btn_prayed_no, noPendingIntent)
+        }
 
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_alarm)
-            .setContentTitle("Namoz eslatmasi")
-            .setContentText("$prayerName o'qidingizmi?")
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(checkLayout)
+            .setCustomBigContentView(checkLayout)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
-            .addAction(0, "Ha", yesPendingIntent)
-            .addAction(0, "Yo'q", noPendingIntent)
             .build()
 
         notificationManager.notify(notificationId, notification)

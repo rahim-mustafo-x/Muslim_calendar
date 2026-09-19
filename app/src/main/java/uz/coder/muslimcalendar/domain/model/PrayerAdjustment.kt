@@ -14,9 +14,6 @@ data class PrayerAdjustment(
 
 enum class AzanSound(val displayName: String, val resourceId: Int) {
     DEFAULT("Standart azan", uz.coder.muslimcalendar.R.raw.azan),
-    MAKKAH("Makka azani", -1),  // Will be added
-    MADINAH("Madina azani", -1),
-    EGYPT("Misr azani", -1),
     NOTIFICATION("Oddiy bildirishnoma", -2);
     
     companion object {
