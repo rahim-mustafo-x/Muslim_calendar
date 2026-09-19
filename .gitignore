@@ -19,3 +19,6 @@ local.properties
 **/build/
 /app/build/
 /shared/build/
+.gradle/
+.kotlin/
+.idea/app/release/
