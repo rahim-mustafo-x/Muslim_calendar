@@ -16,4 +16,4 @@ local.properties
 /.idea/
 /.kotlin/
 *.hprof
-/shared/build/*
+**/build/
