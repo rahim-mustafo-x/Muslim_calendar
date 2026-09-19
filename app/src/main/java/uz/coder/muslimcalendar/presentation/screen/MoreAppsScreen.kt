@@ -145,7 +145,8 @@ fun AppItemCard(app: AppItem, onOpenClick: () -> Unit) {
                     )
                 }
                 Text(
-                    text = "O'lchami: ${app.size}",
+                    text = "O'l" +
+                            "chami: ${app.size}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )

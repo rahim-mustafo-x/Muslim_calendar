@@ -11,7 +11,7 @@ import uz.coder.muslimcalendar.domain.model.AudioPath
 import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.model.quran.Sura
 import uz.coder.muslimcalendar.domain.model.quran.Surah
-import uz.coder.muslimcalendar.models.model.SuraAyah
+import uz.coder.muslimcalendar.domain.model.SuraAyah
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.todo.cyrillicToLatin
 import uz.coder.muslimcalendar.todo.toWeakDays

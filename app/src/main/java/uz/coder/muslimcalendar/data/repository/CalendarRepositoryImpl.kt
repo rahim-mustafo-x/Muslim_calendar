@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -31,7 +30,7 @@ import uz.coder.muslimcalendar.domain.model.quran.Sura
 import uz.coder.muslimcalendar.domain.model.quran.Surah
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
-import uz.coder.muslimcalendar.models.model.SuraAyah
+import uz.coder.muslimcalendar.domain.model.SuraAyah
 import uz.coder.muslimcalendar.todo.REGION
 import uz.coder.muslimcalendar.todo.hasInternetConnection
 import java.time.LocalDate

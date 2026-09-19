@@ -1,6 +1,6 @@
 package uz.coder.muslimcalendar.presentation.viewModel.state
 
-import uz.coder.muslimcalendar.models.model.SuraAyah
+import uz.coder.muslimcalendar.domain.model.SuraAyah
 
 sealed class SurahState {
     data object Init : SurahState()

@@ -1,4 +1,4 @@
-package uz.coder.muslimcalendar.models.model
+package uz.coder.muslimcalendar.domain.model
 
 data class SuraAyah(
     var id: String = "",

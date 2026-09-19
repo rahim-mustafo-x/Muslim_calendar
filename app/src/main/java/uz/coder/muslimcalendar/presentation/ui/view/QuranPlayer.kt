@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.delay
 import uz.coder.muslimcalendar.todo.formatTime
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun QuranPlayer(
@@ -36,9 +37,9 @@ fun QuranPlayer(
         while (true) {
             currentPosition = exoPlayer.currentPosition
             duration = exoPlayer.duration.coerceAtLeast(1L)
-            isCompleted = duration > 0 && currentPosition >= duration
+            isCompleted = duration in 1..currentPosition
             sliderPosition = currentPosition.toFloat() / duration.toFloat()
-            delay(500)
+            delay(500.milliseconds)
         }
     }
 

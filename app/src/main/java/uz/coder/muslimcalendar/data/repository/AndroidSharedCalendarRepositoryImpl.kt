@@ -12,7 +12,7 @@ import uz.coder.muslimcalendar.domain.model.quran.Sura
 import uz.coder.muslimcalendar.domain.model.quran.Surah
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
-import uz.coder.muslimcalendar.models.model.SuraAyah
+import uz.coder.muslimcalendar.domain.model.SuraAyah
 import java.time.LocalDate
 
 class AndroidSharedCalendarRepositoryImpl(

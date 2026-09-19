@@ -16,10 +16,10 @@ class PrayerActionReceiver : BroadcastReceiver(), KoinComponent {
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
-        val prayerName = intent?.getStringExtra("EXTRA_PRAYER_NAME") ?: return
-        val eventId = intent.getStringExtra("EXTRA_EVENT_ID") ?: return
-        val prayed = intent.getBooleanExtra("EXTRA_PRAYED", false)
-        val notificationId = intent.getIntExtra("EXTRA_NOTIFICATION_ID", 101)
+        val prayerName = intent?.getStringExtra("EXTRA_PRAYER_NAME") ?: intent?.getStringExtra("prayer_name") ?: return
+        val eventId = intent?.getStringExtra("EXTRA_EVENT_ID") ?: intent?.getStringExtra("event_id") ?: return
+        val prayed = intent?.getBooleanExtra("EXTRA_PRAYED", false) == true || (intent?.action == "ACTION_PRAYER_YES")
+        val notificationId = intent?.getIntExtra("EXTRA_NOTIFICATION_ID", intent?.getIntExtra("notification_id", 101) ?: 101) ?: 101
 
         // Stop Azan
         AlarmBroadCast.mediaPlayer?.let {

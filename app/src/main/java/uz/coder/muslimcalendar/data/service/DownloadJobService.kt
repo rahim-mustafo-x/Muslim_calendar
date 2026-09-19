@@ -1,16 +1,13 @@
 package uz.coder.muslimcalendar.data.service
 
 import android.annotation.SuppressLint
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.job.JobParameters
 import android.app.job.JobService
 import android.util.Log
-import org.koin.android.ext.android.get
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import org.koin.core.qualifier.named
+import android.widget.RemoteViews
+import androidx.core.app.NotificationCompat
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -26,6 +23,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.db.model.AudioPathDbModel
@@ -51,11 +50,7 @@ class DownloadJobService : JobService(), KoinComponent {
         const val KEY_SURA = "KEY_SURA"
         const val TAG = "DownloadJobService"
         const val CHANNEL_ID = "download_channel"
-        const val NOTIFICATION_ID = 1
-    }
-
-    override fun onCreate() {
-        super.onCreate()
+        const val NOTIFICATION_ID = 1001
     }
 
     override fun onStartJob(params: JobParameters?): Boolean {
@@ -82,26 +77,26 @@ class DownloadJobService : JobService(), KoinComponent {
             return false
         }
 
-        createNotificationChannel()
+        ensureChannel()
 
         jobScope.launch {
             try {
-                // Insert surah data into DB
-                if (surahLists.isNotEmpty()) {
-                    db.surahAyahDao().insertAll(map.toSuraAyahDbModels(surahLists))
-                }
+                // 1. Text Download (DB Insertion)
+                Log.d(TAG, "Saving surah text to database...")
+                db.surahAyahDao().insertAll(map.toSuraAyahDbModels(surahLists))
 
-                // Start download
+                // 2. Audio Download
+                Log.d(TAG, "Starting audio download from: $fileUrl")
                 val filePath = downloadFile(fileUrl)
 
                 if (filePath.isNotEmpty()) {
                     db.audioPathDao().insertAudioPath(
                         AudioPathDbModel(surahLists.first().sura, filePath)
                     )
-                    Log.d(TAG, "File downloaded and saved: $filePath")
+                    Log.d(TAG, "Download process completed successfully.")
                     jobFinished(params, false)
                 } else {
-                    Log.e(TAG, "File download failed")
+                    Log.e(TAG, "Audio download failed.")
                     jobFinished(params, true)
                 }
 
@@ -118,20 +113,19 @@ class DownloadJobService : JobService(), KoinComponent {
     }
 
     override fun onStopJob(params: JobParameters?): Boolean {
-        // Allow coroutine to cancel naturally
         return true
     }
 
-    private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Sura Download",
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            description = getString(R.string.proggressOfDownload)
-        }
+    private fun ensureChannel() {
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        manager.createNotificationChannel(channel)
+        if (manager.getNotificationChannel(CHANNEL_ID) == null) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Yuklab olish",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            manager.createNotificationChannel(channel)
+        }
     }
 
     @SuppressLint("ForegroundServiceType")
@@ -139,17 +133,19 @@ class DownloadJobService : JobService(), KoinComponent {
         val fileName = fileUrl.substringAfterLast("/")
         val file = File(applicationContext.getExternalFilesDir(null), fileName)
 
-        if (file.exists()) return@withContext file.absolutePath
+        // If file already exists, we consider it "downloaded"
+        if (file.exists() && file.length() > 0) return@withContext file.absolutePath
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val builder = Notification.Builder(applicationContext, CHANNEL_ID)
-            .setContentTitle(getString(R.string.suraIsDownloading))
+        val customLayout = RemoteViews(packageName, R.layout.notification_download_progress)
+        
+        val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(customLayout)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setProgress(100, 0, false)
 
-        // Promote service to foreground
         startForeground(NOTIFICATION_ID, builder.build())
 
         try {
@@ -160,7 +156,7 @@ class DownloadJobService : JobService(), KoinComponent {
             var lastProgress = -1
 
             FileOutputStream(file).use { output ->
-                val buffer = ByteArray(8 * 1024) // 8 KB
+                val buffer = ByteArray(8 * 1024)
                 while (!channel.isClosedForRead) {
                     val bytesRead = channel.readAvailable(buffer)
                     if (bytesRead == -1) break
@@ -170,30 +166,33 @@ class DownloadJobService : JobService(), KoinComponent {
                     if (totalBytes > 0) {
                         val progress = (downloadedBytes * 100 / totalBytes).toInt()
                         if (progress != lastProgress) {
-                            builder.setProgress(100, progress, false)
+                            customLayout.setProgressBar(R.id.download_progress_bar, 100, progress, false)
+                            customLayout.setTextViewText(R.id.download_status, "$progress%")
                             manager.notify(NOTIFICATION_ID, builder.build())
                             lastProgress = progress
                         }
                     } else {
-                        builder.setProgress(0, 0, true)
+                        customLayout.setProgressBar(R.id.download_progress_bar, 100, 0, true)
+                        customLayout.setTextViewText(R.id.download_status, "Yuklanmoqda...")
                         manager.notify(NOTIFICATION_ID, builder.build())
                     }
                 }
                 output.flush()
             }
 
-            // Final notification
-            builder.setProgress(0, 0, false)
-                .setOngoing(false)
-                .setContentText(getString(R.string.downloadCompleted))
+            // Success final notification state
+            customLayout.setTextViewText(R.id.download_title, "Yuklash yakunlandi")
+            customLayout.setProgressBar(R.id.download_progress_bar, 100, 100, false)
+            customLayout.setTextViewText(R.id.download_status, "100%")
+            builder.setOngoing(false)
             manager.notify(NOTIFICATION_ID, builder.build())
 
             delay(1000)
-            stopForeground(true) // stop foreground
+            stopForeground(true)
             return@withContext file.absolutePath
 
         } catch (e: Exception) {
-            Log.e(TAG, "Download failed", e)
+            Log.e(TAG, "Download error during file write: ${e.message}")
             if (file.exists()) file.delete()
             stopForeground(true)
             return@withContext ""
@@ -202,6 +201,6 @@ class DownloadJobService : JobService(), KoinComponent {
 
     override fun onDestroy() {
         super.onDestroy()
-        jobScope.cancel() // cancel all coroutines
+        jobScope.cancel()
     }
 }

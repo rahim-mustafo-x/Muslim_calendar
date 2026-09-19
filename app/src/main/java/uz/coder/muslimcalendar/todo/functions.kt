@@ -8,7 +8,7 @@ import android.content.ContextWrapper
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import uz.coder.muslimcalendar.domain.model.Item
-import uz.coder.muslimcalendar.models.model.SuraAyah
+import uz.coder.muslimcalendar.domain.model.SuraAyah
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 
 fun Context.isConnected():Boolean{

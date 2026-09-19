@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#222222">
+    android:padding="4dp">
 
     <TextView
         android:id="@+id/check_title"
@@ -12,42 +11,51 @@
         android:layout_height="wrap_content"
         android:text="Namoz o'qidingizmi?"
         android:textColor="#FFFFFF"
-        android:textSize="17sp"
+        android:textSize="14sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/check_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="0dp"
         android:text="Iltimos, namoz o'qiganingizni tasdiqlang."
         android:textColor="#CCCCCC"
-        android:textSize="14sp" />
+        android:textSize="12sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="end">
 
-        <Button
+        <TextView
             android:id="@+id/btn_prayed_yes"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="Alhamdulillah"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF" />
+            android:padding="4dp"
+            android:text="Ha"
+            android:textColor="#4CAF50"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
 
-        <Button
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
             android:id="@+id/btn_prayed_no"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Hali yo'q"
-            android:backgroundTint="#F44336"
-            android:textColor="#FFFFFF" />
+            android:padding="4dp"
+            android:text="Yo'q"
+            android:textColor="#F44336"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 </LinearLayout>
