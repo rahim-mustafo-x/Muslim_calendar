@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uz.coder.muslimcalendar.R
+import uz.coder.muslimcalendar.data.service.QuranPlayerManager
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.domain.usecase.DownloadSurahUseCase
 import uz.coder.muslimcalendar.domain.usecase.GetAudioPathUseCase
@@ -25,7 +26,8 @@ class SurahViewModel (
     private val getSuraUseCase: GetSuraUseCase,
     private val getSurahByNumberUseCase: GetSurahByNumberUseCase,
     private val audioPathUseCase: GetAudioPathUseCase,
-    private val downloadSurahUseCase: DownloadSurahUseCase
+    private val downloadSurahUseCase: DownloadSurahUseCase,
+    val quranPlayerManager: QuranPlayerManager
 ): ViewModel() {
     private val _state = MutableStateFlow<SurahState>(SurahState.Init)
     val state = _state.asStateFlow()

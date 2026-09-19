@@ -83,6 +83,9 @@ class HomeViewModel(
     }
 
     fun reloadSavedLocation() {
+        // Rehydrate the in-memory state from durable storage after process/activity
+        // recreation before the UI decides whether to open location setup.
+        locationSupervisor.refreshFromStorage()
         _state.update {
             it.copy(
                 locationName = sharedPref.getString(REGION),

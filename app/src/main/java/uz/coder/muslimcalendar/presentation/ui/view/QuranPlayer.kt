@@ -14,35 +14,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.delay
 import uz.coder.muslimcalendar.todo.formatTime
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun QuranPlayer(
-    exoPlayer: ExoPlayer,
     isPlaying: Boolean,
+    isPreparing: Boolean,
+    sliderPosition: Float,
+    currentPosition: Long,
+    duration: Long,
+    onValueChange: (Float) -> Unit,
     onPlayPauseClick: () -> Unit,
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var sliderPosition by remember { mutableFloatStateOf(0f) }
-    var duration by remember { mutableLongStateOf(1L) }
-    var currentPosition by remember { mutableLongStateOf(0L) }
-    var isCompleted by remember { mutableStateOf(false) }
-
-    LaunchedEffect(exoPlayer) {
-        while (true) {
-            currentPosition = exoPlayer.currentPosition
-            duration = exoPlayer.duration.coerceAtLeast(1L)
-            isCompleted = duration in 1..currentPosition
-            sliderPosition = currentPosition.toFloat() / duration.toFloat()
-            delay(500.milliseconds)
-        }
-    }
-
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -52,12 +40,25 @@ fun QuranPlayer(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (isPreparing) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Audio tayyorlanmoqda…",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f)
+                )
+            }
+
             Slider(
                 value = sliderPosition,
-                onValueChange = {
-                    sliderPosition = it
-                    exoPlayer.seekTo((duration * it).toLong())
-                },
+                onValueChange = onValueChange,
                 colors = SliderDefaults.colors(
                     thumbColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     activeTrackColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -102,16 +103,10 @@ fun QuranPlayer(
                 }
 
                 IconButton(onClick = {
-                    if (isCompleted) {
-                        exoPlayer.seekTo(0)
-                        exoPlayer.playWhenReady = true
-                        isCompleted = false
-                    } else {
-                        onPlayPauseClick()
-                    }
+                    onPlayPauseClick()
                 }) {
                     Icon(
-                        imageVector = if (isPlaying && !isCompleted)
+                        imageVector = if (isPlaying)
                             Icons.Default.Pause
                         else
                             Icons.Default.PlayArrow,

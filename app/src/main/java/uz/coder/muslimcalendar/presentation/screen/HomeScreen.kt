@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -48,6 +49,7 @@ fun HomeScreen(
     val prayerTimes = state.prayerTimes
     val currentTime = LocalTime.now()
     val lifecycleOwner = LocalLifecycleOwner.current
+    var hasRequestedLocationSetup by rememberSaveable { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -58,7 +60,14 @@ fun HomeScreen(
     }
 
     LaunchedEffect(state.isLocationConfigured) {
-        if (!state.isLocationConfigured) onNavigate("location_settings")
+        if (state.isLocationConfigured) {
+            hasRequestedLocationSetup = false
+        } else if (!hasRequestedLocationSetup) {
+            // A saved flag may arrive one frame after Home is restored. Only issue
+            // one redirect while that state is being rehydrated.
+            hasRequestedLocationSetup = true
+            onNavigate("location_settings")
+        }
     }
 
     // Dynamic theme colors from MaterialTheme (supports system Light and Dark mode)

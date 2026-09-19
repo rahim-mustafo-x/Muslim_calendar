@@ -28,10 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,6 +51,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
+import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.SharedPref
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -63,6 +66,8 @@ fun QiblaCompassScreen(
     val context = LocalContext.current
     val activity = context as? Activity
     val lifecycleOwner = LocalLifecycleOwner.current
+    // Keep this heading continuous (rather than constrained to -180..180). This
+    // avoids a 359° animation jump whenever the device crosses north.
     var azimuth by remember { mutableFloatStateOf(0f) }
     var qiblaDirection by remember { mutableFloatStateOf(0f) }
     var isCalibrated by remember { mutableStateOf(false) }
@@ -116,57 +121,74 @@ fun QiblaCompassScreen(
         label = "azimuth"
     )
 
-    DisposableEffect(Unit) {
+    DisposableEffect(context) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
-        
-        if (accelerometer == null || magnetometer == null) {
+
+        if (rotationVector == null && (accelerometer == null || magnetometer == null)) {
             isCalibrated = false
             onDispose { }
-        }
-        
-        val gravity = FloatArray(3)
-        val geomagnetic = FloatArray(3)
-        var lastUpdate = 0L
-        
-        val listener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent) {
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - lastUpdate < 100) return
-                lastUpdate = currentTime
-                
-                when (event.sensor.type) {
-                    Sensor.TYPE_ACCELEROMETER -> event.values.copyInto(gravity)
-                    Sensor.TYPE_MAGNETIC_FIELD -> event.values.copyInto(geomagnetic)
+        } else {
+            val gravity = FloatArray(3)
+            val geomagnetic = FloatArray(3)
+            val rotationMatrix = FloatArray(9)
+            val orientation = FloatArray(3)
+            var lastUpdate = 0L
+
+            fun publishAzimuth(matrix: FloatArray) {
+                SensorManager.getOrientation(matrix, orientation)
+                val rawHeading = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                val delta = ((rawHeading - (azimuth % 360f) + 540f) % 360f) - 180f
+                azimuth += delta
+                isCalibrated = true
+            }
+
+            val listener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastUpdate < 50L) return
+                    lastUpdate = currentTime
+
+                    when (event.sensor.type) {
+                        Sensor.TYPE_ROTATION_VECTOR -> {
+                            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+                            publishAzimuth(rotationMatrix)
+                        }
+                        Sensor.TYPE_ACCELEROMETER -> event.values.copyInto(gravity)
+                        Sensor.TYPE_MAGNETIC_FIELD -> event.values.copyInto(geomagnetic)
+                    }
+
+                    if (rotationVector == null &&
+                        SensorManager.getRotationMatrix(rotationMatrix, null, gravity, geomagnetic)
+                    ) {
+                        publishAzimuth(rotationMatrix)
+                    }
                 }
-                
-                val R = FloatArray(9)
-                val I = FloatArray(9)
-                
-                if (SensorManager.getRotationMatrix(R, I, gravity, geomagnetic)) {
-                    val orientation = FloatArray(3)
-                    SensorManager.getOrientation(R, orientation)
-                    azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                    isCalibrated = true
+
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+                    if (sensor?.type != Sensor.TYPE_ACCELEROMETER) {
+                        isCalibrated = accuracy >= SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM
+                    }
                 }
             }
-            
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                isCalibrated = accuracy >= SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM
+
+            if (rotationVector != null) {
+                sensorManager.registerListener(listener, rotationVector, SensorManager.SENSOR_DELAY_GAME)
+            } else {
+                sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+                sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_GAME)
             }
-        }
-        
-        sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-        sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_UI)
-        
-        val sharedPref = SharedPref(context)
-        val userLat = sharedPref.getFloat("saved_latitude", 41.2995f).toDouble()
-        val userLon = sharedPref.getFloat("saved_longitude", 69.2401f).toDouble()
-        qiblaDirection = calculateQiblaDirection(userLat, userLon)
-        
-        onDispose {
-            sensorManager.unregisterListener(listener)
+
+            val sharedPref = SharedPref(context)
+            val userLat = sharedPref.getFloat("saved_latitude", 41.2995f).toDouble()
+            val userLon = sharedPref.getFloat("saved_longitude", 69.2401f).toDouble()
+            qiblaDirection = calculateQiblaDirection(userLat, userLon)
+
+            onDispose {
+                sensorManager.unregisterListener(listener)
+            }
         }
     }
 
@@ -297,15 +319,43 @@ fun QiblaCompassScreen(
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
+                val qiblaRotation = qiblaDirection - animatedAzimuth
                 CompassView(
                     azimuth = animatedAzimuth,
                     qiblaDirection = qiblaDirection
                 )
+                // The Ka'ba marker travels around the dial with the Qibla direction.
+                // Unlike the red mark (north), it gives the user an unambiguous visual
+                // target even when the Qibla arrow is close to a compass tick.
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .graphicsLayer { rotationZ = qiblaRotation }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_kaaba),
+                        contentDescription = "Qibla yo'nalishi",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 34.dp)
+                            .size(34.dp)
+                            // Keep the Ka'ba glyph upright while its position rotates.
+                            .graphicsLayer { rotationZ = -qiblaRotation }
+                    )
+                }
             }
+
+            Text(
+                text = "Qizil belgi — Shimol  •  Ka'ba belgisi — Qibla",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            val qiblaAngle = ((qiblaDirection - animatedAzimuth + 360) % 360).toInt()
+            val qiblaAngle = ((qiblaDirection - animatedAzimuth) % 360f + 360f).rem(360f).toInt()
             val isAligned = qiblaAngle in 355..360 || qiblaAngle in 0..5
             
             Card(

@@ -51,6 +51,8 @@ class LocationSettingsViewModel(
     }
 
     fun saveLocation(name: String, latitude: Double, longitude: Double) {
+        if (_state.value.isSaving) return
+
         if (name.isBlank() || latitude !in -90.0..90.0 || longitude !in -180.0..180.0) {
             _state.update { it.copy(error = "Joylashuv ma'lumotlarini tekshiring.") }
             return
@@ -65,8 +67,10 @@ class LocationSettingsViewModel(
             return
         }
 
+        // Mark the operation before starting the coroutine so a rapid second tap cannot
+        // enqueue another save/navigation transition.
+        _state.update { it.copy(isSaving = true, error = null) }
         viewModelScope.launch(Dispatchers.IO) {
-            _state.update { it.copy(isSaving = true, error = null) }
             try {
                 repository.region(name)
                 sharedPref.saveValue(SAVED_LATITUDE, latitude.toFloat())

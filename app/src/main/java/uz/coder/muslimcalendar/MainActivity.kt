@@ -27,6 +27,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
@@ -49,6 +50,13 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var appUpdateManager: AppUpdateManager
+    private val updateInstallListener = InstallStateUpdatedListener { installState ->
+        if (installState.installStatus() == InstallStatus.DOWNLOADED) {
+            // The listener fires at the exact completion of a flexible Play update.
+            // Do not wait for onResume (which only happens after leaving/re-entering).
+            appUpdateManager.completeUpdate()
+        }
+    }
     private val viewModel: HomeViewModel by viewModel()
     
     private val notificationScheduler: NotificationScheduler by inject()
@@ -103,31 +111,51 @@ class MainActivity : ComponentActivity() {
             }
         }
         if (::appUpdateManager.isInitialized) {
-            appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-                if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                    appUpdateManager.completeUpdate()
-                }
-            }
+            checkForDownloadedFlexibleUpdate()
         }
+    }
+
+    override fun onDestroy() {
+        if (::appUpdateManager.isInitialized) {
+            appUpdateManager.unregisterListener(updateInstallListener)
+        }
+        super.onDestroy()
     }
 
     private fun checkForUpdates() {
         try {
             appUpdateManager = AppUpdateManagerFactory.create(this)
+            appUpdateManager.registerListener(updateInstallListener)
             appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                when {
+                    appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED -> {
+                        appUpdateManager.completeUpdate()
+                    }
+                    appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
                     && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
-                ) {
-                    appUpdateManager.startUpdateFlowForResult(
-                        appUpdateInfo,
-                        AppUpdateType.FLEXIBLE,
-                        this,
-                        1001
-                    )
+                    -> {
+                        appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            AppUpdateType.FLEXIBLE,
+                            this,
+                            1001
+                        )
+                    }
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun checkForDownloadedFlexibleUpdate() {
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                // Flexible updates do not install themselves. Calling this from the
+                // install-state listener means installation starts as soon as the
+                // Play download ends, without waiting for an activity resume.
+                appUpdateManager.completeUpdate()
+            }
         }
     }
 

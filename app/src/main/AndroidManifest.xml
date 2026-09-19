@@ -11,6 +11,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"
         tools:ignore="ExactAlarmPolicy" />
 
@@ -24,6 +27,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.MuslimCalendar"
         tools:targetApi="31">
         <provider
@@ -43,7 +47,16 @@
         <service android:name=".data.service.QuranJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
         <service android:name=".data.service.DownloadJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
+            android:exported="false"
+            android:foregroundServiceType="dataSync"/>
+        <service android:name=".data.service.QuranAudioService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            tools:ignore="ForegroundServicePermission">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
+            </intent-filter>
+        </service>
 
         <receiver android:name=".data.receiver.AlarmBroadCast" android:exported="false"/>
         <receiver android:name=".data.receiver.StopAlarmBroadCast" android:exported="false"/>

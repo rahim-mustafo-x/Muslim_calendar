@@ -120,7 +120,11 @@ fun LocationSettingsScreen(
     }
 
     LaunchedEffect(state.isSaved) {
-        if (state.isSaved) controller.popBackStack()
+        if (state.isSaved) {
+            // Always return to the existing home entry. A plain pop can race with the
+            // initial location redirect and briefly show the settings screen again.
+            controller.popBackStack("home", inclusive = false)
+        }
     }
 
     Scaffold(

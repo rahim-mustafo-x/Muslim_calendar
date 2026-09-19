@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
@@ -58,23 +59,15 @@ fun QuranAyahScreen(
     var audioPath by remember { mutableStateOf("") }
     var nameOfSura by remember { mutableStateOf(context.getString(R.string.app_name)) }
 
-    // ExoPlayer
-    val exoPlayer = remember { ExoPlayer.Builder(context).build().apply {
-        val mediaItem = MediaItem.fromUri(audioPath)
-        setMediaItem(mediaItem)
-        prepare()
-    } }
-    var isPlaying by remember { mutableStateOf(false) }
+    val isPlaying by viewModel.quranPlayerManager.isPlaying.collectAsState()
+    val playbackPosition by viewModel.quranPlayerManager.playbackPosition.collectAsState()
+    val duration by viewModel.quranPlayerManager.duration.collectAsState()
+    val isAudioPreparing by viewModel.quranPlayerManager.isPreparing.collectAsState()
 
-    LaunchedEffect(audioPath) {
-        if (audioPath.isNotEmpty()) {
-            exoPlayer.apply {
-                setMediaItem(MediaItem.fromUri(audioPath))
-                prepare()
-                if (isPlaying) play()
-            }
-        }
-    }
+    val sliderPosition = if (duration > 0) playbackPosition.toFloat() / duration.toFloat() else 0f
+
+    // Auto start to'xtatildi. Endi faqat foydalanuvchi pastdagi Play/Pause tugmasini bossagina musiqa boshlanadi.
+    // Ammo agar o'sha sura fonda allaqachon ijro etilayotgan bo'lsa, o'yinchi holati avtomatik ulanadi.
 
     val isDark = isSystemInDarkTheme()
     val listBackgroundColor = MaterialTheme.colorScheme.background
@@ -95,21 +88,26 @@ fun QuranAyahScreen(
         },
         bottomBar = {
             QuranPlayer(
-                exoPlayer = exoPlayer,
                 isPlaying = isPlaying,
+                isPreparing = isAudioPreparing,
+                sliderPosition = sliderPosition,
+                currentPosition = playbackPosition,
+                duration = duration,
+                onValueChange = {
+                    viewModel.quranPlayerManager.seekTo((duration * it).toLong())
+                },
                 onPlayPauseClick = {
-                    if (exoPlayer.isPlaying) {
-                        exoPlayer.pause()
+                    if (viewModel.quranPlayerManager.currentTrackTitle.value != nameOfSura) {
+                         viewModel.quranPlayerManager.playSurah(audioPath, nameOfSura)
                     } else {
-                        exoPlayer.play()
+                         viewModel.quranPlayerManager.togglePlayPause()
                     }
-                    isPlaying = !isPlaying
                 },
                 onNextClick = {
-                    exoPlayer.seekTo((exoPlayer.currentPosition + 5000).coerceAtMost(exoPlayer.duration))
+                    viewModel.quranPlayerManager.fastForward()
                 },
                 onPreviousClick = {
-                    exoPlayer.seekTo((exoPlayer.currentPosition - 5000).coerceAtLeast(0))
+                    viewModel.quranPlayerManager.rewind()
                 }
             )
         }
@@ -219,41 +217,38 @@ fun QuranAyahScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            exoPlayer.release()
+            // Background playback handles release via service lifecycle
         }
     }
 
     LaunchedEffect(number) {
         viewModel.getSura(number)
         viewModel.getAudioPath(number.toString())
-    }
-
-    LaunchedEffect(viewModel.getSura(number)) {
         viewModel.getNameOfSura(number).collect {
             nameOfSura = it.englishName
         }
     }
 
-    LaunchedEffect(viewModel.state) {
-        viewModel.state.collect { state ->
-            when (state) {
-                is SurahState.Loading -> isLoading = true
-                is SurahState.Success -> {
-                    isLoading = false
-                    ayahList = state.data.toAyahList()
-                }
-                is SurahState.Error -> {
-                    isLoading = false
-                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
-                }
-                SurahState.Init -> isLoading = false
+    val surahState by viewModel.state.collectAsState()
+
+    LaunchedEffect(surahState) {
+        when (val state = surahState) {
+            is SurahState.Loading -> isLoading = true
+            is SurahState.Success -> {
+                isLoading = false
+                ayahList = state.data.toAyahList()
             }
+            is SurahState.Error -> {
+                isLoading = false
+                Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            }
+            SurahState.Init -> isLoading = false
         }
     }
 
-    LaunchedEffect(viewModel.audioPath) {
-        viewModel.audioPath.collect {
-            audioPath = it
-        }
+    val audioPathFlow by viewModel.audioPath.collectAsState()
+    
+    LaunchedEffect(audioPathFlow) {
+        audioPath = audioPathFlow
     }
 }

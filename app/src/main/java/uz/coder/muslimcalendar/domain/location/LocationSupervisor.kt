@@ -9,10 +9,18 @@ import uz.coder.muslimcalendar.todo.SAVED_LONGITUDE
 
 class LocationSupervisor(private val sharedPref: SharedPref) {
 
-    private val _isLocationConfigured = MutableStateFlow(isLocationConfigured())
+    // Memory is the fast source used by Compose, while SharedPreferences remains the
+    // durable source restored after process death.
+    private val _isLocationConfigured = MutableStateFlow(readConfigurationFromStorage())
     val isLocationConfiguredFlow = _isLocationConfigured.asStateFlow()
-    
-    fun isLocationConfigured(): Boolean {
+
+    fun isLocationConfigured(): Boolean = _isLocationConfigured.value
+
+    fun refreshFromStorage() {
+        _isLocationConfigured.value = readConfigurationFromStorage()
+    }
+
+    private fun readConfigurationFromStorage(): Boolean {
         val isConfigured = sharedPref.getBoolean(LOCATION_CONFIGURED, false)
         val lat = sharedPref.getFloat(SAVED_LATITUDE, 0f)
         val lon = sharedPref.getFloat(SAVED_LONGITUDE, 0f)
@@ -24,7 +32,7 @@ class LocationSupervisor(private val sharedPref: SharedPref) {
 
     fun markLocationConfigured() {
         sharedPref.saveValue(LOCATION_CONFIGURED, true)
-        _isLocationConfigured.value = isLocationConfigured()
+        refreshFromStorage()
     }
     
     fun clearLocationConfig() {

@@ -22,6 +22,7 @@ import uz.coder.muslimcalendar.presentation.viewModel.*
 import uz.coder.muslimcalendar.presentation.viewModel.HomeViewModel
 import uz.coder.muslimcalendar.data.service.*
 import kotlinx.serialization.json.Json
+import org.koin.core.qualifier.named
 
 val appModule = module {
     // Singletons
@@ -29,6 +30,7 @@ val appModule = module {
     single { SharedPref(androidContext()) }
     single { CalendarMap() }
     single { ThemeManager(androidContext()) }
+    single { QuranPlayerManager(androidContext()) }
     single { LocationSupervisor(get()) }
     
     single { Json {
@@ -44,6 +46,8 @@ val appModule = module {
         KtorClient.quranArabClient,
         KtorClient.quranUzbekClient
     ) }
+    
+    single(named("downloadClient")) { KtorClient.downloadClient }
 
     // Repositories
     single<CalendarRepository> { CalendarRepositoryImpl(get(), get(), get(), androidContext(), get()) }
@@ -73,7 +77,7 @@ val appModule = module {
     viewModel { PrayerStatisticsViewModel(get()) }
     viewModel { QuranViewModel(get(), get(), get()) }
     viewModel { SettingsViewModel(get()) }
-    viewModel { SurahViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { SurahViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { TasbehViewModel(get()) }
 
     // Workers

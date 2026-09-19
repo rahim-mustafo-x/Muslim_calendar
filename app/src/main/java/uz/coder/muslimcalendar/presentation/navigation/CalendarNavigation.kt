@@ -148,7 +148,11 @@ fun CalendarNavigation(modifier: Modifier = Modifier) {
                         "allah_names" -> AllahName.route
                         else -> route
                     }
-                    controller.navigate(targetRoute)
+                    if (controller.currentDestination?.route != targetRoute) {
+                        controller.navigate(targetRoute) {
+                            launchSingleTop = true
+                        }
+                    }
                 }
             }
             composable(Tasbeh.route){

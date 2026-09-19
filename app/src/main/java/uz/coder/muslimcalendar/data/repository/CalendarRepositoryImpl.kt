@@ -4,7 +4,7 @@ import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
-import android.os.PersistableBundle
+import android.content.Intent
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -379,8 +379,7 @@ class CalendarRepositoryImpl(
                     .setOverrideDeadline(0)
                     .build()
                     .also {
-                        context
-                            .getSystemService(JobScheduler::class.java)
+                        (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as? JobScheduler)
                             ?.schedule(it)
                     }
 
@@ -546,41 +545,15 @@ class CalendarRepositoryImpl(
         val success = Result.success(
             runCatching {
 
-                val bundle = PersistableBundle().apply {
-
-                    putString(
-                        DownloadJobService.KEY_FILE_URL,
-                        url
-                    )
-
-                    putString(
-                        DownloadJobService.KEY_SURA,
-                        json.encodeToString(suraAyahs)
-                    )
+                val intent = Intent(context, DownloadJobService::class.java).apply {
+                    putExtra(DownloadJobService.KEY_FILE_URL, url)
+                    putExtra(DownloadJobService.KEY_SURA, json.encodeToString(suraAyahs))
                 }
-
-                val job = JobInfo.Builder(
-                    JobIds.AUDIO_DOWNLOAD,
-                    ComponentName(
-                        context,
-                        DownloadJobService::class.java
-                    )
-                )
-                    .setRequiredNetworkType(
-                        JobInfo.NETWORK_TYPE_ANY
-                    )
-                    .setPersisted(true)
-                    .setMinimumLatency(0)
-                    .setOverrideDeadline(0)
-                    .setExtras(bundle)
-                    .build()
-                    .also {
-                        context
-                            .getSystemService(JobScheduler::class.java)
-                            ?.schedule(it)
-                    }
-
-                job.hashCode()
+                // This action follows an explicit user tap, so a foreground service
+                // can display its notification immediately rather than waiting for
+                // JobScheduler to decide when it may run.
+                context.startForegroundService(intent)
+                suraAyahs.size
             }
         )
 
