@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 data class AppItem(
     val name: String,
     val iconUrl: String,
-    val size: String,
     val directUrl: String,
     val description: String? = null
 )
