@@ -14,23 +14,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.koin.androidx.compose.koinViewModel
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import org.koin.androidx.compose.koinViewModel
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.domain.model.Menu
 import uz.coder.muslimcalendar.domain.model.MenuSetting
@@ -40,11 +38,11 @@ import uz.coder.muslimcalendar.presentation.ui.view.QuranPlayer
 import uz.coder.muslimcalendar.presentation.viewModel.SurahViewModel
 import uz.coder.muslimcalendar.presentation.viewModel.state.SurahState
 import uz.coder.muslimcalendar.todo.NUMBER
-import uz.coder.muslimcalendar.todo.toAyahList
 import uz.coder.muslimcalendar.todo.toArabicNumbers
+import uz.coder.muslimcalendar.todo.toAyahList
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @SuppressLint("LocalContextGetResourceValueCall")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuranAyahScreen(
     modifier: Modifier = Modifier,
@@ -65,9 +63,6 @@ fun QuranAyahScreen(
     val isAudioPreparing by viewModel.quranPlayerManager.isPreparing.collectAsState()
 
     val sliderPosition = if (duration > 0) playbackPosition.toFloat() / duration.toFloat() else 0f
-
-    // Auto start to'xtatildi. Endi faqat foydalanuvchi pastdagi Play/Pause tugmasini bossagina musiqa boshlanadi.
-    // Ammo agar o'sha sura fonda allaqachon ijro etilayotgan bo'lsa, o'yinchi holati avtomatik ulanadi.
 
     val isDark = isSystemInDarkTheme()
     val listBackgroundColor = MaterialTheme.colorScheme.background
@@ -98,9 +93,9 @@ fun QuranAyahScreen(
                 },
                 onPlayPauseClick = {
                     if (viewModel.quranPlayerManager.currentTrackTitle.value != nameOfSura) {
-                         viewModel.quranPlayerManager.playSurah(audioPath, nameOfSura)
+                        viewModel.quranPlayerManager.playSurah(audioPath, nameOfSura)
                     } else {
-                         viewModel.quranPlayerManager.togglePlayPause()
+                        viewModel.quranPlayerManager.togglePlayPause()
                     }
                 },
                 onNextClick = {
@@ -137,7 +132,7 @@ fun QuranAyahScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                            text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
                             fontSize = 28.sp,
                             color = primaryTextColor,
                             textAlign = TextAlign.Center,
@@ -154,17 +149,37 @@ fun QuranAyahScreen(
                             .background(cardBackgroundColor, shape = RoundedCornerShape(12.dp))
                             .padding(16.dp)
                     ) {
-                        Text(
-                            text = "${ayah.arabicText} ﴿${ayah.aya}﴾".toArabicNumbers(),
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = primaryTextColor,
-                            textAlign = TextAlign.End,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        // Arabcha matn va oyat raqamini o'ngdan chapga (RTL) yo'naltirish
+                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                // Oyatning arabcha matni
+                                Text(
+                                    text = ayah.arabicText,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = primaryTextColor,
+                                    textAlign = TextAlign.Start
+                                )
+
+                                Spacer(modifier = Modifier.width(6.dp))
+                                // Oyat raqami (Har doim {x} ko'rinishida chiqadi)
+                                Text(
+                                    text = "\u200F{\u200F${ayah.aya.toArabicNumbers()}\u200F}\u200F",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    textAlign = TextAlign.Start
+                                )
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
+                        // Oyatning tarjimasi
                         Text(
                             text = "${ayah.aya}. ${ayah.translation}",
                             fontSize = 16.sp,
@@ -247,7 +262,7 @@ fun QuranAyahScreen(
     }
 
     val audioPathFlow by viewModel.audioPath.collectAsState()
-    
+
     LaunchedEffect(audioPathFlow) {
         audioPath = audioPathFlow
     }

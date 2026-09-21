@@ -11,7 +11,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"
@@ -29,7 +30,7 @@
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.MuslimCalendar"
-        tools:targetApi="31">
+        tools:targetApi="33">
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="uz.coder.muslimcalendar.androidx-startup"
@@ -46,9 +47,12 @@
         </activity>
         <service android:name=".data.service.QuranJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <service android:name=".data.service.DownloadJobService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync"/>
+
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
+
         <service android:name=".data.service.QuranAudioService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback"
@@ -91,6 +95,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/islamic_calendar_widget_info" />
         </receiver>
+        <service
+            android:foregroundServiceType="dataSync"
+            tools:node="merge"
+            android:name="androidx.work.impl.foreground.SystemForegroundService" />
     </application>
 
 </manifest>

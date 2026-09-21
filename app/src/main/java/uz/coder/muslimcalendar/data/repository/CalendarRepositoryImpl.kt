@@ -4,8 +4,12 @@ import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.util.Log
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -15,25 +19,25 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import uz.coder.muslimcalendar.SharedPref
 import uz.coder.muslimcalendar.data.db.AppDatabase
 import uz.coder.muslimcalendar.data.map.CalendarMap
 import uz.coder.muslimcalendar.data.network.KtorApiService
-import uz.coder.muslimcalendar.data.service.DownloadJobService
+import uz.coder.muslimcalendar.data.service.DownloadWorker
 import uz.coder.muslimcalendar.data.service.JobIds
 import uz.coder.muslimcalendar.data.service.QuranJobService
 import uz.coder.muslimcalendar.domain.model.AudioPath
 import uz.coder.muslimcalendar.domain.model.CalendarAvailability
-import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
+import uz.coder.muslimcalendar.domain.model.SuraAyah
 import uz.coder.muslimcalendar.domain.model.quran.Sura
 import uz.coder.muslimcalendar.domain.model.quran.Surah
 import uz.coder.muslimcalendar.domain.model.quran.SurahList
 import uz.coder.muslimcalendar.domain.repository.CalendarRepository
-import uz.coder.muslimcalendar.domain.model.SuraAyah
+import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.todo.REGION
 import uz.coder.muslimcalendar.todo.hasInternetConnection
 import java.time.LocalDate
+import kotlin.time.Duration.Companion.milliseconds
 
 class CalendarRepositoryImpl(
     private val preferences: SharedPref,
@@ -43,39 +47,22 @@ class CalendarRepositoryImpl(
     private val ktorApiService: KtorApiService
 ) : CalendarRepository {
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        encodeDefaults = true
-    }
-
-    private val calendarCache =
-        mutableMapOf<String, MuslimCalendar?>()
-
-    private val surahCache =
-        mutableMapOf<Int, Sura?>()
-
+    private val calendarCache = mutableMapOf<String, MuslimCalendar?>()
+    private val surahCache = mutableMapOf<Int, Sura?>()
     private var cacheTimestamp = 0L
 
     companion object {
         private const val TAG = "CalendarRepository"
         private const val CACHE_DURATION_MS = 5 * 60 * 1000L
-
     }
 
     // ============================================================
     // CALENDAR LOADING
     // ============================================================
 
-    override suspend fun loading(
-        longitude: Double,
-        latitude: Double
-    ) {
+    override suspend fun loading(longitude: Double, latitude: Double) {
         if (!isValidCoordinates(latitude, longitude)) {
-            Log.w(
-                TAG,
-                "Invalid coordinates: lat=$latitude, lon=$longitude"
-            )
+            Log.w(TAG, "Invalid coordinates: lat=$latitude, lon=$longitude")
             return
         }
 
@@ -104,19 +91,13 @@ class CalendarRepositoryImpl(
                     latitude = latitude,
                     longitude = longitude
                 )
-
             }
 
             clearCache()
             Log.d(TAG, "Calendar loading completed for current and next month")
 
         } catch (e: Exception) {
-            Log.e(
-                TAG,
-                "Failed to load prayer calendar",
-                e
-            )
-
+            Log.e(TAG, "Failed to load prayer calendar", e)
             throw e
         }
     }
@@ -136,18 +117,11 @@ class CalendarRepositoryImpl(
         )
     }
 
-    private fun isValidCoordinates(
-        latitude: Double,
-        longitude: Double
-    ): Boolean {
+    private fun isValidCoordinates(latitude: Double, longitude: Double): Boolean {
         return latitude in -90.0..90.0 &&
                 longitude in -180.0..180.0 &&
                 !(latitude == 0.0 && longitude == 0.0)
     }
-
-    // ============================================================
-    // DOWNLOAD + SAVE
-    // ============================================================
 
     private suspend fun downloadAndSaveMonth(
         year: Int,
@@ -155,10 +129,7 @@ class CalendarRepositoryImpl(
         latitude: Double,
         longitude: Double
     ) {
-        Log.d(
-            TAG,
-            "Downloading prayer calendar: $year-$month"
-        )
+        Log.d(TAG, "Downloading prayer calendar: $year-$month")
 
         val result = ktorApiService.getOneMonthPrayerTimes(
             year = year,
@@ -170,143 +141,76 @@ class CalendarRepositoryImpl(
         val prayerDataList = result.data
 
         if (prayerDataList.isNullOrEmpty()) {
-            Log.w(
-                TAG,
-                "API returned no prayer data for $year-$month"
-            )
+            Log.w(TAG, "API returned no prayer data for $year-$month")
             return
         }
 
-        val dbModels =
-            map.toMuslimCalendarDbModel(prayerDataList)
+        val dbModels = map.toMuslimCalendarDbModel(prayerDataList)
 
         if (dbModels.isEmpty()) {
-            Log.w(
-                TAG,
-                "Mapper produced no database models for $year-$month"
-            )
+            Log.w(TAG, "Mapper produced no database models for $year-$month")
             return
         }
 
-        db.calendarDao()
-            .insertMuslimCalendar(dbModels)
-
-        Log.d(
-            TAG,
-            "Saved ${dbModels.size} prayer days for $year-$month"
-        )
+        db.calendarDao().insertMuslimCalendar(dbModels)
+        Log.d(TAG, "Saved ${dbModels.size} prayer days for $year-$month")
     }
 
     // ============================================================
-    // REGION
+    // REGION & HOME
     // ============================================================
 
     override suspend fun region(region: String) {
-        preferences.saveValue(
-            REGION,
-            region
-        )
-
+        preferences.saveValue(REGION, region)
         clearCache()
     }
 
-    // ============================================================
-    // HOME SCREEN
-    // ============================================================
-
     override fun getTodayPrayerTimes(): Flow<MuslimCalendar?> {
-        return flow {
-            val today = LocalDate.now()
-
-            db.calendarDao()
-                .presentDay(
-                    day = today.dayOfMonth,
-                    month = today.monthValue,
-                    year = today.year
-                )
-                .map { dbModel ->
-                    dbModel?.let {
-                        map.toMuslimCalendar(it)
-                    }
-                }
-                .collect { calendar ->
-                    emit(calendar)
-                }
-        }.flowOn(Dispatchers.IO)
-    }
-
-    override fun getTomorrowPrayerTimes(): Flow<MuslimCalendar?> {
-        return flow {
-            val tomorrow = LocalDate.now().plusDays(1)
-
-            db.calendarDao()
-                .presentDay(
-                    day = tomorrow.dayOfMonth,
-                    month = tomorrow.monthValue,
-                    year = tomorrow.year
-                )
-                .map { dbModel ->
-                    dbModel?.let {
-                        map.toMuslimCalendar(it)
-                    }
-                }
-                .collect { calendar ->
-                    emit(calendar)
-                }
-        }.flowOn(Dispatchers.IO)
-    }
-
-    override fun getPrayerTimesForRange(
-        start: Long,
-        end: Long
-    ): Flow<List<MuslimCalendar>> {
-
-        /*
-         * This currently returns all locally stored calendar data.
-         *
-         * Do not pretend this is a real date-range query.
-         * If start/end are actually required, add a DAO query based on
-         * your database date representation.
-         */
+        val today = LocalDate.now()
         return db.calendarDao()
-            .oneMonth()
-            .map { list ->
-                list.mapNotNull {
-                    map.toMuslimCalendar(it)
-                }
-            }
+            .presentDay(
+                day = today.dayOfMonth,
+                month = today.monthValue,
+                year = today.year
+            )
+            .map { dbModel -> dbModel?.let(map::toMuslimCalendar) }
             .flowOn(Dispatchers.IO)
     }
 
-    // ============================================================
-    // EXISTING CALENDAR API
-    // ============================================================
+    override fun getTomorrowPrayerTimes(): Flow<MuslimCalendar?> {
+        val tomorrow = LocalDate.now().plusDays(1)
+        return db.calendarDao()
+            .presentDay(
+                day = tomorrow.dayOfMonth,
+                month = tomorrow.monthValue,
+                year = tomorrow.year
+            )
+            .map { dbModel -> dbModel?.let(map::toMuslimCalendar) }
+            .flowOn(Dispatchers.IO)
+    }
+
+    override fun getPrayerTimesForRange(start: Long, end: Long): Flow<List<MuslimCalendar>> {
+        return db.calendarDao()
+            .oneMonth()
+            .map { list -> list.map(map::toMuslimCalendar) }
+            .flowOn(Dispatchers.IO)
+    }
 
     override suspend fun remove() {
         try {
             db.calendarDao().deleteCalendar()
             clearCache()
         } catch (e: Exception) {
-            Log.e(
-                TAG,
-                "Failed to remove calendar data",
-                e
-            )
-
+            Log.e(TAG, "Failed to remove calendar data", e)
             throw e
         }
     }
 
     override fun presentDay(): Flow<MuslimCalendar> = flow {
-
         val today = LocalDate.now()
-
         val key = "presentDay_$today"
 
-        if (
-            isCacheValid() &&
-            calendarCache.containsKey(key)
-        ) {
+        if (isCacheValid() && calendarCache.containsKey(key)) {
             calendarCache[key]?.let {
                 emit(it)
                 return@flow
@@ -319,116 +223,61 @@ class CalendarRepositoryImpl(
                 month = today.monthValue,
                 year = today.year
             )
-            .mapNotNull {
-                map.toMuslimCalendar(it)
-            }
+            .mapNotNull { map.toMuslimCalendar(it) }
             .collect { calendar ->
-
                 calendarCache[key] = calendar
                 cacheTimestamp = System.currentTimeMillis()
-
                 emit(calendar)
             }
-
     }.catch { error ->
-
-        Log.e(
-            TAG,
-            "Failed to get present day",
-            error
-        )
-
-        calendarCache["presentDay_${LocalDate.now()}"]
-            ?.let {
-                emit(it)
-            }
-
+        Log.e(TAG, "Failed to get present day", error)
+        calendarCache["presentDay_${LocalDate.now()}"]?.let { emit(it) }
     }.flowOn(Dispatchers.IO)
 
     override fun oneMonth(): Flow<List<MuslimCalendar>> {
         return db.calendarDao()
             .oneMonth()
-            .map { list ->
-                list.mapNotNull {
-                    map.toMuslimCalendar(it)
-                }
-            }
+            .map { list -> list.map(map::toMuslimCalendar) }
             .flowOn(Dispatchers.IO)
     }
 
     // ============================================================
-    // QURAN
+    // QURAN & AUDIO
     // ============================================================
 
-    override suspend fun loadQuranArab(): Result<Result<Int>> {
-
-        val success = Result.success(
-            runCatching {
-
-                val job = JobInfo.Builder(
-                    JobIds.QURAN_LOAD,
-                    ComponentName(
-                        context,
-                        QuranJobService::class.java
-                    )
-                )
-                    .setRequiredNetworkType(
-                        JobInfo.NETWORK_TYPE_ANY
-                    )
-                    .setMinimumLatency(0)
-                    .setOverrideDeadline(0)
-                    .build()
-                    .also {
-                        (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as? JobScheduler)
-                            ?.schedule(it)
-                    }
-
-                job.hashCode()
-            }
+    override suspend fun loadQuranArab(): Result<Int> = runCatching {
+        val job = JobInfo.Builder(
+            JobIds.QURAN_LOAD,
+            ComponentName(context, QuranJobService::class.java)
         )
+            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+            .setMinimumLatency(0)
+            .setOverrideDeadline(0)
+            .build()
 
-        return success
+        (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as? JobScheduler)?.schedule(job)
+        job.id
     }
 
     override fun getSurah(): Flow<List<Sura>> = flow {
-
-        if (
-            isCacheValid() &&
-            surahCache.isNotEmpty()
-        ) {
-            emit(
-                surahCache.values.filterNotNull()
-            )
+        if (isCacheValid() && surahCache.isNotEmpty()) {
+            emit(surahCache.values.filterNotNull())
             return@flow
         }
 
         db.suraDao()
             .getAllSura()
             .map { list ->
-
-                list.map(map::toSura)
-                    .also { suras ->
-
-                        surahCache.clear()
-
-                        suras.forEach { sura ->
-                            surahCache[sura.number] = sura
-                        }
-
-                        cacheTimestamp =
-                            System.currentTimeMillis()
-                    }
+                list.map(map::toSura).also { suras ->
+                    surahCache.clear()
+                    suras.forEach { sura -> surahCache[sura.number] = sura }
+                    cacheTimestamp = System.currentTimeMillis()
+                }
             }
-            .collect {
-                emit(it)
-            }
-
+            .collect { emit(it) }
     }.flowOn(Dispatchers.IO)
 
-    override fun getSuraByNumber(
-        number: Int
-    ): Flow<Sura> = flow {
-
+    override fun getSuraByNumber(number: Int): Flow<Sura> = flow {
         surahCache[number]?.let {
             emit(it)
             return@flow
@@ -438,126 +287,77 @@ class CalendarRepositoryImpl(
             .getSuraById(number)
             .map(map::toSura)
             .collect {
-
                 surahCache[number] = it
-                cacheTimestamp =
-                    System.currentTimeMillis()
-
+                cacheTimestamp = System.currentTimeMillis()
                 emit(it)
             }
-
     }.flowOn(Dispatchers.IO)
 
-    override fun getSurahById(
-        sura: String
-    ): Flow<List<SuraAyah>> = flow {
-
+    override fun getSurahById(sura: String): Flow<List<SuraAyah>> = flow {
         db.surahAyahDao()
             .getSurahAyahsById(sura)
-            .map { list ->
-                list.map(map::toSuraAyah)
-            }
-            .collect {
-                emit(it)
-            }
-
+            .map { list -> list.map(map::toSuraAyah) }
+            .collect { emit(it) }
     }.flowOn(Dispatchers.IO)
 
-    override fun getSura(
-        number: Int
-    ): Flow<Surah> = flow {
-
+    override fun getSura(number: Int): Flow<Surah> = flow {
         var retry = 0
-
         while (true) {
-
             try {
+                val result = ktorApiService.getSura(number).result
+                    ?: throw Exception("Empty response")
 
-                val result =
-                    ktorApiService
-                        .getSura(number)
-                        .result
-                        ?: throw Exception("Empty response")
-
-                emit(
-                    Surah(
-                        withContext(Dispatchers.IO) {
-                            map.toSurahList(result)
-                        }
-                    )
-                )
-
-                return@flow
-
-            } catch (e: Exception) {
-
-                retry++
-
-                if (retry >= 3) {
-                    throw e
+                val surahList = withContext(Dispatchers.IO) {
+                    map.toSurahList(result)
                 }
 
-                delay(1000L * retry)
+                emit(Surah(surahList))
+                return@flow
+            } catch (e: Exception) {
+                retry++
+                if (retry >= 3) throw e
+                delay((1000L * retry).milliseconds)
             }
         }
-
     }.flowOn(Dispatchers.IO)
 
-    // ============================================================
-    // AUDIO
-    // ============================================================
-
-    override fun getAudioPath(
-        sura: String
-    ): Flow<AudioPath> = flow {
-
+    override fun getAudioPath(sura: String): Flow<AudioPath> = flow {
         runCatching {
-
             db.audioPathDao()
                 .getAudioPathBySura(sura)
-                .map {
-                    AudioPath(
-                        it?.audioPath,
-                        it?.sura ?: sura
-                    )
-                }
-                .collect {
-                    emit(it)
-                }
-
+                .map { AudioPath(it?.audioPath, it?.sura ?: sura) }
+                .collect { emit(it) }
         }.onFailure {
-
-            emit(
-                AudioPath(
-                    null,
-                    sura
-                )
-            )
+            emit(AudioPath(null, sura))
         }
-
     }.flowOn(Dispatchers.IO)
 
-    override fun downloadSurah(
+    override suspend fun downloadSurah(
         suraAyahs: List<SurahList>,
         url: String
-    ): Result<Result<Int>> {
+    ): Result<Int> = runCatching {
+        val suraNumber = suraAyahs.firstOrNull()?.sura ?: "0"
 
-        val success = Result.success(
-            runCatching {
+        // Save text data to DB first to avoid passing large payload to WorkManager
+        db.surahAyahDao().insertAll(map.toSuraAyahDbModels(suraAyahs))
 
-                val intent = Intent(context, DownloadJobService::class.java).apply {
-                    putExtra(DownloadJobService.KEY_FILE_URL, url)
-                    putExtra(DownloadJobService.KEY_SURA, json.encodeToString(suraAyahs))
-                }
-                // This action follows an explicit user tap, so a foreground service
-                // can display its notification immediately rather than waiting for
-                // JobScheduler to decide when it may run.
-                context.startForegroundService(intent)
-                suraAyahs.size
-            }
+        val workRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+            .setInputData(
+                workDataOf(
+                    DownloadWorker.KEY_FILE_URL to url,
+                    DownloadWorker.KEY_SURA to suraNumber
+                )
+            )
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+        // Prevent duplicate download workers running concurrently for the same Surah
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "download_surah_$suraNumber",
+            ExistingWorkPolicy.KEEP,
+            workRequest
         )
-
-        return success
+        suraAyahs.size
     }
 
     // ============================================================
@@ -565,8 +365,7 @@ class CalendarRepositoryImpl(
     // ============================================================
 
     private fun isCacheValid(): Boolean {
-        return System.currentTimeMillis() - cacheTimestamp <
-                CACHE_DURATION_MS
+        return System.currentTimeMillis() - cacheTimestamp < CACHE_DURATION_MS
     }
 
     private fun clearCache() {

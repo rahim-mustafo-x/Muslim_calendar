@@ -40,6 +40,7 @@ koin = "4.2.2"
 playAppUpdate = "2.1.0"
 versionCode = "15"
 versionName = "2.4"
+coil = "2.7.0"
 
 [libraries]
 koin-androidx-compose-v422 = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }
@@ -102,6 +103,7 @@ ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooli
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glanceMaterial3" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

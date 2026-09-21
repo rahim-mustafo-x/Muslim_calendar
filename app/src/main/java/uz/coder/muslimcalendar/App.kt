@@ -8,20 +8,23 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import uz.coder.muslimcalendar.data.service.PrayerAlarmWorker
-import uz.coder.muslimcalendar.di.initKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.context.GlobalContext.startKoin
 import uz.coder.muslimcalendar.di.appModule
 
 class App : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        initKoin {
+
+        // Call startKoin ONLY once
+        startKoin {
             androidContext(this@App)
-            modules(appModule)
             workManagerFactory()
+            modules(appModule)
         }
+
         createNotificationChannel()
         triggerPrayerAlarmWorker()
     }

@@ -54,7 +54,7 @@ fun MoreMenuScreen(controller: NavHostController) {
                     SettingsItem(
                         icon = Icons.Default.Apps,
                         title = "Ko'proq ilovalar",
-                        subtitle = "Tavsiya etilgan foydali islomiy ilovalar",
+                        subtitle = "Tavsiya etilgan boshqa ilovalar",
                         onClick = { controller.navigate("more_apps") }
                     )
                 }

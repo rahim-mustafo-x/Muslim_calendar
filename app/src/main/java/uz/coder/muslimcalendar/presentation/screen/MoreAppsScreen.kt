@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.SubcomposeAsyncImage
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.launch
@@ -160,37 +161,34 @@ fun AppItemCard(app: AppItem, onOpenClick: () -> Unit) {
 
 @Composable
 fun KtorAsyncImage(url: String, modifier: Modifier = Modifier) {
-    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-
-    LaunchedEffect(url) {
-        if (url.isNotBlank()) {
-            try {
-                val bytes = KtorClient.downloadClient.get(url).body<ByteArray>()
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                imageBitmap = bitmap?.asImageBitmap()
-            } catch (e: Exception) {
-                e.printStackTrace()
+    SubcomposeAsyncImage(
+        model = url,
+        contentDescription = null,
+        modifier = modifier,
+        contentScale = ContentScale.Crop,
+        loading = {
+            Box(
+                modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Apps,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+        error = {
+            Box(
+                modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Apps,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
-    }
-
-    if (imageBitmap != null) {
-        Image(
-            bitmap = imageBitmap!!,
-            contentDescription = null,
-            modifier = modifier,
-            contentScale = ContentScale.Crop
-        )
-    } else {
-        Box(
-            modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Apps,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
+    )
 }
