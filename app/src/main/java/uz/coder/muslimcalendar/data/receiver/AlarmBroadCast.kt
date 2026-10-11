@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Build
 import android.widget.RemoteViews
@@ -109,11 +110,29 @@ class AlarmBroadCast : BroadcastReceiver() {
             WorkManager.getInstance(context).enqueue(workRequest)
         }
 
-        // Play Azan Audio Audio handling with notification modes option filter override support
+        // Play Azan Audio handling with non-blocking async preparation
         if (musicResId != -1) {
-            mediaPlayer?.release()
-            mediaPlayer = MediaPlayer.create(context, musicResId)
-            mediaPlayer?.start()
+            runCatching {
+                mediaPlayer?.release()
+                mediaPlayer = null
+                val mp = MediaPlayer()
+                mp.setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .build()
+                )
+                val afd = context.resources.openRawResourceFd(musicResId)
+                if (afd != null) {
+                    mp.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                    afd.close()
+                    mp.setOnPreparedListener { player ->
+                        player.start()
+                    }
+                    mp.prepareAsync()
+                    mediaPlayer = mp
+                }
+            }
         }
     }
 

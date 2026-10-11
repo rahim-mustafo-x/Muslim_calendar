@@ -35,6 +35,7 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import uz.coder.muslimcalendar.domain.repository.NotificationScheduler
@@ -328,16 +329,20 @@ class MainActivity : ComponentActivity() {
                 sharedPref.saveValue("saved_latitude", location.latitude.toFloat())
                 sharedPref.saveValue("saved_longitude", location.longitude.toFloat())
                 
-                val cityName = try {
-                    val geocoder = Geocoder(this, Locale.forLanguageTag("uz"))
-                    val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                    addresses?.firstOrNull()?.locality ?: addresses?.firstOrNull()?.subAdminArea ?: "Noma'lum"
-                } catch (_: Exception) {
-                    null
+                CoroutineScope(Dispatchers.IO).launch {
+                    val cityName = try {
+                        val geocoder = Geocoder(this@MainActivity, Locale.forLanguageTag("uz"))
+                        val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        addresses?.firstOrNull()?.locality ?: addresses?.firstOrNull()?.subAdminArea ?: "Noma'lum"
+                    } catch (_: Exception) {
+                        null
+                    }
+                    
+                    withContext(Dispatchers.Main) {
+                        viewModel.handleIntent(HomeIntent.UpdateLocation(location.latitude, location.longitude, cityName))
+                        scheduleAzanAlarms()
+                    }
                 }
-                
-                viewModel.handleIntent(HomeIntent.UpdateLocation(location.latitude, location.longitude, cityName))
-                scheduleAzanAlarms()
             } else {
                 Log.d(TAG, "Location is null. Using saved or default location...")
                 loadWithSavedLocation()

@@ -8,7 +8,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.R
 import uz.coder.muslimcalendar.SharedPref
 import uz.coder.muslimcalendar.data.db.AppDatabase
@@ -34,7 +36,7 @@ class NotificationSchedulerImpl(
 ) : NotificationScheduler {
 
     @SuppressLint("ScheduleExactAlarm")
-    override suspend fun scheduleAllAlarms() {
+    override suspend fun scheduleAllAlarms() = withContext(Dispatchers.IO) {
         try {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val today = Calendar.getInstance()
@@ -85,16 +87,16 @@ class NotificationSchedulerImpl(
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, midnight.timeInMillis, pi)
     }
 
-    override suspend fun rescheduleAll() {
+    override suspend fun rescheduleAll() = withContext(Dispatchers.IO) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         cancelAllAlarms(alarmManager)
         scheduleAllAlarms()
         scheduleDailyNotification()
     }
 
-    override suspend fun scheduleDailyNotification() {
+    override suspend fun scheduleDailyNotification() = withContext(Dispatchers.IO) {
         val enabled = sharedPref.getBoolean("daily_notif_enabled", true)
-        if (!enabled) return
+        if (!enabled) return@withContext
 
         val time = sharedPref.getString("daily_notif_time", "00:00")
         val (hour, minute) = time.split(":").map { it.toIntOrNull() ?: 0 }

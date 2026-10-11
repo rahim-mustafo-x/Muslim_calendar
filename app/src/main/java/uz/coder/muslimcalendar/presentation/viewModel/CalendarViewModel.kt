@@ -2,11 +2,14 @@ package uz.coder.muslimcalendar.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uz.coder.muslimcalendar.domain.model.Calendar
 import uz.coder.muslimcalendar.shared.domain.model.MuslimCalendar
 import uz.coder.muslimcalendar.domain.usecase.OneMonthDayUseCase
@@ -39,33 +42,41 @@ class CalendarViewModel (
     private fun loadCalendar() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            oneMonthDayUseCase().collect { items ->
-                val calendarList = mutableListOf<Calendar>()
-                
-                // Add header
-                calendarList.addAll(listOf(
-                    Calendar(context.getString(R.string.dayMonth), Color.White, Light_Blue),
-                    Calendar(context.getString(R.string.bomdod), Color.White, Light_Blue),
-                    Calendar(context.getString(R.string.quyoshChiqishi), Color.White, Light_Blue),
-                    Calendar(context.getString(R.string.peshin), Color.White, Light_Blue),
-                    Calendar(context.getString(R.string.asr), Color.White, Light_Blue),
-                    Calendar(context.getString(R.string.shom), Color.White, Light_Blue),
-                    Calendar(context.getString(R.string.xufton), Color.White, Light_Blue)
-                ))
+            oneMonthDayUseCase()
+                .map { items ->
+                    withContext(Dispatchers.Default) {
+                        val calendarList = mutableListOf<Calendar>()
+                        
+                        // Add header
+                        calendarList.addAll(listOf(
+                            Calendar(context.getString(R.string.dayMonth), Color.White, Light_Blue),
+                            Calendar(context.getString(R.string.bomdod), Color.White, Light_Blue),
+                            Calendar(context.getString(R.string.quyoshChiqishi), Color.White, Light_Blue),
+                            Calendar(context.getString(R.string.peshin), Color.White, Light_Blue),
+                            Calendar(context.getString(R.string.asr), Color.White, Light_Blue),
+                            Calendar(context.getString(R.string.shom), Color.White, Light_Blue),
+                            Calendar(context.getString(R.string.xufton), Color.White, Light_Blue)
+                        ))
 
-                // Add days
-                items.forEach {
-                    calendarList.add(Calendar(it.day.toString().plus("-${context.resources.getStringArray(R.array.months)[it.month-1]}"), Color.White, Light_Blue))
-                    calendarList.add(Calendar(it.tongSaharlik, Color.Black, Color.White))
-                    calendarList.add(Calendar(it.sunRise, Color.Black, Color.White))
-                    calendarList.add(Calendar(it.peshin, Color.Black, Color.White))
-                    calendarList.add(Calendar(it.asr, Color.Black, Color.White))
-                    calendarList.add(Calendar(it.shomIftor, Color.Black, Color.White))
-                    calendarList.add(Calendar(it.hufton, Color.Black, Color.White))
+                        val monthsArray = context.resources.getStringArray(R.array.months)
+                        // Add days
+                        items.forEach {
+                            val monthName = monthsArray.getOrNull(it.month - 1) ?: ""
+                            calendarList.add(Calendar("${it.day}-$monthName", Color.White, Light_Blue))
+                            calendarList.add(Calendar(it.tongSaharlik, Color.Black, Color.White))
+                            calendarList.add(Calendar(it.sunRise, Color.Black, Color.White))
+                            calendarList.add(Calendar(it.peshin, Color.Black, Color.White))
+                            calendarList.add(Calendar(it.asr, Color.Black, Color.White))
+                            calendarList.add(Calendar(it.shomIftor, Color.Black, Color.White))
+                            calendarList.add(Calendar(it.hufton, Color.Black, Color.White))
+                        }
+
+                        calendarList
+                    }
                 }
-
-                _state.update { it.copy(isLoading = false, calendarList = calendarList) }
-            }
+                .collect { calendarList ->
+                    _state.update { it.copy(isLoading = false, calendarList = calendarList) }
+                }
         }
     }
 }

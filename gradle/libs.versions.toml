@@ -38,8 +38,8 @@ compose-multiplatform = "1.12.0"
 kotlinx-datetime = "0.8.0"
 koin = "4.2.2"
 playAppUpdate = "2.1.0"
-versionCode = "15"
-versionName = "2.4"
+versionCode = "16"
+versionName = "2.5"
 coil = "2.7.0"
 
 [libraries]
